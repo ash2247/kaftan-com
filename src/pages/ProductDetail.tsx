@@ -10,7 +10,6 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import ProductReviews from "@/components/ProductReviews";
 import ImageZoom from "@/components/ImageZoom";
 
 const ProductDetail = () => {
@@ -376,17 +375,6 @@ const ProductDetail = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Reviews Section */}
-      {product && (
-        <section className="px-4 sm:px-6 md:px-16 pb-16 md:pb-24 max-w-7xl mx-auto">
-          <ProductReviews
-            productId={product.id}
-            averageRating={(product as any).averageRating}
-            reviewCount={(product as any).reviewCount}
-          />
-        </section>
-      )}
 
       {/* Related Products */}
       {related.length > 0 && (

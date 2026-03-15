@@ -20,7 +20,6 @@ const navItems = [
   { label: "Customers", icon: Users, path: "/admin/customers" },
   { label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
   { label: "Coupons", icon: Percent, path: "/admin/coupons" },
-  { label: "Reviews", icon: Star, path: "/admin/reviews" },
   { label: "Categories", icon: Tag, path: "/admin/categories" },
   { label: "Collections", icon: FileText, path: "/admin/collections" },
   { label: "Inventory", icon: Truck, path: "/admin/inventory" },

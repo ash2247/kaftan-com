@@ -41,7 +41,6 @@ const AdminSettings = () => {
     tax_rate: 10,
     free_shipping_min: 100,
     shipping_fee: 15,
-    enable_reviews: true,
     enable_wishlist: true,
     enable_cod: true,
     maintenance_mode: false,
@@ -479,7 +478,6 @@ const AdminSettings = () => {
           <h3 className="font-heading text-lg font-semibold text-foreground">Features</h3>
         </div>
         {[
-          { key: "enable_reviews", label: "Customer Reviews", desc: "Allow customers to leave product reviews" },
           { key: "enable_wishlist", label: "Wishlist", desc: "Enable wishlist functionality" },
           { key: "enable_cod", label: "Cash on Delivery", desc: "Accept COD payments" },
           { key: "maintenance_mode", label: "Maintenance Mode", desc: "Put store in maintenance mode" },

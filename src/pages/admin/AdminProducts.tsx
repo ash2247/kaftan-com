@@ -308,6 +308,29 @@ const AdminProducts = () => {
     setUploadedImages(uploadedImages.filter((_, i) => i !== index));
   };
 
+  const moveImage = (fromIndex: number, toIndex: number) => {
+    const newImages = [...uploadedImages];
+    const [movedImage] = newImages.splice(fromIndex, 1);
+    newImages.splice(toIndex, 0, movedImage);
+    setUploadedImages(newImages);
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+    if (dragIndex !== dropIndex) {
+      moveImage(dragIndex, dropIndex);
+    }
+  };
+
   const statusBadge = (s: string) => {
     const colors: Record<string, string> = {
       Active: "bg-green-100 text-green-700",
@@ -527,17 +550,35 @@ const AdminProducts = () => {
               {/* Uploaded Images Preview */}
               {uploadedImages.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="font-body text-xs uppercase text-muted-foreground">Uploaded Images</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="font-body text-xs uppercase text-muted-foreground">Uploaded Images</Label>
+                    <span className="font-body text-xs text-muted-foreground">Drag to reorder • First image will be main</span>
+                  </div>
                   <div className="grid grid-cols-3 gap-2">
                     {uploadedImages.map((img, index) => (
-                      <div key={index} className="relative group">
+                      <div
+                        key={index}
+                        className={`relative group cursor-move ${
+                          index === 0 ? 'ring-2 ring-primary rounded-lg' : ''
+                        }`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, index)}
+                      >
                         <img src={img} alt={`Upload ${index + 1}`} className="w-full h-20 object-cover rounded-lg" />
+                        {index === 0 && (
+                          <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs px-2 py-1 rounded font-body">
+                            MAIN
+                          </div>
+                        )}
                         <button
                           onClick={() => removeImage(index)}
                           className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <X size={12} />
                         </button>
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-30 transition-opacity rounded-lg pointer-events-none" />
                       </div>
                     ))}
                   </div>

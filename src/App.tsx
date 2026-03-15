@@ -44,7 +44,6 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminCoupons from "./pages/admin/AdminCoupons";
-import AdminReviews from "./pages/admin/AdminReviews";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminPages from "./pages/admin/AdminPages";
@@ -125,7 +124,6 @@ const AnimatedRoutes = () => {
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="coupons" element={<AdminCoupons />} />
-            <Route path="reviews" element={<AdminReviews />} />
             <Route path="categories" element={<AdminCategories />} />
             <Route path="collections" element={<AdminCollections />} />
             <Route path="inventory" element={<AdminInventory />} />

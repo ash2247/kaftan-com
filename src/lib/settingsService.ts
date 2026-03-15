@@ -9,7 +9,6 @@ export interface StoreSettings {
   tax_rate: number;
   free_shipping_min: number;
   shipping_fee: number;
-  enable_reviews: boolean;
   enable_wishlist: boolean;
   enable_cod: boolean;
   maintenance_mode: boolean;
@@ -80,7 +79,6 @@ export const settingsService = {
             tax_rate: settings.tax_rate,
             free_shipping_min: settings.free_shipping_min,
             shipping_fee: settings.shipping_fee,
-            enable_reviews: settings.enable_reviews,
             enable_wishlist: settings.enable_wishlist,
             enable_cod: settings.enable_cod,
             maintenance_mode: settings.maintenance_mode,
