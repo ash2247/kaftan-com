@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Heart, Minus, Plus, Truck, RotateCcw, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Minus, Plus, Truck, RotateCcw, Shield, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { getProductBySlug, getRelatedProducts } from "@/lib/productUtils";
 import { useProductBySlug } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
@@ -22,6 +22,8 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -47,9 +49,17 @@ const ProductDetail = () => {
   const wishlisted = isInWishlist(product.id);
   const related = staticProduct ? getRelatedProducts(staticProduct) : [];
 
-  const handleAddToCart = () => {
-    addItem(product, "One Size", quantity);
-  };
+  /* ── Build image list from DB (images[]) or static fallback ── */
+  const dbImages: string[] = (product as any).images ?? [];
+  const fallbackImage: string = (product as any).image ?? "";
+  // Merge: use DB images if any, otherwise single fallback
+  const allImages: string[] = dbImages.length > 0 ? dbImages : fallbackImage ? [fallbackImage] : [];
+  const activeImage = allImages[activeIdx] ?? "";
+
+  const prev = () => setActiveIdx(i => (i === 0 ? allImages.length - 1 : i - 1));
+  const next = () => setActiveIdx(i => (i === allImages.length - 1 ? 0 : i + 1));
+
+  const handleAddToCart = () => addItem(product, "One Size", quantity);
 
   const discount = (product as any).originalPrice && product.price
     ? Math.round((((product as any).originalPrice - product.price) / (product as any).originalPrice) * 100)
@@ -72,21 +82,105 @@ const ProductDetail = () => {
       {/* Product */}
       <section className="px-4 sm:px-6 md:px-16 pb-16 md:pb-24">
         <div className="grid md:grid-cols-2 gap-6 md:gap-16 max-w-7xl mx-auto">
-          {/* Image */}
-          <div className="space-y-3 md:space-y-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="aspect-[3/4] overflow-hidden bg-secondary"
-            >
-              <ImageZoom
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full"
-                zoomLevel={2}
-              />
-            </motion.div>
+
+          {/* ── IMAGE GALLERY ── */}
+          <div className="space-y-3">
+
+            {/* Main image */}
+            <div className="relative group">
+              <motion.div
+                key={activeImage}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="aspect-[3/4] overflow-hidden bg-secondary relative"
+              >
+                {activeImage ? (
+                  <ImageZoom
+                    src={activeImage}
+                    alt={`${product.name} — image ${activeIdx + 1}`}
+                    className="w-full h-full"
+                    zoomLevel={2}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    No image
+                  </div>
+                )}
+
+                {/* Lightbox trigger */}
+                <button
+                  onClick={() => setLightboxOpen(true)}
+                  className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                  aria-label="Open fullscreen"
+                >
+                  <ZoomIn size={16} />
+                </button>
+
+                {/* Prev / Next arrows (only when multiple images) */}
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={prev}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={next}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white shadow-md p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+
+                    {/* Dot indicator */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveIdx(i)}
+                          className={`rounded-full transition-all duration-200 ${i === activeIdx ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/60 hover:bg-white/90"
+                            }`}
+                          aria-label={`Image ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Thumbnail strip (only if 2+ images) */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {allImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIdx(i)}
+                    className={`flex-shrink-0 w-16 h-20 sm:w-20 sm:h-24 overflow-hidden border-2 transition-all duration-200 rounded-sm ${i === activeIdx
+                        ? "border-primary scale-105 shadow-md"
+                        : "border-transparent opacity-60 hover:opacity-90 hover:border-border"
+                      }`}
+                    aria-label={`Thumbnail ${i + 1}`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} thumbnail ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Image count badge */}
+            {allImages.length > 1 && (
+              <p className="font-body text-[10px] text-muted-foreground text-right tracking-wider">
+                {activeIdx + 1} / {allImages.length} photos
+              </p>
+            )}
           </div>
 
           {/* Product Info */}
@@ -121,17 +215,22 @@ const ProductDetail = () => {
 
               {/* Description */}
               <div className="mb-8 space-y-2">
-                {product.style && (
-                  <p className="font-body text-sm text-muted-foreground">
-                    <span className="text-foreground font-medium">Style :</span> {product.style}
+                {(product as any).description && (
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                    {(product as any).description}
                   </p>
                 )}
-                {product.color && (
+                {(product as any).style && (
                   <p className="font-body text-sm text-muted-foreground">
-                    <span className="text-foreground font-medium">Color :</span> {product.color}
+                    <span className="text-foreground font-medium">Style :</span> {(product as any).style}
                   </p>
                 )}
-                {!product.style && !product.color && (
+                {(product as any).color && (
+                  <p className="font-body text-sm text-muted-foreground">
+                    <span className="text-foreground font-medium">Color :</span> {(product as any).color}
+                  </p>
+                )}
+                {!(product as any).description && !(product as any).style && !(product as any).color && (
                   <p className="font-body text-sm leading-relaxed text-muted-foreground">
                     A beautifully crafted piece from FashionSpectrum's latest collection.
                   </p>
@@ -172,11 +271,10 @@ const ProductDetail = () => {
                 </button>
                 <button
                   onClick={() => toggleItem(product)}
-                  className={`border p-4 transition-all duration-300 ${
-                    wishlisted
+                  className={`border p-4 transition-all duration-300 ${wishlisted
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border hover:border-primary hover:text-primary"
-                  }`}
+                    }`}
                   aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 >
                   <Heart size={20} fill={wishlisted ? "currentColor" : "none"} />
@@ -201,6 +299,83 @@ const ProductDetail = () => {
           </div>
         </div>
       </section>
+
+      {/* ── LIGHTBOX ── */}
+      <AnimatePresence>
+        {lightboxOpen && activeImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {/* Close */}
+            <button
+              className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-thin leading-none z-10"
+              onClick={() => setLightboxOpen(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            {/* Counter */}
+            <span className="absolute top-5 left-1/2 -translate-x-1/2 font-body text-xs text-white/60 tracking-widest">
+              {activeIdx + 1} / {allImages.length}
+            </span>
+
+            {/* Image */}
+            <motion.img
+              key={activeIdx}
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.25 }}
+              src={activeImage}
+              alt={product.name}
+              className="max-h-[90vh] max-w-[92vw] object-contain rounded shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+
+            {/* Prev / Next */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={e => { e.stopPropagation(); prev(); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all"
+                  aria-label="Previous"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); next(); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all"
+                  aria-label="Next"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+
+            {/* Thumbnail strip in lightbox */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] pb-1">
+                {allImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={e => { e.stopPropagation(); setActiveIdx(i); }}
+                    className={`flex-shrink-0 w-12 h-14 rounded overflow-hidden border-2 transition-all ${i === activeIdx ? "border-white scale-110" : "border-white/30 opacity-50 hover:opacity-80"
+                      }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Reviews Section */}
       {product && (
