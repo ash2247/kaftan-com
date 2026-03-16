@@ -29,7 +29,6 @@ const navItems = [
   { label: "Media", icon: Image, path: "/admin/media" },
   { label: "Messages", icon: MessageSquare, path: "/admin/messages" },
   { label: "Notifications", icon: Bell, path: "/admin/notifications" },
-  { label: "Logo Manager", icon: ImageIcon, path: "/admin/logo-manager" },
   { label: "Settings", icon: Settings, path: "/admin/settings" },
 ];
 
