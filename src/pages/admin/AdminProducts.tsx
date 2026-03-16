@@ -156,7 +156,7 @@ const AdminProducts = () => {
     console.log('Form data:', form);
     console.log('Uploaded images:', uploadedImages);
     
-    if (!form.name || !form.price || !form.stock) {
+    if (!form.name || !form.stock) {
       console.log('❌ Validation failed - missing required fields');
       toast({ title: "Please fill required fields", variant: "destructive" });
       return;
@@ -170,7 +170,7 @@ const AdminProducts = () => {
       try {
         const updateData = {
           name: form.name,
-          price: Number(form.price),
+          price: form.price ? Number(form.price) : 0,
           original_price: form.original_price ? Number(form.original_price) : null,
           category: form.category,
           images: uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],
@@ -196,7 +196,7 @@ const AdminProducts = () => {
       try {
         const createData = {
           name: form.name,
-          price: Number(form.price),
+          price: form.price ? Number(form.price) : 0,
           original_price: form.original_price ? Number(form.original_price) : null,
           category: form.category,
           images: uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],

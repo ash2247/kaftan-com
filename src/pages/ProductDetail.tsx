@@ -198,8 +198,10 @@ const ProductDetail = () => {
 
               {product.price != null && (
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="font-heading text-xl sm:text-2xl text-foreground">${product.price.toFixed(2)}</span>
-                  {(product as any).originalPrice && (
+                  <span className="font-heading text-xl sm:text-2xl text-foreground">
+                    {product.price > 0 ? `$${product.price.toFixed(2)}` : 'Price on Request'}
+                  </span>
+                  {(product as any).originalPrice && product.price > 0 && (
                     <>
                       <span className="font-body text-base sm:text-lg text-muted-foreground line-through">
                         ${(product as any).originalPrice.toFixed(2)}
@@ -261,24 +263,42 @@ const ProductDetail = () => {
               </div>
 
               {/* Add to Cart */}
-              <div className="flex gap-3 mb-8">
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary text-primary-foreground font-body text-xs tracking-[0.2em] uppercase py-4 hover:bg-charcoal transition-all duration-300 active:scale-[0.98]"
-                >
-                  Add to Cart
-                </button>
-                <button
-                  onClick={() => toggleItem(product)}
-                  className={`border p-4 transition-all duration-300 ${wishlisted
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border hover:border-primary hover:text-primary"
-                    }`}
-                  aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                >
-                  <Heart size={20} fill={wishlisted ? "currentColor" : "none"} />
-                </button>
-              </div>
+              {product.price != null && product.price > 0 && (
+                <div className="flex gap-3 mb-8">
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-primary text-primary-foreground font-body text-xs tracking-[0.2em] uppercase py-4 hover:bg-charcoal transition-all duration-300 active:scale-[0.98]"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={() => toggleItem(product)}
+                    className={`border p-4 transition-all duration-300 ${wishlisted
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border hover:border-primary hover:text-primary"
+                      }`}
+                    aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                  >
+                    <Heart size={20} fill={wishlisted ? "currentColor" : "none"} />
+                  </button>
+                </div>
+              )}
+
+              {/* Show wishlist button alone when no price */}
+              {(!product.price || product.price === 0) && (
+                <div className="flex justify-center mb-8">
+                  <button
+                    onClick={() => toggleItem(product)}
+                    className={`border p-4 transition-all duration-300 ${wishlisted
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border hover:border-primary hover:text-primary"
+                      }`}
+                    aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                  >
+                    <Heart size={20} fill={wishlisted ? "currentColor" : "none"} />
+                  </button>
+                </div>
+              )}
 
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-6 border-t border-border">
