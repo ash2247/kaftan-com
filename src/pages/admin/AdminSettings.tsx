@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// Admin Settings Component - Integrated Logo Manager with tabs
 import { Save, Globe, Truck, Shield, Bell, Loader2, Key, Eye, EyeOff, Image as ImageIcon, Settings, CreditCard, Mail, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
