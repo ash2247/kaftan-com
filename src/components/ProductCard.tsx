@@ -37,7 +37,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       className="group cursor-pointer"
     >
       <Link to={`/product/${slugify(product.name)}`}>
-        <div className="relative overflow-hidden bg-secondary aspect-[3/4]">
+        <div className="relative overflow-hidden bg-white aspect-[3/4]">
           <motion.img
             src={product.image}
             alt={product.name}
@@ -57,7 +57,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               className={`absolute top-3 left-3 font-body text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 ${
                 product.badge === "Sold out"
                   ? "bg-charcoal text-primary-foreground"
-                  : "bg-background text-foreground"
+                  : "bg-white text-foreground"
               }`}
             >
               {product.badge}
@@ -71,13 +71,13 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               className={`p-2 transition-all duration-300 shadow-sm ${
                 wishlisted
                   ? "bg-primary text-primary-foreground"
-                  : "bg-background/90 backdrop-blur-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0 hover:bg-primary hover:text-primary-foreground"
+                  : "bg-white/90 backdrop-blur-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0 hover:bg-primary hover:text-primary-foreground"
               }`}
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
             >
               <Heart size={15} fill={wishlisted ? "currentColor" : "none"} />
             </button>
-            <div className="bg-background/90 backdrop-blur-sm p-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0">
+            <div className="bg-white/90 backdrop-blur-sm p-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 translate-x-0 lg:translate-x-2 lg:group-hover:translate-x-0">
               <Eye size={15} />
             </div>
           </div>
