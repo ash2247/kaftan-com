@@ -4,7 +4,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { newArrivals } from "@/lib/products";
+import { paradiseProducts } from "@/lib/paradiseProducts";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 
 const sortOptions = [
@@ -20,14 +20,14 @@ const ParadiseCollection = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(newArrivals.map((p) => p.category)));
+    const cats = Array.from(new Set(paradiseProducts.map((p) => p.category)));
     return ["All", ...cats.sort()];
   }, []);
 
   const filtered = useMemo(() => {
     let items = selectedCategory === "All"
-      ? [...newArrivals]
-      : newArrivals.filter((p) => p.category === selectedCategory);
+      ? [...paradiseProducts]
+      : paradiseProducts.filter((p) => p.category === selectedCategory);
 
     switch (sortBy) {
       case "price-asc":

@@ -15,11 +15,12 @@ interface CatalogPageProps {
   products: Product[];
   bannerImage?: string;
   cmsContent?: CatalogPageContent | null;
+  columns?: 3 | 4;
 }
 
 type SortOption = "featured" | "price-low" | "price-high" | "name-az" | "name-za";
 
-const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent }: CatalogPageProps) => {
+const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, columns = 4 }: CatalogPageProps) => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [showFilters, setShowFilters] = useState(false);
@@ -151,7 +152,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent }: Cat
                 <p className="font-body text-xs text-muted-foreground">Try a different category or filter.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className={`grid grid-cols-2 md:grid-cols-3 ${columns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4 md:gap-6`}>
                 {filtered.map((product, i) => (
                   <ProductCard key={product.id} product={product} index={i} />
                 ))}

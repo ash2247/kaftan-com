@@ -5,7 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 
 const NewArrivals = () => {
   const cmsContent = useCatalogPageContent("new-arrivals");
-  const { data: dbProducts } = useProducts({ featured: true });
+  const { data: dbProducts } = useProducts();
   const products = dbProducts && dbProducts.length > 0 ? dbProducts : newArrivals;
 
   return (
@@ -14,6 +14,7 @@ const NewArrivals = () => {
       subtitle="The latest additions to our collection"
       products={products}
       cmsContent={cmsContent}
+      columns={3}
     />
   );
 };
