@@ -62,7 +62,7 @@ interface Props {
   logoType?: 'header' | 'footer' | 'admin' | 'favicon';
 }
 
-const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
+const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
   const newsletterTitle = content?.newsletterTitle || "Join the FashionSpectrum World";
   const newsletterSubtitle = content?.newsletterSubtitle || "Subscribe for exclusive access to new collections, special offers & more.";
   const ctaText = content?.ctaText || "Subscribe";
@@ -71,7 +71,7 @@ const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
   return (
     <footer className="bg-charcoal text-primary-foreground">
       {/* Newsletter */}
-      <div className="border-b border-primary-foreground/10 py-12 px-6 md:px-16">
+      <div className="border-b border-primary-foreground/10 py-16 px-6 md:px-20">
         <div className="max-w-md mx-auto text-center">
           <h3 className="font-heading text-2xl md:text-3xl mb-3">{newsletterTitle}</h3>
           <p className="font-body text-xs text-primary-foreground/60 tracking-wide mb-6">
@@ -91,7 +91,7 @@ const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
       </div>
 
       {/* Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-16 py-4 md:py-16 px-6 md:px-16 lg:px-24 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-16 py-8 md:py-20 px-6 md:px-20 lg:px-28 max-w-5xl mx-auto">
         {footerSections.map((section) => (
           <CollapsibleSection key={section.title} title={section.title}>
             <ul className="space-y-3">
@@ -108,7 +108,7 @@ const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
       </div>
 
       {/* Social Icons */}
-      <div className="flex flex-col items-center gap-3 py-8 px-6">
+      <div className="flex flex-col items-center gap-3 py-12 px-6">
         <h4 className="font-body text-xs tracking-[0.2em] uppercase text-primary-foreground/80">Follow Us</h4>
         <div className="flex gap-5">
           <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" aria-label="Instagram">
@@ -124,7 +124,7 @@ const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
       </div>
 
       {/* Bottom */}
-      <div className="border-t border-primary-foreground/10 py-6 px-6 text-center">
+      <div className="border-t border-primary-foreground/10 py-8 px-6 text-center">
         {showLogo && (
           <div className="flex justify-center mb-4">
             <Logo type={logoType} size="md" alt="" />

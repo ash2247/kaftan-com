@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import Logo from "@/components/Logo";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -77,8 +78,8 @@ const AdminLogin = () => {
         className="w-full max-w-sm"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Shield size={32} className="text-primary" />
+          <div className="flex justify-center mb-4">
+            <Logo type="admin" size="3xl" />
           </div>
           <h1 className="font-heading text-3xl font-semibold text-foreground">Admin Access</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">Sign in with your admin account</p>

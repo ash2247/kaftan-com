@@ -65,23 +65,22 @@ const Logo = ({
   const logoUrl = getLogoUrl();
   const sizeClasses = getSizeClasses();
 
-  // For admin and header types, only show if a custom logo is uploaded
-  // Don't show fallback text when no custom logo exists
-  const isCustomLogo = logoUrl && (
+  // For admin and header types, show logo if it exists
+  const shouldShowLogo = logoUrl && (
     logoUrl.startsWith('data:') || 
     logoUrl.startsWith('http:') || 
     logoUrl.startsWith('https:') || 
-    (type === 'admin' && logoUrl !== DEFAULT_LOGOS.admin_logo_url && logoUrl !== '/logo.png') ||
-    (type === 'header' && logoUrl !== DEFAULT_LOGOS.header_logo_url && logoUrl !== '/logo.png')
+    logoUrl === '/logo.png' ||
+    logoUrl === '/favicon.png'
   );
   
-  if ((type === 'admin' || type === 'header') && !isCustomLogo) {
+  if ((type === 'admin' || type === 'header') && !shouldShowLogo) {
     return null;
   }
 
   return (
     <div className={`flex items-center ${className}`}>
-      {logoUrl && logoUrl !== DEFAULT_LOGOS[type === 'favicon' ? 'favicon_url' : `${type}_logo_url` as keyof typeof DEFAULT_LOGOS] ? (
+      {shouldShowLogo ? (
         <img
           src={logoUrl}
           alt={alt}

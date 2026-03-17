@@ -50,14 +50,14 @@ const Navbar = () => {
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.08)]">
         {/* Desktop Layout */}
-        <div className="hidden lg:flex items-center px-6 xl:px-10 py-3">
+        <div className="hidden lg:flex items-center px-0 py-0 h-[45px]">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <Logo type="header" size="7xl" />
+            <Logo type="header" size="5xl" />
           </Link>
 
           {/* Nav Links */}
-          <nav className="flex items-center gap-3 xl:gap-5 ml-4 xl:ml-8">
+          <nav className="flex items-center gap-3 xl:gap-5 ml-2 xl:ml-4">
             {navLinks.map((link) =>
               link.label === "Where to Buy" ? (
                 <div
@@ -67,7 +67,7 @@ const Navbar = () => {
                   onMouseLeave={handleWhereToBuyLeave}
                 >
                   <span
-                    className={`font-body text-xs xl:text-sm tracking-[0.1em] xl:tracking-[0.15em] uppercase transition-colors duration-300 hover:text-primary cursor-pointer whitespace-nowrap ${
+                    className={`font-body text-[10px] xl:text-xs tracking-[0.1em] xl:tracking-[0.15em] uppercase transition-colors duration-300 hover:text-primary cursor-pointer whitespace-nowrap ${
                       location.pathname === link.to
                         ? "text-primary font-medium"
                         : "text-foreground"
@@ -146,7 +146,7 @@ const Navbar = () => {
                 <Link
                   key={link.label}
                   to={link.to}
-                  className={`font-body text-xs xl:text-sm tracking-[0.1em] xl:tracking-[0.15em] uppercase transition-colors duration-300 hover:text-primary whitespace-nowrap ${
+                  className={`font-body text-[10px] xl:text-xs tracking-[0.1em] xl:tracking-[0.15em] uppercase transition-colors duration-300 hover:text-primary whitespace-nowrap ${
                     location.pathname === link.to
                       ? "text-primary font-medium"
                       : "text-foreground"
@@ -221,7 +221,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile / Tablet Layout */}
-        <div className="flex lg:hidden items-center justify-between px-4 sm:px-6 py-3">
+        <div className="flex lg:hidden items-center justify-between px-4 sm:px-6 py-2">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-foreground hover:text-primary transition-colors z-10"
@@ -231,7 +231,7 @@ const Navbar = () => {
           </button>
 
           <Link to="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <Logo type="header" size="6xl" />
+            <Logo type="header" size="4xl" />
           </Link>
 
           <div className="flex items-center gap-3 z-10">
@@ -278,7 +278,7 @@ const Navbar = () => {
                     <div key={link.label}>
                       <button
                         onClick={() => setMobileWhereToBuyOpen(!mobileWhereToBuyOpen)}
-                        className="font-body text-sm tracking-[0.15em] uppercase text-foreground w-full text-left"
+                        className="font-body text-xs tracking-[0.15em] uppercase text-foreground w-full text-left"
                       >
                         {link.label}
                       </button>
@@ -354,7 +354,7 @@ const Navbar = () => {
                       key={link.label}
                       to={link.to}
                       onClick={() => setMobileOpen(false)}
-                      className={`font-body text-sm tracking-[0.15em] uppercase ${
+                      className={`font-body text-xs tracking-[0.15em] uppercase ${
                         location.pathname === link.to
                           ? "text-primary font-medium"
                           : "text-foreground"

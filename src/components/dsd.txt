@@ -1,0 +1,28 @@
+client:702 [vite] Internal Server Error
+Failed to resolve import "@/assets/hero-kaftan-4.jpg" from "src/pages/admin/AdminPageEditor.tsx". Does the file exist?
+    at TransformPluginContext._formatError (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49258:41)
+    at TransformPluginContext.error (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49253:16)
+    at normalizeUrl (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64291:23)
+    at async /C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64423:39
+    at async Promise.all (:8080/index 18)
+    at async TransformPluginContext.transform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64350:7)
+    at async PluginContainer.transform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49099:18)
+    at async loadAndTransform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:51977:27)
+    at async viteTransformMiddleware (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:62105:24)
+handleMessage @ client:702
+(anonymous) @ client:550Understand this error
+client:702 [vite] Internal Server Error
+Failed to resolve import "@/assets/hero-kaftan-4.jpg" from "src/hooks/usePageContent.ts". Does the file exist?
+    at TransformPluginContext._formatError (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49258:41)
+    at TransformPluginContext.error (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49253:16)
+    at normalizeUrl (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64291:23)
+    at async /C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64423:39
+    at async Promise.all (:8080/index 4)
+    at async TransformPluginContext.transform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:64350:7)
+    at async PluginContainer.transform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:49099:18)
+    at async loadAndTransform (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:51977:27)
+    at async viteTransformMiddleware (/C:/Users/asadk/Downloads/working/kaftan-com/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:62105:24)
+handleMessage @ client:702
+(anonymous) @ client:550Understand this error
+App.tsx:69  GET http://localhost:8080/src/pages/admin/AdminPageEditor.tsx?t=1773689442794 net::ERR_ABORTED 500 (Internal Server Error)Understand this error
+Shop.tsx:25  GET http://localhost:8080/src/hooks/usePageContent.ts?t=1773689442794 net::ERR_ABORTED 500 (Internal Server Error)
