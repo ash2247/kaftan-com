@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Instagram, Facebook, Twitter, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FooterContent } from "@/hooks/usePageContent";
+import Logo from "./Logo";
 
 const footerSections = [
   {
@@ -57,9 +58,11 @@ const CollapsibleSection = ({ title, children }: { title: string; children: Reac
 
 interface Props {
   content?: FooterContent;
+  showLogo?: boolean;
+  logoType?: 'header' | 'footer' | 'admin' | 'favicon';
 }
 
-const Footer = ({ content }: Props) => {
+const Footer = ({ content, showLogo = false, logoType = 'footer' }: Props) => {
   const newsletterTitle = content?.newsletterTitle || "Join the FashionSpectrum World";
   const newsletterSubtitle = content?.newsletterSubtitle || "Subscribe for exclusive access to new collections, special offers & more.";
   const ctaText = content?.ctaText || "Subscribe";
@@ -122,6 +125,11 @@ const Footer = ({ content }: Props) => {
 
       {/* Bottom */}
       <div className="border-t border-primary-foreground/10 py-6 px-6 text-center">
+        {showLogo && (
+          <div className="flex justify-center mb-4">
+            <Logo type={logoType} size="md" alt="" />
+          </div>
+        )}
         <p className="font-body text-[10px] text-primary-foreground/40 tracking-wider">
           {copyright}
         </p>

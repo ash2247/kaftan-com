@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { paradiseProducts } from "@/lib/paradiseProducts";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useCollectionSettings } from "@/hooks/useCollectionSettings";
 
 const sortOptions = [
   { label: "Sort by popularity", value: "popular" },
@@ -18,6 +19,7 @@ const ParadiseCollection = () => {
   const [sortBy, setSortBy] = useState("popular");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const { getGridClasses } = useCollectionSettings();
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(paradiseProducts.map((p) => p.category)));
@@ -116,7 +118,7 @@ const ParadiseCollection = () => {
 
       {/* Products Grid */}
       <div className="container mx-auto px-4 sm:px-6 pb-16">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className={getGridClasses() + " gap-4 md:gap-6"}>
           {filtered.map((product, i) => (
             <motion.div
               key={product.id}

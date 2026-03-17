@@ -18,6 +18,7 @@ const navLinks = [
   { label: "Home", to: "/" },
   { label: "Safari Collection", to: "/safari-collection" },
   { label: "Paradise Collection", to: "/paradise-collection" },
+  { label: "2026 Collection", to: "/collection-2026" },
   { label: "Clearance", to: "/clearance" },
   { label: "Where to Buy", to: "/shop" },
   { label: "Contact Us", to: "/contact-us" },
@@ -52,10 +53,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center px-6 xl:px-10 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <Logo type="header" size="lg" />
-            <span className="font-heading text-xl xl:text-2xl font-semibold tracking-wider text-primary uppercase">
-              FashionSpectrum
-            </span>
+            <Logo type="header" size="7xl" />
           </Link>
 
           {/* Nav Links */}
@@ -233,10 +231,7 @@ const Navbar = () => {
           </button>
 
           <Link to="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <Logo type="header" size="md" />
-            <span className="font-heading text-lg sm:text-xl font-semibold tracking-wider text-primary uppercase">
-              FashionSpectrum
-            </span>
+            <Logo type="header" size="6xl" />
           </Link>
 
           <div className="flex items-center gap-3 z-10">

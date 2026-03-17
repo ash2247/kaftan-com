@@ -56,6 +56,7 @@ import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSetup from "./pages/admin/AdminSetup";
 import RemovePrices from "./pages/admin/RemovePrices";
 import BuyClearance from "./pages/BuyClearance";
+import Collection2026 from "./pages/Collection2026";
 
 const queryClient = new QueryClient();
 
@@ -166,6 +167,7 @@ const AnimatedRoutes = () => {
           <Route path="/new-arrivals" element={<PageTransition><NewArrivals /></PageTransition>} />
           <Route path="/sale" element={<PageTransition><Sale /></PageTransition>} />
           <Route path="/clearance" element={<PageTransition><BuyClearance /></PageTransition>} />
+          <Route path="/collection-2026" element={<PageTransition><Collection2026 /></PageTransition>} />
           
           <Route path="/product/:slug" element={<PageTransition><ProductDetail /></PageTransition>} />
           <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />

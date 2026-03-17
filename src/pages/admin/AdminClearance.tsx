@@ -234,7 +234,7 @@ const AdminClearance = () => {
             </div>
           </div>
         </div>
-        <Footer />
+        <Footer showLogo={true} logoType="admin" />
       </div>
     );
   }
@@ -412,7 +412,7 @@ const AdminClearance = () => {
         )}
       </div>
 
-      <Footer />
+      <Footer showLogo={true} logoType="admin" />
     </div>
 
     {/* Add/Edit Modal */}

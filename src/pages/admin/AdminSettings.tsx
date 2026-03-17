@@ -55,6 +55,9 @@ const AdminSettings = () => {
     email_notifications: true,
     order_notifications: true,
     low_stock_alerts: true,
+    collection_grid_mobile: 2,
+    collection_grid_tablet: 3,
+    collection_grid_desktop: 4,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -250,10 +253,14 @@ const AdminSettings = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Globe size={16} />
             General
+          </TabsTrigger>
+          <TabsTrigger value="collection" className="flex items-center gap-2">
+            <Settings size={16} />
+            Collection
           </TabsTrigger>
           <TabsTrigger value="logos" className="flex items-center gap-2">
             <ImageIcon size={16} />
@@ -330,6 +337,76 @@ const AdminSettings = () => {
                   <Input type="number" value={settings.shipping_fee} onChange={e => update("shipping_fee", Number(e.target.value))} className="h-10 bg-card border-border font-body" />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button
+              className="font-body text-xs tracking-wider uppercase"
+              onClick={saveSettings}
+              disabled={saving || !hasChanges}
+            >
+              {saving ? <><Loader2 size={14} className="mr-1 animate-spin" /> Saving...</> : <><Save size={14} className="mr-1" /> Save Changes</>}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Collection Grid Settings Tab */}
+        <TabsContent value="collection" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings size={18} className="text-primary" />
+                Collection Grid Settings
+              </CardTitle>
+              <CardDescription>Configure how many items to display per row on collection pages</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Mobile (2 items per row)</Label>
+                  <select 
+                    value={settings.collection_grid_mobile} 
+                    onChange={e => update("collection_grid_mobile", Number(e.target.value))} 
+                    className="w-full h-10 rounded-md border border-border bg-card px-3 font-body text-sm text-foreground"
+                  >
+                    <option value={1}>1 item per row</option>
+                    <option value={2}>2 items per row</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Tablet (3 items per row)</Label>
+                  <select 
+                    value={settings.collection_grid_tablet} 
+                    onChange={e => update("collection_grid_tablet", Number(e.target.value))} 
+                    className="w-full h-10 rounded-md border border-border bg-card px-3 font-body text-sm text-foreground"
+                  >
+                    <option value={2}>2 items per row</option>
+                    <option value={3}>3 items per row</option>
+                    <option value={4}>4 items per row</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Desktop (4 items per row)</Label>
+                  <select 
+                    value={settings.collection_grid_desktop} 
+                    onChange={e => update("collection_grid_desktop", Number(e.target.value))} 
+                    className="w-full h-10 rounded-md border border-border bg-card px-3 font-body text-sm text-foreground"
+                  >
+                    <option value={3}>3 items per row</option>
+                    <option value={4}>4 items per row</option>
+                    <option value={5}>5 items per row</option>
+                    <option value={6}>6 items per row</option>
+                  </select>
+                </div>
+              </div>
+              
+              <Alert>
+                <Settings className="h-4 w-4" />
+                <AlertDescription>
+                  These settings apply to all collection pages including Paradise Collection, Safari Collection, and main Collections page.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
 

@@ -8,6 +8,7 @@ import AnnouncementBar from "./AnnouncementBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import type { CatalogPageContent } from "@/hooks/usePageContent";
+import { useCollectionSettings } from "@/hooks/useCollectionSettings";
 
 interface CatalogPageProps {
   title: string;
@@ -24,6 +25,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [showFilters, setShowFilters] = useState(false);
+  const { getGridClasses } = useCollectionSettings();
 
   // Use CMS content if available, otherwise fall back to props
   const displayTitle = cmsContent?.title || title;
@@ -152,7 +154,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
                 <p className="font-body text-xs text-muted-foreground">Try a different category or filter.</p>
               </div>
             ) : (
-              <div className={`grid grid-cols-2 md:grid-cols-3 ${columns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4 md:gap-6`}>
+              <div className={getGridClasses() + " gap-4 md:gap-6"}>
                 {filtered.map((product, i) => (
                   <ProductCard key={product.id} product={product} index={i} />
                 ))}

@@ -6,7 +6,7 @@ interface LogoProps {
   className?: string;
   alt?: string;
   fallbackText?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
 }
 
 const Logo = ({ 
@@ -45,6 +45,18 @@ const Logo = ({
         return 'h-12 w-12';
       case 'xl':
         return 'h-16 w-16';
+      case '2xl':
+        return 'h-20 w-20';
+      case '3xl':
+        return 'h-24 w-24';
+      case '4xl':
+        return 'h-32 w-32';
+      case '5xl':
+        return 'h-40 w-40';
+      case '6xl':
+        return 'h-48 w-48';
+      case '7xl':
+        return 'h-56 w-56';
       default:
         return 'h-8 w-8';
     }
@@ -52,6 +64,20 @@ const Logo = ({
 
   const logoUrl = getLogoUrl();
   const sizeClasses = getSizeClasses();
+
+  // For admin and header types, only show if a custom logo is uploaded
+  // Don't show fallback text when no custom logo exists
+  const isCustomLogo = logoUrl && (
+    logoUrl.startsWith('data:') || 
+    logoUrl.startsWith('http:') || 
+    logoUrl.startsWith('https:') || 
+    (type === 'admin' && logoUrl !== DEFAULT_LOGOS.admin_logo_url && logoUrl !== '/logo.png') ||
+    (type === 'header' && logoUrl !== DEFAULT_LOGOS.header_logo_url && logoUrl !== '/logo.png')
+  );
+  
+  if ((type === 'admin' || type === 'header') && !isCustomLogo) {
+    return null;
+  }
 
   return (
     <div className={`flex items-center ${className}`}>

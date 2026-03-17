@@ -15,6 +15,9 @@ export interface StoreSettings {
   email_notifications: boolean;
   order_notifications: boolean;
   low_stock_alerts: boolean;
+  collection_grid_mobile: number;
+  collection_grid_tablet: number;
+  collection_grid_desktop: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -85,6 +88,9 @@ export const settingsService = {
             email_notifications: settings.email_notifications,
             order_notifications: settings.order_notifications,
             low_stock_alerts: settings.low_stock_alerts,
+            collection_grid_mobile: settings.collection_grid_mobile,
+            collection_grid_tablet: settings.collection_grid_tablet,
+            collection_grid_desktop: settings.collection_grid_desktop,
             updated_at: new Date().toISOString()
           })
           .eq('id', existing.id)
