@@ -232,10 +232,7 @@ const ImageUploader = ({ src, alt, onUpload, onRemove, onAltChange, className = 
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image must be under 5MB");
-      return;
-    }
+    // No file size limit - allow unlimited uploads
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) onUpload(e.target.result as string);
@@ -314,7 +311,7 @@ const AddSlideButton = ({ onAdd }: { onAdd: (dataUrl: string) => void }) => {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (!file) return;
-          if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB"); return; }
+          // No file size limit - allow unlimited uploads
           const reader = new FileReader();
           reader.onload = (ev) => { if (ev.target?.result) onAdd(ev.target.result as string); };
           reader.readAsDataURL(file);
@@ -339,7 +336,7 @@ const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: str
           e.preventDefault();
           const file = e.dataTransfer.files[0];
           if (!file || !file.type.startsWith("image/")) return;
-          if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB"); return; }
+          // No file size limit - allow unlimited uploads
           const reader = new FileReader();
           reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
           reader.readAsDataURL(file);
@@ -355,7 +352,7 @@ const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: str
           </div>
         </div>
       </div>
-      <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. Max 5MB.</p>
+      <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. No size limit.</p>
       <input
         ref={inputRef}
         type="file"
@@ -364,7 +361,7 @@ const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: str
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (!file) return;
-          if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB"); return; }
+          // No file size limit - allow unlimited uploads
           const reader = new FileReader();
           reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
           reader.readAsDataURL(file);
@@ -622,7 +619,7 @@ const HomePageEditor = ({
                   <AddSlideButton onAdd={onSlideAdd} />
                 )}
               </div>
-              <p className="font-body text-xs text-muted-foreground">{heroSlides.length} slide{heroSlides.length !== 1 ? "s" : ""} · Max 10 slides · Max 5MB per image</p>
+              <p className="font-body text-xs text-muted-foreground">{heroSlides.length} slide{heroSlides.length !== 1 ? "s" : ""} · Max 10 slides · No size limit per image</p>
             </EditorCard>
 
             {/* Hero Text */}

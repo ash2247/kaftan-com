@@ -542,7 +542,7 @@ const AdminProducts = () => {
                 <label htmlFor="image-upload" className="cursor-pointer">
                   <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
                   <p className="font-body text-sm text-muted-foreground">Drag & drop images or click to upload</p>
-                  <p className="font-body text-xs text-muted-foreground mt-1">PNG, JPG up to 5MB</p>
+                  <p className="font-body text-xs text-muted-foreground mt-1">PNG, JPG - No size limit</p>
                   {uploading && <p className="font-body text-xs text-primary mt-2">Uploading...</p>}
                 </label>
               </div>

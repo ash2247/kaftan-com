@@ -83,15 +83,7 @@ const AdminSettings = () => {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 5MB",
-        variant: "destructive"
-      });
-      return;
-    }
+    // No file size limit - allow unlimited uploads
 
     try {
       setUploadingLogo(type);
@@ -480,7 +472,7 @@ const AdminSettings = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, or SVG (max 5MB)
+                      PNG, JPG, or SVG (no size limit)
                     </p>
                   </div>
 
@@ -555,7 +547,7 @@ const AdminSettings = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, or SVG (max 5MB)
+                      PNG, JPG, or SVG (no size limit)
                     </p>
                   </div>
 
@@ -630,7 +622,7 @@ const AdminSettings = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, or SVG (max 5MB)
+                      PNG, JPG, or SVG (no size limit)
                     </p>
                   </div>
 
@@ -705,7 +697,7 @@ const AdminSettings = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, or SVG (max 5MB)
+                      PNG, JPG, or SVG (no size limit)
                     </p>
                   </div>
 
