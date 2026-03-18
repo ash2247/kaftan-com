@@ -38,7 +38,7 @@ const NewArrivalsSection = () => {
     price: p.price,
     original_price: p.original_price || undefined,
     image: p.images?.[0] || "/placeholder.svg",
-    badge: "New in",
+    badge: undefined,
     category: p.category || "",
     style: undefined,
     color: p.colors?.[0],
