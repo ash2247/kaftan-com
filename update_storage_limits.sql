@@ -1,7 +1,3 @@
--- ========================================
--- REMOVE ALL SUPABASE STORAGE LIMITATIONS
--- ========================================
-
 -- Remove ALL file size limits from ALL storage buckets
 UPDATE storage.buckets 
 SET 
@@ -32,7 +28,7 @@ SELECT
   END as status
 FROM storage.buckets;
 
--- Also remove any row-level security policies that might restrict uploads
+-- Remove any row-level security policies that might restrict uploads
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can upload" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can delete" ON storage.objects;
@@ -65,5 +61,3 @@ CREATE POLICY "Public read access" ON storage.objects
   FOR SELECT
   TO anon
   USING (bucket_id IN ('public', 'media', 'products'));
-
-COMMIT;
