@@ -21,24 +21,47 @@ export const uploadService = {
     onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadedFile> {
     try {
-      console.log('Processing image:', file.name, 'Size:', (file.size / 1024).toFixed(1), 'KB');
+      console.log('Processing image:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
       
       // Upload original file without compression
       const fileName = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${file.name.split('.').pop() || 'jpg'}`;
       
+      // Create upload with proper options for large files
+      const uploadOptions: any = {
+        contentType: file.type,
+        upsert: true,
+        cacheControl: '3600'
+      };
+
+      // Add progress tracking if callback provided
+      if (onProgress) {
+        uploadOptions.onProgress = (event: any) => {
+          if (event.loaded && event.total) {
+            const percentage = Math.round((event.loaded / event.total) * 100);
+            onProgress({
+              loaded: event.loaded,
+              total: event.total,
+              percentage,
+              fileName: file.name
+            });
+          }
+        };
+      }
+
       const { data, error } = await supabase.storage
         .from('public')
-        .upload(fileName, file, {
-          contentType: file.type,
-          upsert: true,
-          cacheControl: '3600'
-        });
+        .upload(fileName, file, uploadOptions);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw new Error(`Upload failed: ${error.message || 'Unknown error'}`);
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('public')
         .getPublicUrl(fileName);
+
+      console.log('Upload successful:', file.name, 'URL:', publicUrl);
 
       return {
         url: publicUrl,
@@ -48,7 +71,8 @@ export const uploadService = {
       };
     } catch (error) {
       console.error('Upload error:', error);
-      throw new Error('Failed to upload image');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
+      throw new Error(errorMessage);
     }
   },
 
