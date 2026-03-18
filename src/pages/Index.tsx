@@ -71,7 +71,7 @@ const Index = () => {
       
       {/* Original sections (keeping for compatibility) */}
       {isEnabled("footer") && (
-        <Footer content={content.footer} />
+        <Footer content={content.footer} showLogo={false} />
       )}
     </div>
   );
