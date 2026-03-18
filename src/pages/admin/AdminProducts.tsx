@@ -461,7 +461,7 @@ const AdminProducts = () => {
               e.stopPropagation();
             }}
           >
-            <div className="h-full overflow-y-auto pr-2">
+            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-heading text-xl font-semibold text-foreground">{editProduct ? "Edit Product" : "Add Product"}</h3>
                 <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
