@@ -10,7 +10,6 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import ImageZoom from "@/components/ImageZoom";
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -91,11 +90,11 @@ const ProductDetail = () => {
                 className="aspect-[3/4] overflow-hidden bg-secondary relative"
               >
                 {activeImage ? (
-                  <ImageZoom
+                  <img
                     src={activeImage}
                     alt={`${product.name} — image ${activeIdx + 1}`}
-                    className="w-full h-full"
-                    zoomLevel={2}
+                    className="w-full h-full object-contain"
+                    draggable={false}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
