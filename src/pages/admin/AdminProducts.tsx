@@ -443,7 +443,7 @@ const AdminProducts = () => {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
             className="fixed inset-0 bg-black/60" 
             onClick={(e) => {
@@ -454,18 +454,21 @@ const AdminProducts = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-50 bg-background border border-border rounded-xl shadow-xl w-full max-w-lg mx-4 p-6 max-h-[90vh]"
+            className="relative z-50 bg-background border border-border rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
             onWheel={(e) => {
               // Allow normal scrolling behavior
               e.stopPropagation();
             }}
           >
-            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-heading text-xl font-semibold text-foreground">{editProduct ? "Edit Product" : "Add Product"}</h3>
-                <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
-              </div>
+            {/* Fixed Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <h3 className="font-heading text-xl font-semibold text-foreground">{editProduct ? "Edit Product" : "Add Product"}</h3>
+              <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="font-body text-xs uppercase text-muted-foreground">Product Name *</Label>
@@ -621,11 +624,13 @@ const AdminProducts = () => {
                   </div>
                 </div>
               )}
+              </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            
+            {/* Fixed Footer */}
+            <div className="flex gap-3 p-6 border-t border-border">
               <Button variant="outline" className="flex-1 font-body text-xs tracking-wider uppercase" onClick={() => setShowModal(false)}>Cancel</Button>
               <Button className="flex-1 font-body text-xs tracking-wider uppercase" onClick={handleSave}>{editProduct ? "Update" : "Add"} Product</Button>
-            </div>
             </div>
           </motion.div>
         </div>
