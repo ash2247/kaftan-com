@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { productService } from "@/lib/productService";
-import { uploadService } from "@/lib/uploadService";
+import { uploadService, type UploadProgress } from "@/lib/uploadService";
 import { categoryService } from "@/lib/categoryService";
 import { useCollections } from "@/hooks/useCollections";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ const AdminProducts = () => {
   const [editProduct, setEditProduct] = useState<AdminProduct | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const { collections, loading: collectionsLoading } = useCollections();
   const [form, setForm] = useState<{ 
     name: string; 
@@ -281,8 +282,11 @@ const AdminProducts = () => {
     })));
 
     setUploading(true);
+    setUploadProgress(null);
     try {
-      const uploadedFiles = await uploadService.uploadMultipleImages(files);
+      const uploadedFiles = await uploadService.uploadMultipleImages(files, (progress) => {
+        setUploadProgress(progress);
+      });
       console.log('Upload successful:', uploadedFiles);
       setUploadedImages([...uploadedImages, ...uploadedFiles.map(f => f.url)]);
       toast({ title: `${files.length} image(s) uploaded successfully!` });
@@ -301,6 +305,7 @@ const AdminProducts = () => {
       });
     } finally {
       setUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -543,7 +548,27 @@ const AdminProducts = () => {
                   <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
                   <p className="font-body text-sm text-muted-foreground">Drag & drop images or click to upload</p>
                   <p className="font-body text-xs text-muted-foreground mt-1">PNG, JPG - No size limit</p>
-                  {uploading && <p className="font-body text-xs text-primary mt-2">Uploading...</p>}
+                  {uploading && uploadProgress && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-body text-muted-foreground">
+                          {uploadProgress.fileName}
+                        </span>
+                        <span className="font-body text-primary">
+                          {uploadProgress.percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
+                          style={{ width: `${uploadProgress.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {uploading && !uploadProgress && (
+                    <p className="font-body text-xs text-primary mt-2">Uploading...</p>
+                  )}
                 </label>
               </div>
 

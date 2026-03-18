@@ -7,9 +7,19 @@ export interface UploadedFile {
   type: string;
 }
 
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+  fileName: string;
+}
+
 export const uploadService = {
-  // Upload without compression - original quality
-  async uploadImage(file: File): Promise<UploadedFile> {
+  // Upload without compression - original quality with progress tracking
+  async uploadImage(
+    file: File, 
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<UploadedFile> {
     try {
       console.log('Processing image:', file.name, 'Size:', (file.size / 1024).toFixed(1), 'KB');
       
@@ -20,7 +30,8 @@ export const uploadService = {
         .from('public')
         .upload(fileName, file, {
           contentType: file.type,
-          upsert: true
+          upsert: true,
+          cacheControl: '3600'
         });
 
       if (error) throw error;
@@ -41,18 +52,45 @@ export const uploadService = {
     }
   },
 
-  // Upload multiple images in parallel without compression
-  async uploadMultipleImages(files: File[]): Promise<UploadedFile[]> {
-    const uploads = files.map(async (file) => {
+  // Upload multiple images with progress tracking
+  async uploadMultipleImages(
+    files: File[], 
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<UploadedFile[]> {
+    const uploadedFiles: UploadedFile[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       try {
-        return await this.uploadImage(file);
+        // Report progress for this file
+        if (onProgress) {
+          onProgress({
+            loaded: 0,
+            total: file.size,
+            percentage: 0,
+            fileName: file.name
+          });
+        }
+        
+        const uploadedFile = await this.uploadImage(file);
+        uploadedFiles.push(uploadedFile);
+        
+        // Report completion for this file
+        if (onProgress) {
+          onProgress({
+            loaded: file.size,
+            total: file.size,
+            percentage: 100,
+            fileName: file.name
+          });
+        }
       } catch (error) {
         console.error('Failed to upload:', file.name, error);
         throw error;
       }
-    });
+    }
     
-    return Promise.all(uploads);
+    return uploadedFiles;
   },
 
   // Delete image
