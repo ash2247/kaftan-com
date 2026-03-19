@@ -184,12 +184,12 @@ const CollectionDetail = () => {
                 <Link to={`/product/${product.slug}`} className="block">
                   <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:border-primary/50">
                     {/* Product Image */}
-                    <div className="h-64 bg-secondary/50 flex items-center justify-center relative">
+                    <div className="h-64 bg-secondary/50 relative overflow-hidden">
                       {product.images && product.images.length > 0 ? (
                         <img 
                           src={product.images[0]} 
                           alt={product.name} 
-                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <div className="text-muted-foreground/30">
