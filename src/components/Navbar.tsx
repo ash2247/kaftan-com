@@ -62,12 +62,12 @@ const Navbar = () => {
               link.label === "Where to Buy" ? (
                 <div
                   key={link.label}
-                  className="relative"
+                  className="relative flex items-center"
                   onMouseEnter={handleWhereToBuyEnter}
                   onMouseLeave={handleWhereToBuyLeave}
                 >
                   <span
-                    className={`font-body text-[10px] xl:text-[11px] tracking-[0.05em] xl:tracking-[0.08em] uppercase transition-colors duration-300 hover:text-primary cursor-pointer whitespace-nowrap ${
+                    className={`font-body text-[10px] xl:text-[11px] tracking-[0.05em] xl:tracking-[0.08em] uppercase transition-colors duration-300 hover:text-primary cursor-pointer whitespace-nowrap inline-block leading-none h-[45px] flex items-center ${
                       location.pathname === link.to
                         ? "text-primary font-medium"
                         : "text-foreground"
