@@ -189,7 +189,7 @@ const CollectionDetail = () => {
                         <img 
                           src={product.images[0]} 
                           alt={product.name} 
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="text-muted-foreground/30">
