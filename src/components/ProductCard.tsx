@@ -37,7 +37,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       className="group cursor-pointer"
     >
       <Link to={`/product/${slugify(product.name)}`}>
-        <div className="relative overflow-hidden aspect-[3/4]" style={{ backgroundColor: '#ffffff' }}>
+        <div className="relative overflow-hidden aspect-[3/4] bg-secondary">
           <motion.img
             src={product.image}
             alt={product.name}

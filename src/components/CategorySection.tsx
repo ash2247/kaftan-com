@@ -169,7 +169,7 @@ const CategorySection = () => {
               className="group cursor-pointer"
             >
               <Link to={category.link} className="block">
-                <div className="relative overflow-hidden rounded-lg aspect-[3/4] bg-gray-100">
+                <div className="relative overflow-hidden rounded-lg aspect-[3/4] bg-secondary">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
                   <img
                     src={category.image}
