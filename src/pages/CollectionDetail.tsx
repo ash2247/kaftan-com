@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, Package } from "lucide-react";
+import { ArrowLeft, Calendar, Package, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import HorizontalFilterBar from "@/components/HorizontalFilterBar";
+import type { FilterState } from "@/lib/filterUtils";
+import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
 
 interface Collection {
   id: string;
@@ -37,6 +40,31 @@ const CollectionDetail = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState("latest");
+  const [currentColumns, setCurrentColumns] = useState<3 | 4>(3);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Initialize filters
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    categories: [],
+    priceRange: [0, 1000],
+    colors: [],
+    sizes: [],
+    badges: [],
+    inStockOnly: false,
+  }));
+
+  const getGridClassesForColumns = (cols: 3 | 4) => {
+    if (cols === 3) {
+      return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+    } else {
+      return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+    }
+  };
+
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+  };
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -83,6 +111,38 @@ const CollectionDetail = () => {
 
     fetchCollection();
   }, [slug]);
+
+  // Update price range when products change
+  useEffect(() => {
+    if (products.length > 0) {
+      const priceRange = getPriceRange(products);
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [priceRange.min, priceRange.max]
+      }));
+    }
+  }, [products]);
+
+  // Apply filters and search
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    // Apply filters
+    result = applyFilters(result, filters);
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply sorting
+    return sortProducts(result, sortBy);
+  }, [products, filters, sortBy, searchQuery]);
 
   if (loading) {
     return (
@@ -163,17 +223,57 @@ const CollectionDetail = () => {
           </motion.div>
         </div>
 
+        {/* Search Bar */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 pl-10 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Horizontal Filter Bar */}
+        <HorizontalFilterBar
+          products={products}
+          filters={filters}
+          onFiltersChange={setFilters}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          filteredCount={filteredProducts.length}
+          totalCount={products.length}
+          columns={currentColumns}
+          onColumnsChange={setCurrentColumns}
+        />
+
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {filteredProducts.length === 0 ? (
           <div className="text-center py-16">
-            <p className="font-heading text-xl text-muted-foreground">No products in this collection yet</p>
+            <p className="font-heading text-xl text-muted-foreground">No products found</p>
             <p className="font-body text-muted-foreground mt-2">
-              Check back soon for new additions.
+              Try adjusting your filters or search query.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, index) => (
+          <div className={getGridClassesForColumns(currentColumns) + " gap-6"}>
+            {filteredProducts.map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
