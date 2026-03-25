@@ -123,8 +123,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </span>
             <span className={`font-body text-[10px] uppercase ${
               product.in_stock 
-                ? 'text-green-600 dark:text-green-400' 
-                : 'text-red-600 dark:text-red-400'
+                ? 'text-green-700 dark:text-green-300' 
+                : 'text-red-700 dark:text-red-300'
             }`}>
               {product.in_stock ? 'In Stock' : 'Out of Stock'}
             </span>

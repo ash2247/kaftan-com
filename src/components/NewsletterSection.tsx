@@ -139,8 +139,8 @@ const NewsletterSection = () => {
                 </>
               ) : (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={32} className="text-green-600" />
+                  <div className="w-16 h-16 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={32} className="text-green-700 dark:text-green-300" />
                   </div>
                   <h3 className="font-heading text-xl font-light text-foreground mb-2">
                     Welcome to the Community!
