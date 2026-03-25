@@ -13,6 +13,9 @@ export interface AdminProduct extends Product {
   stock: number;
   status: "Active" | "Draft" | "Archived";
   sku: string;
+  style?: string;
+  color?: string;
+  size?: string;
 }
 
 export const productService = {
