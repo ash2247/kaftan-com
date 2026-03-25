@@ -109,10 +109,65 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         </div>
       </Link>
 
-      <div className="pt-4 space-y-1">
-        <h3 className="font-body text-xs tracking-[0.1em] uppercase text-foreground group-hover:text-primary transition-colors duration-300">
-          {product.name}
-        </h3>
+      <div className="pt-4 space-y-2">
+        {/* Product Details */}
+        <div className="space-y-1">
+          <h3 className="font-body text-xs tracking-[0.1em] uppercase text-foreground group-hover:text-primary transition-colors duration-300">
+            {product.name}
+          </h3>
+          
+          {/* Status */}
+          <div className="flex items-center gap-2">
+            <span className="font-body text-[10px] text-muted-foreground uppercase">
+              Status:
+            </span>
+            <span className={`font-body text-[10px] uppercase ${
+              product.in_stock 
+                ? 'text-green-600 dark:text-green-400' 
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {product.in_stock ? 'In Stock' : 'Out of Stock'}
+            </span>
+          </div>
+
+          {/* Style */}
+          {product.style && (
+            <div className="flex items-center gap-2">
+              <span className="font-body text-[10px] text-muted-foreground uppercase">
+                Style:
+              </span>
+              <span className="font-body text-[10px] text-foreground">
+                {product.style}
+              </span>
+            </div>
+          )}
+
+          {/* Colour */}
+          {product.color && (
+            <div className="flex items-center gap-2">
+              <span className="font-body text-[10px] text-muted-foreground uppercase">
+                Colour:
+              </span>
+              <span className="font-body text-[10px] text-foreground">
+                {product.color}
+              </span>
+            </div>
+          )}
+
+          {/* Collection */}
+          {product.collection && (
+            <div className="flex items-center gap-2">
+              <span className="font-body text-[10px] text-muted-foreground uppercase">
+                Collection:
+              </span>
+              <span className="font-body text-[10px] text-foreground">
+                {product.collection}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Price */}
         {product.price != null ? (
           <div className="flex items-center gap-2">
             <span className="font-body text-sm font-medium text-foreground">

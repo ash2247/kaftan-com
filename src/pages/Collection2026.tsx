@@ -4,23 +4,14 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { SlidersHorizontal, ChevronDown } from "lucide-react";
+import ProductFilters from "@/components/ProductFilters";
+import { SlidersHorizontal, ChevronDown, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
-interface Product2026 {
-  id: string;
-  name: string;
-  price: number;
-  original_price?: number;
-  image: string;
-  images?: string[];
-  category: string;
-  color?: string;
-  in_stock: boolean;
-  sku?: string;
-  created_at: string;
-}
+import type { Product } from "@/lib/products";
+import type { FilterState } from "@/lib/filterUtils";
+import { getActiveFiltersCount, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
+import { getAllProducts } from "@/lib/productUtils";
 
 const sortOptions = [
   { label: "Sort by latest", value: "latest" },
@@ -30,15 +21,90 @@ const sortOptions = [
 ];
 
 const Collection2026 = () => {
-  const [products, setProducts] = useState<Product2026[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("latest");
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Initialize filters with categories only
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    categories: [],
+    priceRange: [0, 1000],
+    colors: [],
+    sizes: [],
+    badges: [],
+    inStockOnly: false,
+  }));
+
+  // Update filters when products change (only for price range)
+  useEffect(() => {
+    if (products.length > 0) {
+      const priceRange = getPriceRange(products);
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [priceRange.min, priceRange.max]
+      }));
+    }
+  }, [products]);
 
   useEffect(() => {
     fetchProducts();
+    fetchCollections();
   }, []);
+
+  const fetchCollections = async () => {
+    try {
+      // First try to get collections from database
+      const { data, error } = await supabase
+        .from('collections')
+        .select('name')
+        .order('name');
+
+      if (error) {
+        console.log('Collections table not found, using product categories');
+        // Fallback to product categories
+        const productCategories = await fetchProductCategories();
+        setCollections(productCategories);
+      } else if (data && data.length > 0) {
+        const collectionNames = data?.map(c => c.name).filter(Boolean) || [];
+        console.log('Collections from database:', collectionNames);
+        setCollections(collectionNames);
+      } else {
+        console.log('Collections table empty, using product categories');
+        // Fallback to product categories
+        const productCategories = await fetchProductCategories();
+        setCollections(productCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+      // Fallback to product categories
+      const productCategories = await fetchProductCategories();
+      setCollections(productCategories);
+    }
+  };
+
+  const fetchProductCategories = async (): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('category')
+        .not('category', 'is', null);
+
+      if (error) {
+        console.error('Error fetching product categories:', error);
+        return [];
+      }
+
+      const categories = Array.from(new Set(data?.map(p => p.category).filter(Boolean))) || [];
+      console.log('Product categories as fallback:', categories);
+      return categories;
+    } catch (error) {
+      console.error('Error fetching product categories:', error);
+      return [];
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -51,12 +117,11 @@ const Collection2026 = () => {
 
       if (error) {
         console.error('Error fetching products:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load products",
-          variant: "destructive"
-        });
-      } else {
+        // Use sample products as fallback
+        const sampleProducts = getAllProducts();
+        console.log('Using sample products:', sampleProducts.length);
+        setProducts(sampleProducts);
+      } else if (data && data.length > 0) {
         const mappedProducts = data?.map(product => ({
           id: product.id,
           name: product.name,
@@ -64,21 +129,32 @@ const Collection2026 = () => {
           original_price: product.original_price,
           image: product.images?.[0] || '/placeholder.svg',
           images: product.images || [],
-          category: product.category || '',
+          category: product.collection || product.category || 'Uncategorized', // Use collection field primarily
+          style: product.description || '',
           color: product.colors?.[0] || '',
-          in_stock: product.in_stock || false,
-          sku: product.sku || '',
-          created_at: product.created_at || ''
+          collection: product.collection || '',
+          badge: product.featured ? 'New in' : (!product.in_stock ? 'Sold out' : product.original_price ? 'Sale' : undefined) as "New in" | "Sold out" | "Sale" | undefined,
+          sort_order: (product as any).sort_order || 999, // Add sort_order field with type assertion
+          featured: product.featured || false, // Add featured field
+          in_stock: product.in_stock !== false, // Add in_stock field
         })) || [];
         
         setProducts(mappedProducts);
+      } else {
+        // Use sample products if database is empty
+        const sampleProducts = getAllProducts();
+        console.log('Database empty, using sample products:', sampleProducts.length);
+        setProducts(sampleProducts);
       }
     } catch (error) {
       console.error('Error:', error);
+      // Use sample products as fallback
+      const sampleProducts = getAllProducts();
+      setProducts(sampleProducts);
       toast({
-        title: "Error",
-        description: "Failed to load products",
-        variant: "destructive"
+        title: "Using Sample Products",
+        description: "Loaded sample products for demonstration",
+        variant: "default"
       });
     } finally {
       setLoading(false);
@@ -87,31 +163,42 @@ const Collection2026 = () => {
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
-    return ["All", ...cats.sort()];
+    console.log('Products:', products);
+    console.log('Categories found:', cats);
+    return cats.sort();
   }, [products]);
 
   const filtered = useMemo(() => {
-    let items = selectedCategory === "All"
-      ? [...products]
-      : products.filter((p) => p.category === selectedCategory);
-
-    switch (sortBy) {
-      case "price-asc":
-        items.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        items.sort((a, b) => b.price - a.price);
-        break;
-      case "name":
-        items.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "latest":
-      default:
-        items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
+    console.log('Filtering by collections:', filters.categories);
+    console.log('Available products:', products.map(p => ({ 
+      id: p.id, 
+      name: p.name, 
+      category: p.category,
+      collection: p.category // This should be the collection field
+    })));
+    
+    let filteredProducts = applyFilters(products, filters);
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filteredProducts = filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.style?.toLowerCase().includes(query) ||
+        p.color?.toLowerCase().includes(query)
+      );
     }
-    return items;
-  }, [sortBy, selectedCategory, products]);
+    
+    console.log('Filtered result count:', filteredProducts.length);
+    console.log('Filtered products:', filteredProducts.map(p => ({ 
+      id: p.id, 
+      name: p.name, 
+      category: p.category 
+    })));
+    
+    return sortProducts(filteredProducts, sortBy);
+  }, [products, filters, sortBy, searchQuery]);
 
   if (loading) {
     return (
@@ -150,19 +237,46 @@ const Collection2026 = () => {
       {/* Toolbar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
         <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
-          >
-            <SlidersHorizontal size={16} />
-            Filters
-          </button>
+          <div className="flex items-center gap-4 flex-1">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
+            >
+              <SlidersHorizontal size={16} />
+              Filters
+              {getActiveFiltersCount(filters, products) > 0 && (
+                <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
+                  {getActiveFiltersCount(filters, products)}
+                </span>
+              )}
+            </button>
+
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="relative">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none font-body text-sm tracking-wide text-foreground bg-background border border-border rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="appearance-none font-body text-sm tracking-wide text-foreground bg-background border border-border rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:border-primary transition-colors"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -173,32 +287,21 @@ const Collection2026 = () => {
             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" size={16} />
           </div>
         </div>
+      </div>
 
-        {/* Category Filter */}
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="pt-4"
-          >
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full font-body text-sm tracking-wide transition-colors ${
-                    selectedCategory === category
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+      {/* Advanced Filters */}
+      <div className="flex gap-8 mt-6">
+        <div className="w-full md:w-80 flex-shrink-0">
+          <ProductFilters
+            products={products}
+            collections={collections}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isOpen={showFilters}
+            onToggle={() => setShowFilters(!showFilters)}
+            className="md:sticky md:top-24"
+          />
+        </div>
       </div>
 
       {/* Products Grid */}
@@ -206,9 +309,7 @@ const Collection2026 = () => {
         {filtered.length === 0 ? (
           <div className="text-center py-12">
             <p className="font-body text-muted-foreground">
-              {selectedCategory === "All" 
-                ? "No products found in the 2026 Collection." 
-                : `No products found in ${selectedCategory} category.`}
+              No products found. Try adjusting your filters or search query.
             </p>
           </div>
         ) : (

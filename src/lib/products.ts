@@ -11,6 +11,10 @@ export interface Product {
   category: string;
   style?: string;
   color?: string;
+  collection?: string;
+  sort_order?: number; // For controlling product order within collections
+  featured?: boolean; // Featured status from database
+  in_stock?: boolean; // Stock status from database
 }
 
 // Get products from database
@@ -28,6 +32,10 @@ export const getProducts = async (): Promise<Product[]> => {
       category: p.category || "",
       style: undefined, // Not in database schema
       color: p.colors?.[0], // Get first color from colors array
+      collection: p.collection || "",
+      sort_order: p.sort_order || 999, // Add sort_order field
+      featured: p.featured || false, // Add featured field
+      in_stock: p.in_stock !== false, // Add in_stock field
     }));
   } catch (error) {
     console.error('Error fetching products:', error);

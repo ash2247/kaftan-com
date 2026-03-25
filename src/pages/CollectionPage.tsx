@@ -5,7 +5,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { SlidersHorizontal, ChevronDown, Package } from "lucide-react";
+import { SlidersHorizontal, ChevronDown, Package, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Collection {
@@ -59,6 +59,7 @@ const CollectionPage = () => {
   const [sortBy, setSortBy] = useState("popular");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   // Fetch collection data
@@ -123,6 +124,17 @@ const CollectionPage = () => {
       ? [...products]
       : products.filter((p) => p.category === selectedCategory);
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      items = items.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.style?.toLowerCase().includes(query) ||
+        p.color?.toLowerCase().includes(query)
+      );
+    }
+
     switch (sortBy) {
       case "price-asc":
         items.sort((a, b) => a.price - b.price);
@@ -137,7 +149,7 @@ const CollectionPage = () => {
         break;
     }
     return items;
-  }, [sortBy, selectedCategory, products]);
+  }, [sortBy, selectedCategory, products, searchQuery]);
 
   if (loading) {
     return (
@@ -219,13 +231,35 @@ const CollectionPage = () => {
       {/* Toolbar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
         <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
-          >
-            <SlidersHorizontal size={16} />
-            Filters
-          </button>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
+            >
+              <SlidersHorizontal size={16} />
+              Filters
+            </button>
+            
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="relative">
             <select

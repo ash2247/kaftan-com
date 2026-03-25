@@ -5,7 +5,9 @@ type ProductRow = Database['public']['Tables']['products']['Row'];
 type ProductInsert = Database['public']['Tables']['products']['Insert'];
 type ProductUpdate = Database['public']['Tables']['products']['Update'];
 
-export interface Product extends ProductRow {}
+export interface Product extends ProductRow {
+  sort_order?: number;
+}
 
 export interface AdminProduct extends Product {
   stock: number;

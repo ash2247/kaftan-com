@@ -1,14 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, ChevronDown, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
+import ProductFilters from "./ProductFilters";
 import AnnouncementBar from "./AnnouncementBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import type { CatalogPageContent } from "@/hooks/usePageContent";
 import { useCollectionSettings } from "@/hooks/useCollectionSettings";
+import { getActiveFiltersCount, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
+import type { FilterState } from "@/lib/filterUtils";
 
 interface CatalogPageProps {
   title: string;
@@ -19,13 +22,32 @@ interface CatalogPageProps {
   columns?: 3 | 4;
 }
 
-type SortOption = "featured" | "price-low" | "price-high" | "name-az" | "name-za";
+type SortOption = "featured" | "price-low" | "price-high" | "name-az" | "name-za" | "collection-order";
 
 const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, columns = 4 }: CatalogPageProps) => {
-  const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { getGridClasses } = useCollectionSettings();
+
+  // Initialize filters with price range
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    categories: [],
+    priceRange: [getPriceRange(products).min, getPriceRange(products).max],
+    colors: [],
+    sizes: [],
+    badges: [],
+    inStockOnly: false,
+  }));
+
+  // Update price range when products change
+  useEffect(() => {
+    const priceRange = getPriceRange(products);
+    setFilters(prev => ({
+      ...prev,
+      priceRange: [priceRange.min, priceRange.max]
+    }));
+  }, [products]);
 
   // Use CMS content if available, otherwise fall back to props
   const displayTitle = cmsContent?.title || title;
@@ -46,19 +68,25 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(products.map((p) => p.category)));
-    return ["All", ...cats.sort()];
+    return cats.sort();
   }, [products]);
 
   const filtered = useMemo(() => {
-    let result = activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
-    switch (sortBy) {
-      case "price-low": return [...result].sort((a, b) => a.price - b.price);
-      case "price-high": return [...result].sort((a, b) => b.price - a.price);
-      case "name-az": return [...result].sort((a, b) => a.name.localeCompare(b.name));
-      case "name-za": return [...result].sort((a, b) => b.name.localeCompare(a.name));
-      default: return result;
+    let filteredProducts = applyFilters(products, filters);
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filteredProducts = filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.style?.toLowerCase().includes(query) ||
+        p.color?.toLowerCase().includes(query)
+      );
     }
-  }, [products, activeCategory, sortBy]);
+    
+    return sortProducts(filteredProducts, sortBy);
+  }, [products, filters, sortBy, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background pb-mobile-nav">
@@ -98,60 +126,84 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
       <div className="px-4 sm:px-6 md:px-16 py-8 md:py-12">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="md:hidden flex items-center gap-2 border border-border px-4 py-2 font-body text-xs tracking-wider uppercase hover:border-primary transition-colors"
             >
               <SlidersHorizontal size={14} />
               Filters
+              {getActiveFiltersCount(filters, products) > 0 && (
+                <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
+                  {getActiveFiltersCount(filters, products)}
+                </span>
+              )}
             </button>
-            <p className="font-body text-xs text-muted-foreground tracking-wide">
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
-            </p>
+            
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-transparent border border-border px-4 py-2 font-body text-xs tracking-wider uppercase text-foreground focus:outline-none focus:border-primary cursor-pointer"
-          >
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name-az">Name: A–Z</option>
-            <option value="name-za">Name: Z–A</option>
-          </select>
+          
+          <div className="flex items-center gap-4">
+            <p className="font-body text-xs text-muted-foreground tracking-wide">
+              {filtered.length} product{filtered.length !== 1 ? "s" : ""} found
+              {filtered.length < products.length && ` of ${products.length}`}
+            </p>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="appearance-none font-body text-sm tracking-wide text-foreground bg-background border border-border rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:border-primary transition-colors"
+              >
+                <option value="featured">Featured</option>
+                <option value="collection-order">Collection Order</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name-az">Name: A–Z</option>
+                <option value="name-za">Name: Z–A</option>
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" size={16} />
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-8">
-          {/* Sidebar filters */}
-          <aside className={`${showFilters ? "block" : "hidden"} md:block w-full md:w-48 flex-shrink-0`}>
-            <div className="flex items-center justify-between mb-4 md:hidden">
-              <h3 className="font-body text-xs tracking-[0.2em] uppercase">Filters</h3>
-              <button onClick={() => setShowFilters(false)}><X size={18} /></button>
-            </div>
-            <h3 className="font-body text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-3">Category</h3>
-            <div className="space-y-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`block w-full text-left font-body text-xs tracking-wider py-1.5 transition-colors ${
-                    activeCategory === cat ? "text-primary font-medium" : "text-foreground hover:text-primary"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </aside>
+          {/* Advanced Filters Sidebar */}
+          <div className="w-full md:w-80 flex-shrink-0">
+            <ProductFilters
+              products={products}
+              collections={categories}
+              filters={filters}
+              onFiltersChange={setFilters}
+              isOpen={showFilters}
+              onToggle={() => setShowFilters(!showFilters)}
+              className="md:sticky md:top-24"
+            />
+          </div>
 
           {/* Product Grid */}
           <div className="flex-1">
             {filtered.length === 0 ? (
               <div className="text-center py-20">
                 <p className="font-heading text-2xl text-foreground mb-2">No products found</p>
-                <p className="font-body text-xs text-muted-foreground">Try a different category or filter.</p>
+                <p className="font-body text-xs text-muted-foreground">Try adjusting your filters or search query.</p>
               </div>
             ) : (
               <div className={getGridClasses() + " gap-4 md:gap-6"}>
