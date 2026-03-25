@@ -42,6 +42,9 @@ const AdminProducts = () => {
     sku: string; 
     status: "Active" | "Draft" | "Archived";
     selectedCollections: string[];
+    style: string;
+    color: string;
+    size: string;
   }>({ 
     name: "", 
     price: "", 
@@ -50,7 +53,10 @@ const AdminProducts = () => {
     stock: "", 
     sku: "", 
     status: "Active",
-    selectedCollections: []
+    selectedCollections: [],
+    style: "",
+    color: "",
+    size: ""
   });
 
   // Load products and categories from database
@@ -124,7 +130,10 @@ const AdminProducts = () => {
       stock: "", 
       sku: "", 
       status: "Active",
-      selectedCollections: []
+      selectedCollections: [],
+      style: "",
+      color: "",
+      size: ""
     });
     setUploadedImages([]);
     setShowModal(true);
@@ -142,7 +151,10 @@ const AdminProducts = () => {
         stock: String(p.stock),
         sku: p.sku,
         status: p.status,
-        selectedCollections: productCollections
+        selectedCollections: productCollections,
+        style: p.style || "",
+        color: p.color || "",
+        size: p.size || ""
       });
     });
     setUploadedImages(p.images || []);
@@ -193,6 +205,9 @@ const AdminProducts = () => {
           stock: Number(form.stock),
           sku: form.sku || `FS-${Date.now().toString(36).toUpperCase().slice(-6)}`,
           status: form.status,
+          style: form.style,
+          color: form.color,
+          size: form.size,
         };
         console.log('Update data:', updateData);
         
@@ -225,6 +240,9 @@ const AdminProducts = () => {
           collection: null,
           slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
           status: form.status,
+          style: form.style,
+          color: form.color,
+          size: form.size,
         };
         console.log('Create data:', createData);
         
@@ -613,6 +631,22 @@ const AdminProducts = () => {
                     <option value="Draft">Draft</option>
                     <option value="Archived">Archived</option>
                   </select>
+                </div>
+              </div>
+              
+              {/* New Fields: Style, Color, Size */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Style</Label>
+                  <Input value={form.style} onChange={e => setForm(f => ({ ...f, style: e.target.value }))} className="h-10 bg-card border-border font-body" placeholder="e.g., Long Dress" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Color</Label>
+                  <Input value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} className="h-10 bg-card border-border font-body" placeholder="e.g., Black, Blue" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Size</Label>
+                  <Input value={form.size} onChange={e => setForm(f => ({ ...f, size: e.target.value }))} className="h-10 bg-card border-border font-body" placeholder="e.g., M, L, XL" />
                 </div>
               </div>
               
