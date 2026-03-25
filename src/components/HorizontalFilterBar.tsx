@@ -81,7 +81,7 @@ const HorizontalFilterBar = ({
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between py-4">
           {/* Left side - Filter dropdowns */}
-          <div className="flex items-center gap-4 flex-1 overflow-x-auto">
+          <div className="flex items-center gap-4 flex-1">
             {filterCategories.map((category) => {
               const activeCount = getActiveFilterCount(category.key as keyof FilterState);
               const hasOptions = category.options.length > 0;
@@ -108,7 +108,7 @@ const HorizontalFilterBar = ({
 
                   {/* Dropdown */}
                   {openDropdown === category.key && hasOptions && (
-                    <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 min-w-[200px] max-h-[300px] overflow-y-auto">
+                    <div className="absolute top-full left-0 mt-1 bg-background border border-border rounded-md shadow-lg z-[9999] min-w-[200px] max-h-[300px] overflow-y-auto">
                       <div className="p-2">
                         {category.options.map((option) => {
                           const isChecked = (filters[category.key as keyof FilterState] as string[])?.includes(option);
@@ -170,7 +170,7 @@ const HorizontalFilterBar = ({
               </button>
 
               {openDropdown === "sort" && (
-                <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 min-w-[200px]">
+                <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-[9999] min-w-[200px]">
                   <div className="p-2">
                     {sortOptions.map((option) => (
                       <button
@@ -197,7 +197,7 @@ const HorizontalFilterBar = ({
       {/* Close dropdown when clicking outside */}
       {openDropdown && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[9998]"
           onClick={() => setOpenDropdown(null)}
         />
       )}
