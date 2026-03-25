@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import type { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
 import ProductFilters from "./ProductFilters";
+import HorizontalFilterBar from "./HorizontalFilterBar";
 import AnnouncementBar from "./AnnouncementBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -124,64 +125,53 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
       </div>
 
       <div className="px-4 sm:px-6 md:px-16 py-8 md:py-12">
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden flex items-center gap-2 border border-border px-4 py-2 font-body text-xs tracking-wider uppercase hover:border-primary transition-colors"
-            >
-              <SlidersHorizontal size={14} />
-              Filters
-              {getActiveFiltersCount(filters, products) > 0 && (
-                <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
-                  {getActiveFiltersCount(filters, products)}
-                </span>
-              )}
-            </button>
-            
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <p className="font-body text-xs text-muted-foreground tracking-wide">
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""} found
-              {filtered.length < products.length && ` of ${products.length}`}
-            </p>
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="appearance-none font-body text-sm tracking-wide text-foreground bg-background border border-border rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:border-primary transition-colors"
+        {/* Search Bar */}
+        <div className="flex justify-center mb-8">
+          <div className="relative w-full max-w-md">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                <option value="featured">Featured</option>
-                <option value="collection-order">Collection Order</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name-az">Name: A–Z</option>
-                <option value="name-za">Name: Z–A</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" size={16} />
-            </div>
+                <X size={14} />
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Horizontal Filter Bar */}
+        <HorizontalFilterBar
+          products={products}
+          filters={filters}
+          onFiltersChange={setFilters}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          filteredCount={filtered.length}
+          totalCount={products.length}
+        />
+
+        {/* Mobile Filters Toggle */}
+        <div className="md:hidden mt-4 mb-6">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 border border-border px-4 py-2 font-body text-xs tracking-wider uppercase hover:border-primary transition-colors"
+          >
+            <SlidersHorizontal size={14} />
+            Advanced Filters
+            {getActiveFiltersCount(filters, products) > 0 && (
+              <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
+                {getActiveFiltersCount(filters, products)}
+              </span>
+            )}
+          </button>
         </div>
 
         <div className="flex gap-8">

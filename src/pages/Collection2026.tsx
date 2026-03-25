@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
+import HorizontalFilterBar from "@/components/HorizontalFilterBar";
 import { SlidersHorizontal, ChevronDown, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -234,58 +235,56 @@ const Collection2026 = () => {
         </p>
       </div>
 
-      {/* Toolbar */}
+      {/* Search Bar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
-        <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
-          <div className="flex items-center gap-4 flex-1">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
-            >
-              <SlidersHorizontal size={16} />
-              Filters
-              {getActiveFiltersCount(filters, products) > 0 && (
-                <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
-                  {getActiveFiltersCount(filters, products)}
-                </span>
-              )}
-            </button>
-
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
+        </div>
+      </div>
 
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none font-body text-sm tracking-wide text-foreground bg-background border border-border rounded-md px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:border-primary transition-colors"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" size={16} />
-          </div>
+      {/* Horizontal Filter Bar */}
+      <HorizontalFilterBar
+        products={products}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        filteredCount={filtered.length}
+        totalCount={products.length}
+      />
+
+      {/* Mobile Filters Toggle */}
+      <div className="container mx-auto px-4 sm:px-6 mb-6">
+        <div className="md:hidden">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 font-body text-sm tracking-wide text-foreground hover:text-primary transition-colors"
+          >
+            <SlidersHorizontal size={16} />
+            Advanced Filters
+            {getActiveFiltersCount(filters, products) > 0 && (
+              <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs ml-1">
+                {getActiveFiltersCount(filters, products)}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
