@@ -248,7 +248,7 @@ const BuyClearance = () => {
                     {/* Discount Badge */}
                     {product.discount_percentage && product.discount_percentage > 0 && (
                       <div className="absolute top-3 left-3">
-                        <Badge className="bg-red-500 text-white font-bold text-xs">
+                        <Badge className="bg-destructive text-destructive-foreground font-bold text-xs">
                           -{product.discount_percentage}%
                         </Badge>
                       </div>
@@ -257,7 +257,7 @@ const BuyClearance = () => {
                     {/* Original Price Badge */}
                     {product.original_price && product.original_price > product.price && (
                       <div className="absolute top-3 right-3">
-                        <Badge className="bg-gray-100 text-gray-700 text-xs">
+                        <Badge className="bg-muted text-foreground text-xs">
                           Was ${product.original_price.toFixed(2)}
                         </Badge>
                       </div>

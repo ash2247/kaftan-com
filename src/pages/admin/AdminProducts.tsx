@@ -352,12 +352,12 @@ const AdminProducts = () => {
   };
 
   const statusBadge = (s: string) => {
-    const colors: Record<string, string> = {
-      Active: "bg-green-100 text-green-700",
-      Draft: "bg-amber-100 text-amber-700",
+    const statusStyles = {
+      Active: "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300",
+      Draft: "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300",
       Archived: "bg-muted text-muted-foreground",
     };
-    return colors[s] || "";
+    return statusStyles[s] || "";
   };
 
   // Sort order management functions
@@ -718,7 +718,7 @@ const AdminProducts = () => {
                         )}
                         <button
                           onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <X size={12} />
                         </button>

@@ -218,7 +218,7 @@ const AdminSmtpSettings = () => {
             className={cn(
               "font-body",
               config.enabled && isConfigured
-                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800"
                 : "bg-muted text-muted-foreground"
             )}
           >
@@ -413,7 +413,7 @@ const AdminSmtpSettings = () => {
                 <div className={cn(
                   "flex items-center gap-2 p-3 rounded-lg text-sm font-body",
                   testResult === "success"
-                    ? "bg-emerald-500/10 text-emerald-600"
+                    ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
                     : "bg-destructive/10 text-destructive"
                 )}>
                   {testResult === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}

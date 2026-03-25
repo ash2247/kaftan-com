@@ -770,7 +770,7 @@ const Checkout = () => {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="font-heading text-xl text-foreground">Contact Information</h2>
                     {user && (
-                      <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300 px-3 py-1 rounded-full">
                         <User size={14} />
                         <span>Auto-filled from your profile</span>
                       </div>
@@ -815,7 +815,7 @@ const Checkout = () => {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="font-heading text-xl text-foreground">Shipping Address</h2>
                     {user && (
-                      <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300 px-3 py-1 rounded-full">
                         <Truck size={14} />
                         <span>Auto-filled from your profile</span>
                       </div>
@@ -1126,7 +1126,7 @@ const Checkout = () => {
                                   <p className="text-sm text-muted-foreground">Expires {card.expiry}</p>
                                 </div>
                                 {card.isDefault && (
-                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                  <span className="text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 px-2 py-1 rounded-full">
                                     Default
                                   </span>
                                 )}

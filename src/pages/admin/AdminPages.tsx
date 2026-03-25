@@ -225,7 +225,7 @@ const AdminPages = () => {
                     <button
                       onClick={() => toggleStatus(p.id)}
                       className={`text-xs px-2.5 py-1 rounded-full font-body font-medium cursor-pointer transition-colors ${
-                        p.status === "published" ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                        p.status === "published" ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30" : "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30"
                       }`}
                     >
                       {p.status === "published" ? "Published" : "Draft"}
