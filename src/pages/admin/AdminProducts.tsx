@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, Edit2, Trash2, Eye, MoreVertical,
-  X, Upload, Package, ChevronDown
+  X, Upload, Package, ChevronDown, ChevronUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,7 @@ import { uploadService, type UploadProgress } from "@/lib/uploadService";
 import { categoryService } from "@/lib/categoryService";
 import { useCollections } from "@/hooks/useCollections";
 import { supabase } from "@/integrations/supabase/client";
-import type { Product } from "@/lib/productService";
-
-interface AdminProduct extends Product {
-  stock: number;
-  status: "Active" | "Draft" | "Archived";
-  sku: string;
-}
+import type { Product, AdminProduct } from "@/lib/productService";
 
 const initialProducts: AdminProduct[] = [];
 
@@ -32,6 +26,7 @@ const AdminProducts = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [categories, setCategories] = useState<string[]>(["All"]);
+  const [sortBy, setSortBy] = useState("created_at");
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<AdminProduct | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -82,7 +77,7 @@ const AdminProducts = () => {
       const adminProducts: AdminProduct[] = data.map(p => ({
         ...p,
         stock: p.stock ?? (p.in_stock ? 100 : 0),
-        status: "Active" as const,
+        status: p.status || "Active",
         sku: p.sku || `FS-${p.id.slice(-4).toUpperCase()}`,
         original_price: p.original_price
       }));
@@ -99,6 +94,24 @@ const AdminProducts = () => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === "All" || p.category === category;
     return matchSearch && matchCat;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "price-low":
+        return a.price - b.price;
+      case "price-high":
+        return b.price - a.price;
+      case "collection-order":
+        // Sort by collection first, then by sort order
+        if (a.collection !== b.collection) {
+          return (a.collection || '').localeCompare(b.collection || '');
+        }
+        return (a.sort_order || 999) - (b.sort_order || 999);
+      case "created_at":
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
   });
 
   const openAdd = () => {
@@ -179,6 +192,7 @@ const AdminProducts = () => {
           in_stock: Number(form.stock) > 0,
           stock: Number(form.stock),
           sku: form.sku || `FS-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+          status: form.status,
         };
         console.log('Update data:', updateData);
         
@@ -210,6 +224,7 @@ const AdminProducts = () => {
           description: "",
           collection: null,
           slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          status: form.status,
         };
         console.log('Create data:', createData);
         
@@ -345,6 +360,44 @@ const AdminProducts = () => {
     return colors[s] || "";
   };
 
+  // Sort order management functions
+  const updateSortOrder = async (productId: string, newSortOrder: number) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('products')
+        .update({ sort_order: newSortOrder })
+        .eq('id', productId);
+      
+      if (error) throw error;
+      
+      toast({ title: "Sort order updated" });
+      loadProducts(); // Reload products to show changes
+    } catch (error) {
+      console.error('Error updating sort order:', error);
+      toast({ title: "Error updating sort order", variant: "destructive" });
+    }
+  };
+
+  const moveProductUp = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    const currentSort = product.sort_order || 999;
+    const newSort = Math.max(1, currentSort - 1);
+    
+    await updateSortOrder(productId, newSort);
+  };
+
+  const moveProductDown = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    const currentSort = product.sort_order || 999;
+    const newSort = currentSort + 1;
+    
+    await updateSortOrder(productId, newSort);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -376,6 +429,18 @@ const AdminProducts = () => {
             </button>
           ))}
         </div>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px] h-10 bg-card border-border font-body">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created_at">Latest First</SelectItem>
+            <SelectItem value="name">Name (A-Z)</SelectItem>
+            <SelectItem value="price-low">Price (Low to High)</SelectItem>
+            <SelectItem value="price-high">Price (High to Low)</SelectItem>
+            <SelectItem value="collection-order">Collection Order</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Products Table */}
@@ -387,6 +452,9 @@ const AdminProducts = () => {
                 <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground">Product</th>
                 <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground hidden sm:table-cell">SKU</th>
                 <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground">Price</th>
+                <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground hidden md:table-cell">Status</th>
+                <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground hidden md:table-cell">Collection</th>
+                <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground hidden lg:table-cell">Sort Order</th>
                 <th className="text-left px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground hidden md:table-cell">Stock</th>
                 <th className="text-right px-4 py-3 font-body text-xs uppercase tracking-wider text-muted-foreground">Actions</th>
               </tr>
@@ -407,6 +475,42 @@ const AdminProducts = () => {
                   <td className="px-4 py-3">
                     <p className="font-body text-sm font-medium text-foreground">$ {p.price}</p>
                     {p.original_price && <p className="font-body text-xs text-muted-foreground line-through">$ {p.original_price}</p>}
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <Badge className={statusBadge(p.status)}>
+                      {p.status}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <Badge variant="secondary" className="font-body text-xs">
+                      {p.collection || 'Uncategorized'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={p.sort_order || 999}
+                        onChange={(e) => updateSortOrder(p.id, parseInt(e.target.value) || 999)}
+                        className="w-20 h-8 text-xs font-body"
+                        min="1"
+                        max="999"
+                      />
+                      <button
+                        onClick={() => moveProductUp(p.id)}
+                        className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
+                        title="Move Up"
+                      >
+                        <ChevronUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => moveProductDown(p.id)}
+                        className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"
+                        title="Move Down"
+                      >
+                        <ChevronDown size={12} />
+                      </button>
+                    </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className={`font-body text-sm ${Number(p.stock || 0) < 10 ? "text-red-500 font-medium" : "text-muted-foreground"}`}>

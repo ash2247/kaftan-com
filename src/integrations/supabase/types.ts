@@ -192,6 +192,7 @@ export type Database = {
           price: number
           sizes: string[] | null
           slug: string
+          status: "Active" | "Draft" | "Archived" | null
           stock: number | null
           sku: string | null
           updated_at: string
@@ -211,6 +212,7 @@ export type Database = {
           price: number
           sizes?: string[] | null
           slug: string
+          status?: "Active" | "Draft" | "Archived" | null
           stock?: number | null
           sku?: string | null
           updated_at?: string
@@ -230,6 +232,7 @@ export type Database = {
           price?: number
           sizes?: string[] | null
           slug?: string
+          status?: "Active" | "Draft" | "Archived" | null
           stock?: number | null
           sku?: string | null
           updated_at?: string
