@@ -29,7 +29,16 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentColumns, setCurrentColumns] = useState<3 | 4>(columns as 3 | 4);
   const { getGridClasses } = useCollectionSettings();
+
+  const getGridClassesForColumns = (cols: 3 | 4) => {
+    if (cols === 3) {
+      return "grid grid-cols-2 md:grid-cols-3";
+    } else {
+      return "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+    }
+  };
 
   // Initialize filters with price range
   const [filters, setFilters] = useState<FilterState>(() => ({
@@ -156,6 +165,8 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
           onSortChange={setSortBy}
           filteredCount={filtered.length}
           totalCount={products.length}
+          columns={currentColumns}
+          onColumnsChange={setCurrentColumns}
         />
 
         {/* Mobile Filters Toggle */}
@@ -196,7 +207,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
                 <p className="font-body text-xs text-muted-foreground">Try adjusting your filters or search query.</p>
               </div>
             ) : (
-              <div className={getGridClasses() + " gap-4 md:gap-6"}>
+              <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
                 {filtered.map((product, i) => (
                   <ProductCard key={product.id} product={product} index={i} />
                 ))}

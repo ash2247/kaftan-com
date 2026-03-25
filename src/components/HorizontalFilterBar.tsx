@@ -13,6 +13,8 @@ interface HorizontalFilterBarProps {
   onSortChange: (sortBy: string) => void;
   filteredCount: number;
   totalCount: number;
+  columns: 3 | 4;
+  onColumnsChange: (columns: 3 | 4) => void;
 }
 
 const HorizontalFilterBar = ({
@@ -22,7 +24,9 @@ const HorizontalFilterBar = ({
   sortBy,
   onSortChange,
   filteredCount,
-  totalCount
+  totalCount,
+  columns,
+  onColumnsChange
 }: HorizontalFilterBarProps) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   
@@ -154,6 +158,41 @@ const HorizontalFilterBar = ({
             <span className="text-sm text-muted-foreground">
               {filteredCount} of {totalCount} products
             </span>
+
+            {/* Layout Toggle */}
+            <div className="flex items-center border border-border rounded-md">
+              <button
+                onClick={() => onColumnsChange(3)}
+                className={`p-2 text-sm transition-colors ${
+                  columns === 3
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="3 columns"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="1" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                  <rect x="6.5" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                  <rect x="12" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                </svg>
+              </button>
+              <button
+                onClick={() => onColumnsChange(4)}
+                className={`p-2 text-sm transition-colors ${
+                  columns === 4
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="4 columns"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="0.5" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                  <rect x="4.5" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                  <rect x="8.5" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                  <rect x="12.5" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
+                </svg>
+              </button>
+            </div>
 
             {/* Sort dropdown */}
             <div className="relative">

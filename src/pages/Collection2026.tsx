@@ -28,6 +28,15 @@ const Collection2026 = () => {
   const [sortBy, setSortBy] = useState("latest");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentColumns, setCurrentColumns] = useState<3 | 4>(3); // Default to 3 columns for larger images
+
+  const getGridClassesForColumns = (cols: 3 | 4) => {
+    if (cols === 3) {
+      return "grid grid-cols-2 md:grid-cols-3";
+    } else {
+      return "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+    }
+  };
 
   // Initialize filters with categories only
   const [filters, setFilters] = useState<FilterState>(() => ({
@@ -268,6 +277,8 @@ const Collection2026 = () => {
         onSortChange={setSortBy}
         filteredCount={filtered.length}
         totalCount={products.length}
+        columns={currentColumns}
+        onColumnsChange={setCurrentColumns}
       />
 
       {/* Mobile Filters Toggle */}
@@ -312,7 +323,7 @@ const Collection2026 = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
             {filtered.map((product, index) => (
               <motion.div
                 key={product.id}
