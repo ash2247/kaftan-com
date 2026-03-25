@@ -13,6 +13,7 @@ const Sale = () => {
       subtitle="Limited time offers on select styles"
       products={products}
       cmsContent={cmsContent}
+      columns={3}
     />
   );
 };

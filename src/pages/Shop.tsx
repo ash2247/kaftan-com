@@ -16,6 +16,7 @@ const Shop = () => {
       products={products}
       bannerImage={collectionBanner}
       cmsContent={cmsContent}
+      columns={3}
     />
   );
 };

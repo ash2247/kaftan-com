@@ -12,6 +12,7 @@ const Collections = () => {
       products={getAllProducts()}
       bannerImage={heroBanner}
       cmsContent={cmsContent}
+      columns={3}
     />
   );
 };
