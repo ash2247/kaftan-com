@@ -18,6 +18,9 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   
   // Check if this is a Paradise collection product
   const isParadiseProduct = product.id.startsWith('pr') || product.name.includes('Paradise');
+  
+  // Check if this is a Safari collection product
+  const isSafariProduct = product.id.startsWith('sf') || product.name.includes('Safari');
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -104,8 +107,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             {product.name}
           </h3>
           
-          {/* Style */}
-          {product.style && (
+          {/* Style - Hidden for Safari Collection */}
+          {product.style && !isSafariProduct && (
             <div className="flex items-center gap-2">
               <span className="font-body text-[10px] text-muted-foreground uppercase">
                 Style:
@@ -116,8 +119,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </div>
           )}
 
-          {/* Colour */}
-          {product.color && (
+          {/* Colour - Hidden for Safari Collection */}
+          {product.color && !isSafariProduct && (
             <div className="flex items-center gap-2">
               <span className="font-body text-[10px] text-muted-foreground uppercase">
                 Colour:
