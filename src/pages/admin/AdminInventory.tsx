@@ -120,7 +120,7 @@ const AdminInventory = () => {
         </div>
         <div className="bg-card border border-red-200 rounded-lg p-4 text-center">
           <TrendingDown size={18} className="mx-auto text-red-500 mb-2" />
-          <p className="font-heading text-xl font-semibold text-red-600">{stats.out_of_stock}</p>
+          <p className="font-heading text-xl font-semibold text-destructive">{stats.out_of_stock}</p>
           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider">Out of Stock</p>
         </div>
       </div>

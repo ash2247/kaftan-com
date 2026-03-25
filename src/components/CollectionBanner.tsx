@@ -64,7 +64,7 @@ const CollectionBanner = ({ content, image }: Props) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,1)", color: "#1f1a17" }}
+            whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,1)", color: "hsl(var(--foreground))" }}
             href={ctaLink}
             className="inline-block font-body text-xs tracking-[0.2em] uppercase border border-primary-foreground text-primary-foreground px-8 py-3 transition-all duration-500"
           >

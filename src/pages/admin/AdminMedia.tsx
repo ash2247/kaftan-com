@@ -450,8 +450,8 @@ const AdminMedia = () => {
                         <button onClick={(e) => { e.stopPropagation(); openUpscaleDialog(m.url, m.name, m); }} className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors shadow-lg border border-blue-600">
                           <Wand2 size={16} className="text-white" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete(m); }} className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors shadow-lg border border-red-600">
-                          <Trash2 size={16} className="text-white" />
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(m); }} className="p-2 bg-destructive rounded-full hover:bg-destructive/90 transition-colors shadow-lg border border-destructive">
+                          <Trash2 size={16} className="text-destructive-foreground" />
                         </button>
                       </div>
                     </div>

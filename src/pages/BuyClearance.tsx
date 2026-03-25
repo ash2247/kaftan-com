@@ -272,7 +272,7 @@ const BuyClearance = () => {
                     {product.name}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="font-body text-lg font-bold text-red-600">
+                    <span className="font-body text-lg font-bold text-destructive">
                       ${product.price.toFixed(2)}
                     </span>
                     {product.original_price && product.original_price > product.price && (
