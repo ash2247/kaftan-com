@@ -104,20 +104,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             {product.name}
           </h3>
           
-          {/* Status */}
-          <div className="flex items-center gap-2">
-            <span className="font-body text-[10px] text-muted-foreground uppercase">
-              Status:
-            </span>
-            <span className={`font-body text-[10px] uppercase ${
-              product.in_stock 
-                ? 'text-green-700 dark:text-green-300' 
-                : 'text-red-700 dark:text-red-300'
-            }`}>
-              {product.in_stock ? 'In Stock' : 'Out of Stock'}
-            </span>
-          </div>
-
           {/* Style */}
           {product.style && (
             <div className="flex items-center gap-2">
