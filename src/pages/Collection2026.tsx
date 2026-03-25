@@ -30,6 +30,10 @@ const Collection2026 = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentColumns, setCurrentColumns] = useState<3 | 4>(3); // Default to 3 columns for larger images
 
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+  };
+
   const getGridClassesForColumns = (cols: 3 | 4) => {
     if (cols === 3) {
       return "grid grid-cols-2 md:grid-cols-3";
@@ -274,7 +278,7 @@ const Collection2026 = () => {
         filters={filters}
         onFiltersChange={setFilters}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={handleSortChange}
         filteredCount={filtered.length}
         totalCount={products.length}
         columns={currentColumns}

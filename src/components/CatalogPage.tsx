@@ -98,6 +98,10 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
     return sortProducts(filteredProducts, sortBy);
   }, [products, filters, sortBy, searchQuery]);
 
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy as SortOption);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-mobile-nav">
       <AnnouncementBar content={announcementContent} />
@@ -162,7 +166,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
           filters={filters}
           onFiltersChange={setFilters}
           sortBy={sortBy}
-          onSortChange={setSortBy}
+          onSortChange={handleSortChange}
           filteredCount={filtered.length}
           totalCount={products.length}
           columns={currentColumns}
