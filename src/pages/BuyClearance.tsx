@@ -234,7 +234,7 @@ const BuyClearance = () => {
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ duration: 0.3 }}
               >
                 <Link to={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}>
                   <div className="relative overflow-hidden bg-white aspect-[3/4]">
