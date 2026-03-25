@@ -94,18 +94,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               <Eye size={15} />
             </div>
           </div>
-
-          {/* Quick add */}
-          {product.price != null && product.price > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 translate-y-0 lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-500 ease-out">
-              <button
-                onClick={handleQuickAdd}
-                className="w-full bg-charcoal/90 backdrop-blur-sm text-primary-foreground font-body text-xs tracking-[0.2em] uppercase py-3.5 hover:bg-primary transition-colors duration-300"
-              >
-                Quick Add — Size M
-              </button>
-            </div>
-          )}
         </div>
       </Link>
 
@@ -166,24 +154,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </div>
           )}
         </div>
-
-        {/* Price */}
-        {product.price != null ? (
-          <div className="flex items-center gap-2">
-            <span className="font-body text-sm font-medium text-foreground">
-              {product.price > 0 ? `$${product.price.toFixed(2)}` : 'Price on Request'}
-            </span>
-            {product.original_price && product.price > 0 && (
-              <span className="font-body text-sm text-muted-foreground line-through">
-                ${product.original_price.toFixed(2)}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="font-body text-sm font-medium text-foreground">
-            Price on Request
-          </div>
-        )}
       </div>
     </motion.div>
   );
