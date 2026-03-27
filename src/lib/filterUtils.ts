@@ -32,7 +32,7 @@ export const getFilterOptions = (products: Product[]) => {
   return {
     categories: Array.from(new Set(products.map(p => p.category))).filter(Boolean),
     colors: Array.from(new Set(products.map(p => p.color).filter(Boolean))),
-    sizes: ["XS", "S", "M", "L", "XL", "XXL", "3XL"], // Standard sizes
+    sizes: Array.from(new Set(products.map(p => p.size).filter(Boolean))),
     badges: Array.from(new Set(products.map(p => p.badge).filter(Boolean))),
   };
 };

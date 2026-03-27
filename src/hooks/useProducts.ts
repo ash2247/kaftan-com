@@ -20,8 +20,9 @@ const mapDbProductToProduct = (dbProduct: any): Product => {
     images: dbProduct.images || [],
     badge: isSoldOut ? "Sold out" : dbProduct.featured ? "New in" : undefined,
     category: dbProduct.category || "Uncategorized",
-    style: dbProduct.description || undefined,
-    color: dbProduct.colors?.[0] || undefined,
+    style: dbProduct.style || undefined,
+    color: dbProduct.color || undefined,
+    size: dbProduct.size || undefined,
   };
 };
 

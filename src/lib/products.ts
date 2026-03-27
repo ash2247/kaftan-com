@@ -11,6 +11,7 @@ export interface Product {
   category: string;
   style?: string;
   color?: string;
+  size?: string;
   collection?: string;
   sort_order?: number; // For controlling product order within collections
   featured?: boolean; // Featured status from database

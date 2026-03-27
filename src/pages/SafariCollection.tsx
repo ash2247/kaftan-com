@@ -61,6 +61,7 @@ const SafariCollection = () => {
           const mappedProducts = (data || []).map((p: any) => ({
             ...p,
             image: p.images?.[0] || "/placeholder.svg",
+            size: p.size || undefined,
           }));
           setProducts(mappedProducts);
         }
