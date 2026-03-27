@@ -42,6 +42,7 @@ const BuyClearance = () => {
   const fetchClearanceProducts = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching Clearance products...');
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -50,6 +51,10 @@ const BuyClearance = () => {
         .gt('original_price', 0)
         .in('display_page', ['clearance', 'all'])
         .order('created_at', { ascending: false });
+
+      console.log('📊 Clearance products data:', data);
+      console.log('❌ Clearance products error:', error);
+      console.log(`✅ Found ${data?.length || 0} Clearance products`);
 
       if (error) {
         console.error('Error fetching clearance products:', error);
