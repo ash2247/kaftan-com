@@ -1,155 +1,137 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Filter, Search, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Search, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import HorizontalFilterBar from "@/components/ui/horizontal-filter-bar";
+import type { FilterState } from "@/lib/filterUtils";
+import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
+import type { Product } from "@/lib/products";
 
-interface ClearanceProduct {
-  id: string;
-  name: string;
-  price: number;
-  original_price?: number;
-  image: string;
-  category: string;
-  color?: string;
-  in_stock: boolean;
-  discount_percentage?: number;
-  sku?: string;
-}
+const sortOptions = [
+  { label: "Sort by popularity", value: "popular" },
+  { label: "Sort by latest", value: "latest" },
+  { label: "Price: low to high", value: "price-asc" },
+  { label: "Price: high to low", value: "price-desc" },
+];
 
 const BuyClearance = () => {
-  const [products, setProducts] = useState<ClearanceProduct[]>([]);
+  const [sortBy, setSortBy] = useState("popular");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentColumns, setCurrentColumns] = useState<3 | 4>(3);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("discount-desc");
-  const [categories, setCategories] = useState<string[]>(["All"]);
 
+  // Fetch Clearance products from database
   useEffect(() => {
-    fetchClearanceProducts();
-  }, []);
+    const fetchClearanceProducts = async () => {
+      try {
+        setLoading(true);
+        console.log('🔍 Fetching Clearance products...');
+        // @ts-ignore - Suppress TypeScript error for complex Supabase query
+        const result = await supabase
+          .from('products')
+          .select('*')
+          .eq('in_stock', true)
+          .not('original_price', 'is', null)
+          .gt('original_price', 0)
+          .in('display_page', ['clearance', 'all'])
+          .order('created_at', { ascending: false });
+        
+        const { data, error } = result as any;
 
-  const fetchClearanceProducts = async () => {
-    try {
-      setLoading(true);
-      console.log('🔍 Fetching Clearance products...');
-      // @ts-ignore - Suppress TypeScript error for complex Supabase query
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('in_stock', true)
-        .not('original_price', 'is', null)
-        .gt('original_price', 0)
-        .in('display_page', ['clearance', 'all'])
-        .order('created_at', { ascending: false });
+        console.log('📊 Clearance products data:', data);
+        console.log('❌ Clearance products error:', error);
+        console.log(`✅ Found ${data?.length || 0} Clearance products`);
 
-      console.log('📊 Clearance products data:', data);
-      console.log('❌ Clearance products error:', error);
-      console.log(`✅ Found ${data?.length || 0} Clearance products`);
-
-      if (error) {
-        console.error('Error fetching clearance products:', error);
+        if (error) {
+          console.error('Error fetching clearance products:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load clearance products",
+            variant: "destructive"
+          });
+        } else {
+          // Map database products to Product interface
+          const mappedProducts = (data || []).map((p: any) => ({
+            ...p,
+            image: p.images?.[0] || "/placeholder.svg",
+          }));
+          setProducts(mappedProducts);
+        }
+      } catch (error) {
+        console.error('Error:', error);
         toast({
           title: "Error",
           description: "Failed to load clearance products",
           variant: "destructive"
         });
-      } else {
-        const clearanceProducts = data?.map(product => ({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          original_price: product.original_price,
-          image: product.images?.[0] || '',
-          category: product.category,
-          color: product.colors?.[0] || '',
-          in_stock: product.in_stock || false,
-          discount_percentage: product.original_price && product.price > 0 
-            ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-            : 0,
-          sku: product.sku || ''
-        })).filter(product => product.original_price && product.price > 0 && product.price < product.original_price) || [];
-        
-        // Sort client-side based on sortBy
-        const sortedProducts = [...clearanceProducts].sort((a, b) => {
-          switch (sortBy) {
-            case "discount-desc":
-              return (b.discount_percentage || 0) - (a.discount_percentage || 0);
-            case "price-asc":
-              return a.price - b.price;
-            case "price-desc":
-              return b.price - a.price;
-            default:
-              return 0;
-          }
-        });
-        
-        setProducts(sortedProducts);
-        
-        // Extract unique categories from clearance products
-        const uniqueCategories = Array.from(new Set(clearanceProducts.map(p => p.category).filter(cat => cat && cat.trim() !== "")));
-        setCategories(["All", ...uniqueCategories]);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load clearance products",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+    };
+
+    fetchClearanceProducts();
+  }, []);
+
+  // Initialize filters
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    categories: [],
+    priceRange: [0, 1000],
+    colors: [],
+    sizes: [],
+    badges: [],
+    inStockOnly: false,
+  }));
+
+  const getGridClassesForColumns = (cols: 3 | 4) => {
+    if (cols === 3) {
+      return "grid grid-cols-2 md:grid-cols-3";
+    } else {
+      return "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
     }
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = category === "All" || product.category === category;
-    return matchesSearch && matchesCategory;
-  });
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+  };
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case "discount-desc":
-        return (b.discount_percentage || 0) - (a.discount_percentage || 0);
-      case "price-asc":
-        return a.price - b.price;
-      case "price-desc":
-        return b.price - a.price;
-      case "name-asc":
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(products.map((p) => p.category)));
+    return ["All", ...cats.sort()];
+  }, [products]);
+
+  const filtered = useMemo(() => {
+    let items = [...products];
+
+    // Apply new filter system
+    items = applyFilters(items, filters);
+    
+    // Apply legacy category filter for backward compatibility
+    if (selectedCategory !== "All") {
+      items = items.filter((p) => p.category === selectedCategory);
     }
-  });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
-        <AnnouncementBar />
-        <Navbar />
-        <div className="container mx-auto px-4 py-16">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="font-body text-sm text-muted-foreground tracking-widest uppercase animate-pulse">Loading clearance deals...</p>
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      items = items.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query) ||
+        p.style?.toLowerCase().includes(query) ||
+        p.color?.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sorting using the new sort system
+    return sortProducts(items, sortBy);
+  }, [products, filters, selectedCategory, searchQuery, sortBy]);
 
   return (
     <div className="min-h-screen bg-background pb-mobile-nav">
@@ -163,139 +145,74 @@ const BuyClearance = () => {
           animate={{ opacity: 1, y: 0 }}
           className="font-heading text-3xl md:text-5xl text-foreground"
         >
-          Buy Clearance
+          Clearance Sale
         </motion.h1>
         <p className="font-body text-sm text-muted-foreground mt-3 tracking-wide">
-          {filteredProducts.length} Clearance Items Available
+          {filtered.length} Clearance Items Available
         </p>
       </div>
 
-      {/* Filters */}
+      {/* Search Bar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-4 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search clearance items..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.filter(cat => cat && cat.trim() !== "").map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search clearance items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
-
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="discount-desc">Biggest Discount</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="name-asc">Name: A-Z</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
+      </div>
+
+      {/* Horizontal Filter Bar */}
+      <div className="container mx-auto px-4 sm:px-6 mb-8">
+        <HorizontalFilterBar
+          products={products}
+          filters={filters}
+          onFiltersChange={setFilters}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          filteredCount={filtered.length}
+          totalCount={products.length}
+          columns={currentColumns}
+          onColumnsChange={setCurrentColumns}
+        />
       </div>
 
       {/* Products Grid */}
       <div className="container mx-auto px-4 sm:px-6 pb-16">
-        {sortedProducts.length === 0 ? (
+        <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
+          {filtered.map((product, i) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03 }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
           <div className="text-center py-20">
-            <Filter className="mx-auto text-muted-foreground mb-4 h-12 w-12" />
             <p className="font-body text-muted-foreground">
-              {search || category !== "All" 
+              {searchQuery || selectedCategory !== "All" || filters.categories.length > 0
                 ? "No clearance items found matching your filters."
                 : "No clearance items available at the moment."}
             </p>
-            <Button 
-              onClick={() => {
-                setSearch("");
-                setCategory("All");
-              }}
-              variant="outline"
-              className="mt-4"
-            >
-              Clear Filters
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {sortedProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Link to={`/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                  <div className="relative overflow-hidden bg-white aspect-[3/4]">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
-                    
-                    {/* Discount Badge */}
-                    {product.discount_percentage && product.discount_percentage > 0 && (
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-destructive text-destructive-foreground font-bold text-xs">
-                          -{product.discount_percentage}%
-                        </Badge>
-                      </div>
-                    )}
-
-                    {/* Original Price Badge */}
-                    {product.original_price && product.original_price > product.price && (
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-muted text-foreground text-xs">
-                          Was ${product.original_price.toFixed(2)}
-                        </Badge>
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  </div>
-                </Link>
-
-                <div className="pt-4 space-y-1">
-                  <h3 className="font-body text-xs tracking-[0.1em] uppercase text-foreground group-hover:text-primary transition-colors duration-300">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="font-body text-lg font-bold text-destructive">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    {product.original_price && product.original_price > product.price && (
-                      <span className="font-body text-sm text-muted-foreground line-through">
-                        ${product.original_price.toFixed(2)}
-                      </span>
-                    )}
-                    {product.discount_percentage && product.discount_percentage > 0 && (
-                      <Badge variant="secondary" className="text-xs">
-                        Save {product.discount_percentage}%
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </div>
         )}
       </div>
