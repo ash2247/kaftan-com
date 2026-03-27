@@ -40,7 +40,7 @@ const ParadiseCollection = () => {
         const result = await supabase
           .from('products')
           .select('*')
-          .in('display_page', ['paradise', 'all'])
+          .eq('display_page', 'paradise')
           .order('created_at', { ascending: false });
         
         const { data, error } = result as any;

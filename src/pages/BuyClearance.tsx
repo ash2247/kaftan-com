@@ -41,7 +41,7 @@ const BuyClearance = () => {
           .eq('in_stock', true)
           .not('original_price', 'is', null)
           .gt('original_price', 0)
-          .in('display_page', ['clearance', 'all'])
+          .eq('display_page', 'clearance')
           .order('created_at', { ascending: false });
         
         const { data, error } = result as any;

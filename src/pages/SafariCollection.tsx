@@ -40,7 +40,7 @@ const SafariCollection = () => {
         const result = await supabase
           .from('products')
           .select('*')
-          .in('display_page', ['safari', 'all'])
+          .eq('display_page', 'safari')
           .order('created_at', { ascending: false });
         
         const { data, error } = result as any;
