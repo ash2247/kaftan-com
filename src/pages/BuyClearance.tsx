@@ -43,6 +43,7 @@ const BuyClearance = () => {
     try {
       setLoading(true);
       console.log('🔍 Fetching Clearance products...');
+      // @ts-ignore - Suppress TypeScript error for complex Supabase query
       const { data, error } = await supabase
         .from('products')
         .select('*')
