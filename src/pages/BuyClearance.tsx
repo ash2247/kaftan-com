@@ -7,7 +7,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import HorizontalFilterBar from "@/components/ui/horizontal-filter-bar";
+import HorizontalFilterBar from "@/components/HorizontalFilterBar";
 import type { FilterState } from "@/lib/filterUtils";
 import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
 import type { Product } from "@/lib/products";
