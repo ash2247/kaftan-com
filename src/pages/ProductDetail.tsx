@@ -193,12 +193,21 @@ const ProductDetail = () => {
 
               {product.price != null && (
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="font-heading text-xl sm:text-2xl text-foreground">
-                    {product.price > 0 ? `$${product.price.toFixed(2)}` : 'Price on Request'}
-                  </span>
-                  {(product as any).originalPrice && product.price > 0 && (
-                    <span className="font-body text-base sm:text-lg text-muted-foreground line-through">
-                      ${(product as any).originalPrice.toFixed(2)}
+                  {product.original_price && product.original_price > product.price ? (
+                    <>
+                      {/* Original Price (strikethrough) */}
+                      <span className="font-heading text-xl sm:text-2xl text-muted-foreground line-through">
+                        ${product.original_price.toFixed(2)} AUD
+                      </span>
+                      {/* Sale Price */}
+                      <span className="font-heading text-xl sm:text-2xl text-foreground">
+                        ${product.price.toFixed(2)} AUD
+                      </span>
+                    </>
+                  ) : (
+                    /* Regular Price (no discount) */
+                    <span className="font-heading text-xl sm:text-2xl text-foreground">
+                      ${product.price.toFixed(2)} AUD
                     </span>
                   )}
                 </div>
