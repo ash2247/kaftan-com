@@ -127,7 +127,7 @@ const SafariCollection = () => {
 
     // Apply sorting using the new sort system
     return sortProducts(items, sortBy);
-  }, [safariProducts, filters, selectedCategory, searchQuery, sortBy]);
+  }, [products, filters, selectedCategory, searchQuery, sortBy]);
 
   return (
     <div className="min-h-screen bg-background pb-mobile-nav">
@@ -175,13 +175,13 @@ const SafariCollection = () => {
       {/* Horizontal Filter Bar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
         <HorizontalFilterBar
-          products={safariProducts}
+          products={products}
           filters={filters}
           onFiltersChange={setFilters}
           sortBy={sortBy}
           onSortChange={handleSortChange}
           filteredCount={filtered.length}
-          totalCount={safariProducts.length}
+          totalCount={products.length}
           columns={currentColumns}
           onColumnsChange={setCurrentColumns}
         />
