@@ -16,6 +16,7 @@ export interface AdminProduct extends Product {
   style?: string;
   color?: string;
   size?: string;
+  display_page?: string;
 }
 
 export const productService = {

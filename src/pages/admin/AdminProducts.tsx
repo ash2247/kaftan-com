@@ -45,6 +45,7 @@ const AdminProducts = () => {
     style: string;
     color: string;
     size: string;
+    display_page: string;
   }>({ 
     name: "", 
     price: "", 
@@ -56,7 +57,8 @@ const AdminProducts = () => {
     selectedCollections: [],
     style: "",
     color: "",
-    size: ""
+    size: "",
+    display_page: "all"
   });
 
   // Load products and categories from database
@@ -133,7 +135,8 @@ const AdminProducts = () => {
       selectedCollections: [],
       style: "",
       color: "",
-      size: ""
+      size: "",
+      display_page: "all"
     });
     setUploadedImages([]);
     setShowModal(true);
@@ -154,7 +157,8 @@ const AdminProducts = () => {
         selectedCollections: productCollections,
         style: p.style || "",
         color: p.color || "",
-        size: p.size || ""
+        size: p.size || "",
+        display_page: (p as any).display_page || "all"
       });
     });
     setUploadedImages(p.images || []);
@@ -208,6 +212,7 @@ const AdminProducts = () => {
           style: form.style,
           color: form.color,
           size: form.size,
+          display_page: form.display_page,
         };
         console.log('Update data:', updateData);
         
@@ -243,6 +248,7 @@ const AdminProducts = () => {
           style: form.style,
           color: form.color,
           size: form.size,
+          display_page: form.display_page,
         };
         console.log('Create data:', createData);
         
@@ -686,6 +692,26 @@ const AdminProducts = () => {
                     Selected: {collections.find(c => c.id === form.selectedCollections[0])?.name || 'Collection'}
                   </div>
                 )}
+              </div>
+              
+              {/* Display Page Selection */}
+              <div className="space-y-1.5">
+                <Label className="font-body text-xs uppercase text-muted-foreground">Display Page *</Label>
+                <select 
+                  value={form.display_page} 
+                  onChange={e => setForm(f => ({ ...f, display_page: e.target.value }))} 
+                  className="w-full h-10 rounded-md border border-border bg-card px-3 font-body text-sm text-foreground"
+                >
+                  <option value="all">All Pages</option>
+                  <option value="clearance">Clearance Page</option>
+                  <option value="safari">Safari Collection</option>
+                  <option value="paradise">Paradise Collection</option>
+                  <option value="collection2026">Collection 2026</option>
+                  <option value="home">Home Page Only</option>
+                </select>
+                <div className="text-xs text-muted-foreground">
+                  Select which page(s) this product should appear on
+                </div>
               </div>
               
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
