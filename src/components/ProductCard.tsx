@@ -23,6 +23,11 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
     original_price: product.original_price 
   });
   
+  // Hide products that don't have a valid price (0, null, or undefined)
+  if (!product.price || product.price <= 0) {
+    return null;
+  }
+  
   // Check if this is a Paradise collection product
   const isParadiseProduct = product.id.startsWith('pr') || product.name.includes('Paradise');
   
@@ -165,28 +170,21 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
 
         {/* Price Display - Always show */}
         <div className="flex items-center gap-2 mt-2">
-          {product.price !== undefined && product.price !== null ? (
-            product.original_price && product.original_price > product.price ? (
-              <>
-                {/* Compare Price (strikethrough) */}
-                <span className="font-body text-xs text-muted-foreground line-through">
-                  ${product.original_price.toFixed(2)}
-                </span>
-                {/* Sale Price */}
-                <span className="font-body text-sm font-semibold text-red-600">
-                  ${product.price.toFixed(2)}
-                </span>
-              </>
-            ) : (
-              /* Regular Price (no discount) */
-              <span className="font-body text-sm font-semibold text-foreground">
-                ${product.price.toFixed(2)}
+          {product.original_price && product.original_price > product.price ? (
+            <>
+              {/* Compare Price (strikethrough) */}
+              <span className="font-body text-xs text-muted-foreground line-through">
+                ${product.original_price.toFixed(2)} AUD
               </span>
-            )
+              {/* Sale Price */}
+              <span className="font-body text-sm font-semibold text-red-600">
+                ${product.price.toFixed(2)} AUD
+              </span>
+            </>
           ) : (
-            /* No price data - show placeholder */
-            <span className="font-body text-sm text-muted-foreground">
-              ${"0.00"}
+            /* Regular Price (no discount) */
+            <span className="font-body text-sm font-semibold text-foreground">
+              ${product.price.toFixed(2)} AUD
             </span>
           )}
         </div>
