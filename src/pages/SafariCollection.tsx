@@ -1,15 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import HorizontalFilterBar from "@/components/HorizontalFilterBar";
-import { safariProducts } from "@/lib/safariProducts";
 import { SlidersHorizontal, ChevronDown, Search, X } from "lucide-react";
 import { useCollectionSettings } from "@/hooks/useCollectionSettings";
 import type { FilterState } from "@/lib/filterUtils";
 import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import type { Product } from "@/lib/products";
 
 const sortOptions = [
   { label: "Sort by popularity", value: "popular" },
@@ -24,7 +26,45 @@ const SafariCollection = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentColumns, setCurrentColumns] = useState<3 | 4>(3);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const { getGridClasses } = useCollectionSettings();
+
+  // Fetch Safari products from database
+  useEffect(() => {
+    const fetchSafariProducts = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .in('display_page', ['safari', 'all'])
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching Safari products:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load Safari collection products",
+            variant: "destructive"
+          });
+        } else {
+          setProducts(data || []);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load Safari collection products",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSafariProducts();
+  }, []);
 
   // Initialize filters
   const [filters, setFilters] = useState<FilterState>(() => ({
@@ -49,12 +89,12 @@ const SafariCollection = () => {
   };
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(safariProducts.map((p) => p.category)));
+    const cats = Array.from(new Set(products.map((p) => p.category)));
     return ["All", ...cats.sort()];
-  }, []);
+  }, [products]);
 
   const filtered = useMemo(() => {
-    let items = [...safariProducts];
+    let items = [...products];
 
     // Apply new filter system
     items = applyFilters(items, filters);
