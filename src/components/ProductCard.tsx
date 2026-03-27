@@ -16,6 +16,13 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   const { toggleItem, isInWishlist } = useWishlist();
   const wishlisted = isInWishlist(product.id);
   
+  // Debug: Check if price data exists
+  console.log('Product price data:', { 
+    name: product.name, 
+    price: product.price, 
+    original_price: product.original_price 
+  });
+  
   // Check if this is a Paradise collection product
   const isParadiseProduct = product.id.startsWith('pr') || product.name.includes('Paradise');
   
@@ -153,6 +160,34 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
                 {product.collection}
               </span>
             </div>
+          )}
+        </div>
+
+        {/* Price Display - Always show */}
+        <div className="flex items-center gap-2 mt-2">
+          {product.price !== undefined && product.price !== null ? (
+            product.original_price && product.original_price > product.price ? (
+              <>
+                {/* Compare Price (strikethrough) */}
+                <span className="font-body text-xs text-muted-foreground line-through">
+                  ${product.original_price.toFixed(2)}
+                </span>
+                {/* Sale Price */}
+                <span className="font-body text-sm font-semibold text-red-600">
+                  ${product.price.toFixed(2)}
+                </span>
+              </>
+            ) : (
+              /* Regular Price (no discount) */
+              <span className="font-body text-sm font-semibold text-foreground">
+                ${product.price.toFixed(2)}
+              </span>
+            )
+          ) : (
+            /* No price data - show placeholder */
+            <span className="font-body text-sm text-muted-foreground">
+              ${"0.00"}
+            </span>
           )}
         </div>
       </div>
