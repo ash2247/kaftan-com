@@ -221,7 +221,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile / Tablet Layout */}
-        <div className="flex lg:hidden items-center justify-between px-4 sm:px-6 py-2">
+        <div className="flex lg:hidden items-center justify-between px-4 sm:px-6 py-4">
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-foreground hover:text-primary transition-colors z-10"
