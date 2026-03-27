@@ -35,11 +35,15 @@ const SafariCollection = () => {
     const fetchSafariProducts = async () => {
       try {
         setLoading(true);
+        console.log('🔍 Fetching Safari products...');
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .in('display_page', ['safari', 'all'])
           .order('created_at', { ascending: false });
+
+        console.log('📊 Safari products data:', data);
+        console.log('❌ Safari products error:', error);
 
         if (error) {
           console.error('Error fetching Safari products:', error);
@@ -49,6 +53,7 @@ const SafariCollection = () => {
             variant: "destructive"
           });
         } else {
+          console.log(`✅ Found ${data?.length || 0} Safari products`);
           setProducts(data || []);
         }
       } catch (error) {

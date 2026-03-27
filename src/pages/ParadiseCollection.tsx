@@ -35,11 +35,15 @@ const ParadiseCollection = () => {
     const fetchParadiseProducts = async () => {
       try {
         setLoading(true);
+        console.log('🔍 Fetching Paradise products...');
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .in('display_page', ['paradise', 'all'])
           .order('created_at', { ascending: false });
+
+        console.log('📊 Paradise products data:', data);
+        console.log('❌ Paradise products error:', error);
 
         if (error) {
           console.error('Error fetching Paradise products:', error);
@@ -49,6 +53,7 @@ const ParadiseCollection = () => {
             variant: "destructive"
           });
         } else {
+          console.log(`✅ Found ${data?.length || 0} Paradise products`);
           setProducts(data || []);
         }
       } catch (error) {
@@ -117,7 +122,7 @@ const ParadiseCollection = () => {
 
     // Apply sorting using the new sort system
     return sortProducts(items, sortBy);
-  }, [paradiseProducts, filters, selectedCategory, searchQuery, sortBy]);
+  }, [products, filters, selectedCategory, searchQuery, sortBy]);
 
   return (
     <div className="min-h-screen bg-background pb-mobile-nav">
@@ -165,13 +170,13 @@ const ParadiseCollection = () => {
       {/* Horizontal Filter Bar */}
       <div className="container mx-auto px-4 sm:px-6 mb-8">
         <HorizontalFilterBar
-          products={paradiseProducts}
+          products={products}
           filters={filters}
           onFiltersChange={setFilters}
           sortBy={sortBy}
           onSortChange={handleSortChange}
           filteredCount={filtered.length}
-          totalCount={paradiseProducts.length}
+          totalCount={products.length}
           columns={currentColumns}
           onColumnsChange={setCurrentColumns}
         />
