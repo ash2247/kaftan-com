@@ -107,8 +107,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             {product.name}
           </h3>
           
-          {/* Style - Hidden for Safari Collection */}
-          {product.style && !isSafariProduct && (
+          {/* Style */}
+          {product.style && (
             <div className="flex items-center gap-2">
               <span className="font-body text-[10px] text-muted-foreground uppercase">
                 Style:
@@ -119,14 +119,26 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </div>
           )}
 
-          {/* Colour - Hidden for Safari Collection */}
-          {product.color && !isSafariProduct && (
+          {/* Colour */}
+          {product.color && (
             <div className="flex items-center gap-2">
               <span className="font-body text-[10px] text-muted-foreground uppercase">
                 Colour:
               </span>
               <span className="font-body text-[10px] text-foreground">
                 {product.color}
+              </span>
+            </div>
+          )}
+
+          {/* Size */}
+          {product.size && (
+            <div className="flex items-center gap-2">
+              <span className="font-body text-[10px] text-muted-foreground uppercase">
+                Size:
+              </span>
+              <span className="font-body text-[10px] text-foreground">
+                {product.size}
               </span>
             </div>
           )}
