@@ -46,9 +46,7 @@ const HorizontalFilterBar = ({
     { key: "colors", label: "Color", options: filterOptions.colors },
     { key: "sizes", label: "Size", options: filterOptions.sizes },
     { key: "badges", label: "Features", options: filterOptions.badges },
-    { key: "style", label: "Style", options: [] }, // Placeholder for future implementation
-    { key: "print", label: "Print", options: [] }, // Placeholder for future implementation
-    { key: "occasion", label: "Occasion", options: [] } // Placeholder for future implementation
+    { key: "style", label: "Style", options: [] } // Placeholder for future implementation
   ];
 
   const handleFilterChange = (filterKey: keyof FilterState, value: string, checked: boolean) => {
