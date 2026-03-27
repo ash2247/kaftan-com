@@ -694,23 +694,30 @@ const AdminProducts = () => {
                 )}
               </div>
               
-              {/* Display Page Selection */}
-              <div className="space-y-1.5">
-                <Label className="font-body text-xs uppercase text-muted-foreground">Display Page *</Label>
+              {/* Display Page Selection - More Prominent */}
+              <div className="space-y-1.5 border border-border rounded-lg p-3 bg-card">
+                {console.log('Display Page Field Rendering - Current Value:', form.display_page)}
+                <Label className="font-body text-xs uppercase text-muted-foreground font-semibold">
+                  Display Page *
+                  <span className="ml-2 text-xs font-normal text-primary">(Where this product appears)</span>
+                </Label>
                 <select 
                   value={form.display_page} 
                   onChange={e => setForm(f => ({ ...f, display_page: e.target.value }))} 
-                  className="w-full h-10 rounded-md border border-border bg-card px-3 font-body text-sm text-foreground"
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <option value="all">All Pages</option>
-                  <option value="clearance">Clearance Page</option>
-                  <option value="safari">Safari Collection</option>
-                  <option value="paradise">Paradise Collection</option>
-                  <option value="collection2026">Collection 2026</option>
-                  <option value="home">Home Page Only</option>
+                  <option value="all">🌐 All Pages (Default)</option>
+                  <option value="clearance">💰 Clearance Page Only</option>
+                  <option value="safari">🦁 Safari Collection Only</option>
+                  <option value="paradise">🌴 Paradise Collection Only</option>
+                  <option value="collection2026">✨ Collection 2026 Only</option>
+                  <option value="home">🏠 Home Page Only</option>
                 </select>
-                <div className="text-xs text-muted-foreground">
-                  Select which page(s) this product should appear on
+                <div className="text-xs text-muted-foreground mt-1">
+                  ⚠️ Important: Select the specific page where this product should be visible
+                </div>
+                <div className="text-xs text-primary mt-1">
+                  Debug: Current selection = "{form.display_page}"
                 </div>
               </div>
               
