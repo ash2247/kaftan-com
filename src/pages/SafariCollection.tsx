@@ -40,7 +40,7 @@ const SafariCollection = () => {
           .from('products')
           .select('*')
           .in('display_page', ['safari', 'all'])
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false }) as any;
 
         console.log('📊 Safari products data:', data);
         console.log('❌ Safari products error:', error);
@@ -55,7 +55,7 @@ const SafariCollection = () => {
         } else {
           console.log(`✅ Found ${data?.length || 0} Safari products`);
           // Map database products to Product interface
-          const mappedProducts = (data || []).map(p => ({
+          const mappedProducts = (data || []).map((p: any) => ({
             ...p,
             image: p.images?.[0] || "/placeholder.svg",
           }));

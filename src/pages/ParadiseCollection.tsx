@@ -40,7 +40,7 @@ const ParadiseCollection = () => {
           .from('products')
           .select('*')
           .in('display_page', ['paradise', 'all'])
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false }) as any;
 
         console.log('📊 Paradise products data:', data);
         console.log('❌ Paradise products error:', error);
@@ -55,7 +55,7 @@ const ParadiseCollection = () => {
         } else {
           console.log(`✅ Found ${data?.length || 0} Paradise products`);
           // Map database products to Product interface
-          const mappedProducts = (data || []).map(p => ({
+          const mappedProducts = (data || []).map((p: any) => ({
             ...p,
             image: p.images?.[0] || "/placeholder.svg",
           }));
