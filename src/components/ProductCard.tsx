@@ -29,6 +29,13 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   // Check if this is a Safari collection product
   const isSafariProduct = product.id.startsWith('sf') || product.name.includes('Safari');
 
+  // Debug: Check price value
+  console.log('Price check for', product.name, ':', { 
+    price: product.price, 
+    priceType: typeof product.price,
+    isValid: product.price != null && product.price !== undefined && product.price > 0 
+  });
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -164,7 +171,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         </div>
 
         {/* Price Display - Only show if price is valid */}
-        {product.price && product.price > 0 && (
+        {(product.price != null && product.price !== undefined && product.price > 0) && (
           <div className="flex items-center gap-2 mt-2">
             {product.original_price && product.original_price > product.price ? (
               <>
