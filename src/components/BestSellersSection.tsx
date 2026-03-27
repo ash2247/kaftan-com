@@ -86,8 +86,8 @@ const BestSellersSection = () => {
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[...Array(8)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[3/4] bg-secondary rounded-lg mb-4" />
                 <div className="h-4 bg-secondary rounded w-3/4 mb-2" />
@@ -97,7 +97,7 @@ const BestSellersSection = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-12">
               {bestSellerProducts.map((product, index) => (
                 <motion.div
                   key={product.id}

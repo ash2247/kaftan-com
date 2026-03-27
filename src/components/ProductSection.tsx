@@ -112,7 +112,7 @@ const ProductSection = ({ title, products, id, viewAllLabel = "View All", viewAl
         className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
       >
         {products.map((product, i) => (
-          <div key={product.id} className="flex-shrink-0 w-[260px] md:w-[300px] snap-start">
+          <div key={product.id} className="flex-shrink-0 w-[320px] md:w-[380px] lg:w-[420px] snap-start">
             <ProductCard product={product} index={i} />
           </div>
         ))}
