@@ -640,6 +640,35 @@ const AdminProducts = () => {
                 </div>
               </div>
               
+              {/* Display Page Selection - PROMINENT POSITION */}
+              <div className="space-y-1.5 border-2 border-primary rounded-lg p-4 bg-card shadow-sm">
+                {console.log('Display Page Field Rendering - Current Value:', form.display_page)}
+                <Label className="font-body text-sm uppercase text-primary font-bold">
+                  📍 Display Page Selection *
+                  <span className="ml-2 text-xs font-normal text-foreground">(Choose where this product appears)</span>
+                </Label>
+                <select 
+                  value={form.display_page} 
+                  onChange={e => setForm(f => ({ ...f, display_page: e.target.value }))} 
+                  className="w-full h-12 rounded-md border-2 border-input bg-background px-4 font-body text-base font-medium text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                >
+                  <option value="all">🌐 Show on ALL Pages (Recommended)</option>
+                  <option value="clearance">💰 Show ONLY on Clearance Page</option>
+                  <option value="safari">🦁 Show ONLY on Safari Collection</option>
+                  <option value="paradise">🌴 Show ONLY on Paradise Collection</option>
+                  <option value="collection2026">✨ Show ONLY on Collection 2026</option>
+                  <option value="home">🏠 Show ONLY on Home Page</option>
+                </select>
+                <div className="bg-primary/10 border border-primary/20 rounded p-2 mt-2">
+                  <div className="text-xs text-primary font-semibold">
+                    ⚠️ IMPORTANT: This controls where customers can see this product!
+                  </div>
+                  <div className="text-xs text-foreground mt-1">
+                    Current selection: <span className="font-bold text-primary">"{form.display_page}"</span>
+                  </div>
+                </div>
+              </div>
+              
               {/* New Fields: Style, Color, Size */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
@@ -692,33 +721,6 @@ const AdminProducts = () => {
                     Selected: {collections.find(c => c.id === form.selectedCollections[0])?.name || 'Collection'}
                   </div>
                 )}
-              </div>
-              
-              {/* Display Page Selection - More Prominent */}
-              <div className="space-y-1.5 border border-border rounded-lg p-3 bg-card">
-                {console.log('Display Page Field Rendering - Current Value:', form.display_page)}
-                <Label className="font-body text-xs uppercase text-muted-foreground font-semibold">
-                  Display Page *
-                  <span className="ml-2 text-xs font-normal text-primary">(Where this product appears)</span>
-                </Label>
-                <select 
-                  value={form.display_page} 
-                  onChange={e => setForm(f => ({ ...f, display_page: e.target.value }))} 
-                  className="w-full h-11 rounded-md border border-input bg-background px-3 font-body text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="all">🌐 All Pages (Default)</option>
-                  <option value="clearance">💰 Clearance Page Only</option>
-                  <option value="safari">🦁 Safari Collection Only</option>
-                  <option value="paradise">🌴 Paradise Collection Only</option>
-                  <option value="collection2026">✨ Collection 2026 Only</option>
-                  <option value="home">🏠 Home Page Only</option>
-                </select>
-                <div className="text-xs text-muted-foreground mt-1">
-                  ⚠️ Important: Select the specific page where this product should be visible
-                </div>
-                <div className="text-xs text-primary mt-1">
-                  Debug: Current selection = "{form.display_page}"
-                </div>
               </div>
               
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
