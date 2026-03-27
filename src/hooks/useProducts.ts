@@ -5,6 +5,7 @@ import type { Product } from "@/lib/products";
 interface UseProductsOptions {
   collection?: string;
   featured?: boolean;
+  displayPage?: string | string[];
 }
 
 const mapDbProductToProduct = (dbProduct: any): Product => {
@@ -35,6 +36,13 @@ export const useProducts = (options?: UseProductsOptions) => {
       }
       if (options?.featured) {
         query = query.eq("featured", true);
+      }
+      if (options?.displayPage) {
+        if (Array.isArray(options.displayPage)) {
+          query = query.in("display_page", options.displayPage);
+        } else {
+          query = query.eq("display_page", options.displayPage);
+        }
       }
 
       const { data, error } = await query.order("created_at", { ascending: false });

@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 
 const Shop = () => {
   const cmsContent = useCatalogPageContent("shop");
-  const { data: dbProducts } = useProducts();
+  const { data: dbProducts } = useProducts({ displayPage: 'all' });
   const products = dbProducts && dbProducts.length > 0 ? dbProducts : getAllProducts();
 
   return (
