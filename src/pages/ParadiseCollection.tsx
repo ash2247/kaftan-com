@@ -134,7 +134,7 @@ const ParadiseCollection = () => {
   }, [products, filters, selectedCategory, searchQuery, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[80px] pb-mobile-nav">
       <AnnouncementBar content={{ text: "Explore the Paradise Collection!", enabled: true }} />
       <Navbar />
 

@@ -103,7 +103,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
   };
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[80px] pb-mobile-nav">
       <AnnouncementBar content={announcementContent} />
       <Navbar />
 
