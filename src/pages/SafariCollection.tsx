@@ -54,7 +54,12 @@ const SafariCollection = () => {
           });
         } else {
           console.log(`✅ Found ${data?.length || 0} Safari products`);
-          setProducts(data || []);
+          // Map database products to Product interface
+          const mappedProducts = (data || []).map(p => ({
+            ...p,
+            image: p.images?.[0] || "/placeholder.svg",
+          }));
+          setProducts(mappedProducts);
         }
       } catch (error) {
         console.error('Error:', error);
