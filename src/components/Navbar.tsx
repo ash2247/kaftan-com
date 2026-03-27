@@ -231,7 +231,7 @@ const Navbar = () => {
           </button>
 
           <Link to="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <Logo type="header" size="4xl" />
+            <Logo type="header" size="6xl" />
           </Link>
 
           <div className="flex items-center gap-3 z-10">
