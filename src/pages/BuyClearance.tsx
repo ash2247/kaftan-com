@@ -96,8 +96,8 @@ const BuyClearance = () => {
         
         setProducts(sortedProducts);
         
-        // Extract unique categories
-        const uniqueCategories = Array.from(new Set(clearanceProducts.map(p => p.category)));
+        // Extract unique categories from clearance products
+        const uniqueCategories = Array.from(new Set(clearanceProducts.map(p => p.category).filter(cat => cat && cat.trim() !== "")));
         setCategories(["All", ...uniqueCategories]);
       }
     } catch (error) {
@@ -190,7 +190,7 @@ const BuyClearance = () => {
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
+                {categories.filter(cat => cat && cat.trim() !== "").map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>
