@@ -25,7 +25,6 @@ export const productService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('display_page', 'all')
       .order('created_at', { ascending: false });
     
     if (error) throw error;
