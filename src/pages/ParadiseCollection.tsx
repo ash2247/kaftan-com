@@ -36,11 +36,13 @@ const ParadiseCollection = () => {
       try {
         setLoading(true);
         console.log('🔍 Fetching Paradise products...');
-        const { data, error } = await supabase
+        const result = await supabase
           .from('products')
           .select('*')
           .in('display_page', ['paradise', 'all'])
-          .order('created_at', { ascending: false }) as any;
+          .order('created_at', { ascending: false });
+        
+        const { data, error } = result as any;
 
         console.log('📊 Paradise products data:', data);
         console.log('❌ Paradise products error:', error);

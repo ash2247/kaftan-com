@@ -36,11 +36,13 @@ const SafariCollection = () => {
       try {
         setLoading(true);
         console.log('🔍 Fetching Safari products...');
-        const { data, error } = await supabase
+        const result = await supabase
           .from('products')
           .select('*')
           .in('display_page', ['safari', 'all'])
-          .order('created_at', { ascending: false }) as any;
+          .order('created_at', { ascending: false });
+        
+        const { data, error } = result as any;
 
         console.log('📊 Safari products data:', data);
         console.log('❌ Safari products error:', error);
