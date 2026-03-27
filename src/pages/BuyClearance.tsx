@@ -135,7 +135,7 @@ const BuyClearance = () => {
   }, [products, filters, selectedCategory, searchQuery, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background pt-[80px] pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[100px] pb-mobile-nav">
       <AnnouncementBar content={{ text: "🔥 Hot Clearance Deals - Limited Time Offers!", enabled: true }} />
       <Navbar />
 

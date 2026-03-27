@@ -50,10 +50,10 @@ const Navbar = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.08)]">
         {/* Desktop Layout */}
-        <div className="hidden lg:flex items-center px-0 py-0 h-[45px]">
+        <div className="hidden lg:flex items-center px-6 py-3 h-[60px]">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <Logo type="header" size="5xl" />
+            <Logo type="header" size="6xl" />
           </Link>
 
           {/* Nav Links */}

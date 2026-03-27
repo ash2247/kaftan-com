@@ -60,7 +60,7 @@ const ProductDetail = () => {
   const handleAddToCart = () => addItem(product, "One Size", quantity);
 
   return (
-    <div className="min-h-screen bg-background pt-[80px] pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[100px] pb-mobile-nav">
       <AnnouncementBar />
       <Navbar />
 
