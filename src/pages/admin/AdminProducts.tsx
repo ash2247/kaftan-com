@@ -239,7 +239,7 @@ const AdminProducts = () => {
           colors: [],
           sizes: [],
           description: "",
-          collection: null,
+          collection: form.category,
           slug: form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
           status: form.status,
           style: form.style,
