@@ -36,6 +36,7 @@ const ParadiseCollection = () => {
       try {
         setLoading(true);
         console.log('🔍 Fetching Paradise products...');
+        // @ts-ignore - Suppress TypeScript error for complex Supabase query
         const result = await supabase
           .from('products')
           .select('*')

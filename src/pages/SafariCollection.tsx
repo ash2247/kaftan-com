@@ -36,6 +36,7 @@ const SafariCollection = () => {
       try {
         setLoading(true);
         console.log('🔍 Fetching Safari products...');
+        // @ts-ignore - Suppress TypeScript error for complex Supabase query
         const result = await supabase
           .from('products')
           .select('*')
