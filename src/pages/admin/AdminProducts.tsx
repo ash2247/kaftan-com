@@ -144,22 +144,19 @@ const AdminProducts = () => {
 
   const openEdit = (p: AdminProduct) => {
     setEditProduct(p);
-    // Fetch product collections
-    fetchProductCollections(p.id).then(productCollections => {
-      setForm({
-        name: p.name,
-        price: String(p.price),
-        original_price: p.original_price ? String(p.original_price) : "",
-        category: p.category,
-        stock: String(p.stock),
-        sku: p.sku,
-        status: p.status,
-        selectedCollections: productCollections,
-        style: p.style || "",
-        color: p.color || "",
-        size: p.size || "",
-        display_page: (p as any).display_page || "all"
-      });
+    setForm({
+      name: p.name,
+      price: String(p.price),
+      original_price: p.original_price ? String(p.original_price) : "",
+      category: p.category,
+      stock: String(p.stock),
+      sku: p.sku,
+      status: p.status,
+      selectedCollections: (p as any).display_page && (p as any).display_page !== "all" ? [(p as any).display_page] : [],
+      style: p.style || "",
+      color: p.color || "",
+      size: p.size || "",
+      display_page: (p as any).display_page || "all"
     });
     setUploadedImages(p.images || []);
     setShowModal(true);
@@ -692,19 +689,26 @@ const AdminProducts = () => {
                 <Label className="font-body text-xs uppercase text-muted-foreground">Collections</Label>
                 {collectionsLoading ? (
                   <div className="text-sm text-muted-foreground">Loading collections...</div>
-                ) : collections.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No collections available</div>
                 ) : (
                   <Select
-                    value={form.selectedCollections.length > 0 ? form.selectedCollections[0] : ""}
+                    value={form.display_page || "all"}
                     onValueChange={(value) => {
-                      setForm(f => ({ ...f, selectedCollections: value ? [value] : [] }));
+                      setForm(f => ({ ...f, display_page: value, selectedCollections: value !== "all" ? [value] : [] }));
                     }}
                   >
                     <SelectTrigger className="h-10 bg-card border-border font-body">
                       <SelectValue placeholder="Select a collection (optional)" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="all">Show on All Pages (Recommended)</SelectItem>
+                      <SelectItem value="safari">Show Only on Safari Collection</SelectItem>
+                      <SelectItem value="paradise">Show Only on Paradise Collection</SelectItem>
+                      <SelectItem value="clearance">Show Only on Clearance Page</SelectItem>
+                      <SelectItem value="collection2026">Show Only on Collection 2026</SelectItem>
+                      <SelectItem value="home">Show Only on Home Page</SelectItem>
+                      {collections.length > 0 && (
+                        <div className="border-t border-border my-1"></div>
+                      )}
                       {collections.map((collection) => (
                         <SelectItem key={collection.id} value={collection.id}>
                           <div className="flex items-center gap-2">
@@ -718,9 +722,14 @@ const AdminProducts = () => {
                     </SelectContent>
                   </Select>
                 )}
-                {form.selectedCollections.length > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    Selected: {collections.find(c => c.id === form.selectedCollections[0])?.name || 'Collection'}
+                {form.display_page && form.display_page !== "all" && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Selected: {form.display_page === "safari" ? "Safari Collection" : 
+                              form.display_page === "paradise" ? "Paradise Collection" :
+                              form.display_page === "clearance" ? "Clearance Page" :
+                              form.display_page === "collection2026" ? "Collection 2026" :
+                              form.display_page === "home" ? "Home Page" :
+                              collections.find(c => c.id === form.display_page)?.name || 'Unknown Collection'}
                   </div>
                 )}
               </div>
