@@ -63,7 +63,7 @@ interface FooterContent {
 interface SectionMeta {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: string;
   enabled: boolean;
 }
 
@@ -101,15 +101,28 @@ const defaultHomeContent = {
 };
 
 const defaultSections: SectionMeta[] = [
-  { id: "announcement", label: "Announcement Bar", icon: <Globe size={16} />, enabled: true },
-  { id: "hero", label: "Hero Section", icon: <ImageIcon size={16} />, enabled: true },
-  { id: "newArrivals", label: "New Arrivals", icon: <Layout size={16} />, enabled: true },
-  { id: "collectionBanner", label: "Collection Banner", icon: <ImageIcon size={16} />, enabled: true },
-  { id: "saleBanner", label: "Summer Sale", icon: <Layout size={16} />, enabled: true },
-  { id: "bestSellers", label: "Best Sellers", icon: <Layout size={16} />, enabled: true },
-  { id: "about", label: "About Brand", icon: <FileText size={16} />, enabled: true },
-  { id: "footer", label: "Footer", icon: <Mail size={16} />, enabled: true },
+  { id: "announcement", label: "Announcement Bar", icon: "Globe", enabled: true },
+  { id: "hero", label: "Hero Section", icon: "ImageIcon", enabled: true },
+  { id: "newArrivals", label: "New Arrivals", icon: "Layout", enabled: true },
+  { id: "collectionBanner", label: "Collection Banner", icon: "ImageIcon", enabled: true },
+  { id: "saleBanner", label: "Summer Sale", icon: "Layout", enabled: true },
+  { id: "bestSellers", label: "Best Sellers", icon: "Layout", enabled: true },
+  { id: "about", label: "About Brand", icon: "FileText", enabled: true },
+  { id: "footer", label: "Footer", icon: "Mail", enabled: true },
 ];
+
+// Icon mapping function
+const getIconComponent = (iconName: string) => {
+  const iconProps = { size: 16 };
+  switch (iconName) {
+    case "Globe": return <Globe {...iconProps} />;
+    case "ImageIcon": return <ImageIcon {...iconProps} />;
+    case "Layout": return <Layout {...iconProps} />;
+    case "FileText": return <FileText {...iconProps} />;
+    case "Mail": return <Mail {...iconProps} />;
+    default: return <Layout {...iconProps} />;
+  }
+};
 
 export interface CatalogPageContent {
   title: string;
@@ -219,159 +232,6 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
   },
 };
 
-// ---- Image Uploader Component ----
-const ImageUploader = ({ src, alt, onUpload, onRemove, onAltChange, className = "" }: {
-  src: string;
-  alt: string;
-  onUpload: (dataUrl: string) => void;
-  onRemove?: () => void;
-  onAltChange?: (alt: string) => void;
-  className?: string;
-}) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    // No file size limit - allow unlimited uploads
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) onUpload(e.target.result as string);
-    };
-    reader.readAsDataURL(file);
-  }, [onUpload]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  }, [handleFile]);
-
-  return (
-    <div className={`relative group ${className}`}>
-      <div
-        className="relative overflow-hidden rounded-lg border border-border bg-secondary/30 cursor-pointer"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
-        <img src={src} alt={alt} className="w-full h-40 object-cover" />
-        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-            <div className="bg-background/90 rounded-full p-2">
-              <Replace size={16} className="text-foreground" />
-            </div>
-            <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">Replace</span>
-          </div>
-        </div>
-      </div>
-      {onRemove && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-        >
-          <X size={12} />
-        </button>
-      )}
-      {onAltChange && (
-        <Input
-          value={alt}
-          onChange={(e) => onAltChange(e.target.value)}
-          placeholder="Alt text..."
-          className="mt-2 text-xs h-8"
-        />
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
-      />
-    </div>
-  );
-};
-
-// Add new slide placeholder
-const AddSlideButton = ({ onAdd }: { onAdd: (dataUrl: string) => void }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div>
-      <button
-        onClick={() => inputRef.current?.click()}
-        className="w-full h-40 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-secondary/20 hover:bg-secondary/40 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer"
-      >
-        <Plus size={24} className="text-muted-foreground" />
-        <span className="font-body text-xs text-muted-foreground">Add Slide</span>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          // No file size limit - allow unlimited uploads
-          const reader = new FileReader();
-          reader.onload = (ev) => { if (ev.target?.result) onAdd(ev.target.result as string); };
-          reader.readAsDataURL(file);
-          e.target.value = "";
-        }}
-      />
-    </div>
-  );
-};
-
-// Single image upload card (for collection banner / about)
-const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: string; onUpload: (dataUrl: string) => void }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div className="space-y-2">
-      <Label className="font-body text-sm">{label}</Label>
-      <div
-        className="relative group overflow-hidden rounded-lg border border-border cursor-pointer"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-          if (!file || !file.type.startsWith("image/")) return;
-          // No file size limit - allow unlimited uploads
-          const reader = new FileReader();
-          reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
-          reader.readAsDataURL(file);
-        }}
-      >
-        <img src={src} alt={label} className="w-full h-48 object-cover" />
-        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-            <div className="bg-background/90 rounded-full p-2.5">
-              <Upload size={18} className="text-foreground" />
-            </div>
-            <span className="font-body text-sm text-background font-medium bg-foreground/70 px-3 py-1.5 rounded">Upload New Image</span>
-          </div>
-        </div>
-      </div>
-      <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. No size limit.</p>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          // No file size limit - allow unlimited uploads
-          const reader = new FileReader();
-          reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
-          reader.readAsDataURL(file);
-          e.target.value = "";
-        }}
-      />
-    </div>
-  );
-};
-
 // ---- Main Component ----
 const AdminPageEditor = () => {
   const { pageId } = useParams<{ pageId: string }>();
@@ -418,13 +278,86 @@ const AdminPageEditor = () => {
 
   const markChanged = () => setHasChanges(true);
 
-  const handleSave = () => {
+  // Helper function to compress base64 image
+  const compressBase64Image = (base64: string, maxWidth: number = 1920, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(base64);
+          return;
+        }
+
+        // Calculate new dimensions
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = base64;
+    });
+  };
+
+  // Helper function to safely set localStorage with quota handling
+  const safeSetLocalStorage = (key: string, value: any): boolean => {
+    try {
+      const jsonString = JSON.stringify(value);
+      localStorage.setItem(key, jsonString);
+      return true;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'QuotaExceededError') {
+        console.error('Storage quota exceeded. Please try uploading smaller images.');
+        toast({ 
+          title: "Storage Error", 
+          description: "Image too large. Please try a smaller image or compress the current one.",
+          variant: "destructive" 
+        });
+        return false;
+      }
+      throw error;
+    }
+  };
+
+  const handleSave = async () => {
     if (isHome) {
-      localStorage.setItem(`page_content_${pageKey}`, JSON.stringify({
-        hero, heroSlides, announcement, collectionBanner, collectionImage, aboutImage, about, footer, sections,
-      }));
+      // Compress images before saving
+      const compressedHeroSlides = await Promise.all(
+        heroSlides.map(async (slide) => ({
+          ...slide,
+          src: await compressBase64Image(slide.src, 1920, 0.8)
+        }))
+      );
+      
+      const compressedCollectionImage = await compressBase64Image(collectionImage, 1920, 0.8);
+      const compressedAboutImage = await compressBase64Image(aboutImage, 1920, 0.8);
+
+      const saveData = {
+        hero, 
+        heroSlides: compressedHeroSlides, 
+        announcement, 
+        collectionBanner, 
+        collectionImage: compressedCollectionImage, 
+        aboutImage: compressedAboutImage, 
+        about, 
+        footer, 
+        sections,
+      };
+
+      const success = safeSetLocalStorage(`page_content_${pageKey}`, saveData);
+      if (!success) return;
     } else {
-      localStorage.setItem(`page_content_${pageKey}`, JSON.stringify(catalogPage));
+      const success = safeSetLocalStorage(`page_content_${pageKey}`, catalogPage);
+      if (!success) return;
     }
     setHasChanges(false);
     toast({ title: "Page saved successfully" });
@@ -455,6 +388,215 @@ const AdminPageEditor = () => {
   };
 
   const pageName = isHome ? "Home" : (catalogPageDefaults[pageKey]?.title || pageKey);
+
+  // ---- Image Uploader Component ----
+  const ImageUploader = ({ src, alt, onUpload, onRemove, onAltChange, className = "" }: {
+    src: string;
+    alt: string;
+    onUpload: (dataUrl: string) => void;
+    onRemove?: () => void;
+    onAltChange?: (alt: string) => void;
+    className?: string;
+  }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleFile = useCallback((file: File) => {
+      if (!file.type.startsWith("image/")) return;
+      
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({ 
+          title: "File Too Large", 
+          description: "Please select an image smaller than 10MB.",
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) onUpload(e.target.result as string);
+      };
+      reader.readAsDataURL(file);
+    }, [onUpload, toast]);
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (!file || !file.type.startsWith("image/")) return;
+      
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({ 
+          title: "File Too Large", 
+          description: "Please select an image smaller than 10MB.",
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      handleFile(file);
+    }, [handleFile, toast]);
+
+    return (
+      <div className={`relative group ${className}`}>
+        <div
+          className="relative overflow-hidden rounded-lg border border-border bg-secondary/30 cursor-pointer"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+        >
+          <img src={src} alt={alt} className="w-full h-40 object-cover" />
+          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+              <div className="bg-background/90 rounded-full p-2">
+                <Replace size={16} className="text-foreground" />
+              </div>
+              <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">Replace</span>
+            </div>
+          </div>
+        </div>
+        {onRemove && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+          >
+            <X size={12} />
+          </button>
+        )}
+        {onAltChange && (
+          <Input
+            value={alt}
+            onChange={(e) => onAltChange(e.target.value)}
+            placeholder="Alt text..."
+            className="mt-2 text-xs h-8"
+          />
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+        />
+      </div>
+    );
+  };
+
+  // Add new slide placeholder
+  const AddSlideButton = ({ onAdd }: { onAdd: (dataUrl: string) => void }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+    
+    const handleFile = (file: File) => {
+      if (!file.type.startsWith("image/")) return;
+      
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({ 
+          title: "File Too Large", 
+          description: "Please select an image smaller than 10MB.",
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (ev) => { if (ev.target?.result) onAdd(ev.target.result as string); };
+      reader.readAsDataURL(file);
+    };
+    
+    return (
+      <div>
+        <button
+          onClick={() => inputRef.current?.click()}
+          className="w-full h-40 rounded-lg border-2 border-dashed border-border hover:border-primary/50 bg-secondary/20 hover:bg-secondary/40 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer"
+        >
+          <Plus size={24} className="text-muted-foreground" />
+          <span className="font-body text-xs text-muted-foreground">Add Slide</span>
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              handleFile(file);
+              e.target.value = "";
+            }
+          }}
+        />
+      </div>
+    );
+  };
+
+  // Single image upload card (for collection banner / about)
+  const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: string; onUpload: (dataUrl: string) => void }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+    
+    const handleFile = (file: File) => {
+      if (!file.type.startsWith("image/")) return;
+      
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast({ 
+          title: "File Too Large", 
+          description: "Please select an image smaller than 10MB.",
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
+      reader.readAsDataURL(file);
+    };
+    
+    return (
+      <div className="space-y-2">
+        <Label className="font-body text-sm">{label}</Label>
+        <div
+          className="relative group overflow-hidden rounded-lg border border-border cursor-pointer"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+          }}
+        >
+          <img src={src} alt={label} className="w-full h-48 object-cover" />
+          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+              <div className="bg-background/90 rounded-full p-2.5">
+                <Upload size={18} className="text-foreground" />
+              </div>
+              <span className="font-body text-sm text-background font-medium bg-foreground/70 px-3 py-1.5 rounded">Upload New Image</span>
+            </div>
+          </div>
+        </div>
+        <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. Max size 10MB.</p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              handleFile(file);
+              e.target.value = "";
+            }
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -557,7 +699,7 @@ const HomePageEditor = ({
           <div key={sec.id} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/50 transition-colors group">
             <div className="flex items-center gap-3">
               <GripVertical size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab" />
-              <span className="text-muted-foreground">{sec.icon}</span>
+              <div className="text-muted-foreground">{getIconComponent(sec.icon)}</div>
               <span className="font-body text-sm text-foreground">{sec.label}</span>
             </div>
             <Switch checked={sec.enabled} onCheckedChange={() => toggleSection(sec.id)} />
@@ -919,5 +1061,172 @@ const PreviewBox = ({ children }: { children: React.ReactNode }) => (
     </div>
   </div>
 );
+
+// Image Upload Components
+const ImageUploader = ({ 
+  src, 
+  alt, 
+  onUpload, 
+  onRemove, 
+  onAltChange 
+}: { 
+  src: string; 
+  alt: string; 
+  onUpload: (src: string) => void; 
+  onRemove?: () => void; 
+  onAltChange: (alt: string) => void; 
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        onUpload(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <div className="aspect-square rounded-lg overflow-hidden border border-border bg-secondary/20">
+        {src ? (
+          <img src={src} alt={alt} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageIcon className="w-8 h-8 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Replace className="w-4 h-4" />
+        </Button>
+        {onRemove && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={onRemove}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      <Input
+        value={alt}
+        onChange={(e) => onAltChange(e.target.value)}
+        placeholder="Alt text"
+        className="mt-2 h-8 text-xs"
+      />
+    </div>
+  );
+};
+
+const AddSlideButton = ({ onAdd }: { onAdd: (src: string) => void }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        onAdd(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="aspect-square rounded-lg border-2 border-dashed border-border bg-secondary/20 hover:bg-secondary/40 transition-colors flex items-center justify-center group"
+      >
+        <Plus className="w-8 h-8 text-muted-foreground group-hover:text-foreground" />
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+    </>
+  );
+};
+
+const SingleImageUploader = ({ 
+  src, 
+  label, 
+  onUpload 
+}: { 
+  src: string; 
+  label: string; 
+  onUpload: (src: string) => void; 
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        onUpload(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label className="font-body text-sm">{label}</Label>
+      <div 
+        className="relative group cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <div className="rounded-lg overflow-hidden border border-border bg-secondary/20 min-h-[200px] flex items-center justify-center">
+          {src ? (
+            <img src={src} alt="" className="w-full h-full object-cover min-h-[200px]" />
+          ) : (
+            <div className="text-center">
+              <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+              <p className="font-body text-sm text-muted-foreground">Click to upload image</p>
+            </div>
+          )}
+        </div>
+        {src && (
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+            <Button size="sm" variant="secondary">
+              <Replace className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
+    </div>
+  );
+};
 
 export default AdminPageEditor;

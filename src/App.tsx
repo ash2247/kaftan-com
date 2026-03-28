@@ -55,6 +55,9 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSetup from "./pages/admin/AdminSetup";
 import RemovePrices from "./pages/admin/RemovePrices";
+import AdminBackup from "./pages/admin/AdminBackup";
+import AdminBackupSetupRedirect from "./pages/admin/AdminBackupSetupRedirect";
+import AdminBackupManualSetup from "./pages/admin/AdminBackupManualSetup";
 import BuyClearance from "./pages/BuyClearance";
 import Collection2026 from "./pages/Collection2026";
 
@@ -196,6 +199,9 @@ const AnimatedRoutes = () => {
             <Route path="media" element={<AdminMedia />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="backup" element={<AdminBackup />} />
+            <Route path="backup/setup" element={<AdminBackupSetupRedirect />} />
+            <Route path="backup/manual-setup" element={<AdminBackupManualSetup />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="remove-prices" element={<RemovePrices />} />
           </Route>
