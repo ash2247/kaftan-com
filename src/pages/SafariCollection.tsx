@@ -31,18 +31,38 @@ const SafariCollection = () => {
   const [loading, setLoading] = useState(true);
   const { getGridClasses } = useCollectionSettings();
 
-  // Use static Safari products
+  // Use static Safari products with lazy loading for better performance
   useEffect(() => {
     console.log('🦁 Loading static Safari products...');
     console.log(`✅ Found ${safariProducts.length} Safari products`);
-    // Map static products to Product interface with proper image paths
-    const mappedProducts = safariProducts.map((p) => ({
-      ...p,
-      image: p.image, // Static imports already handle the path
-      size: p.size || undefined,
-    }));
-    setProducts(mappedProducts);
-    setLoading(false);
+    
+    // Lazy load products in batches to improve initial load time
+    const loadProductsInBatches = async () => {
+      // Load first 10 products immediately
+      const firstBatch = safariProducts.slice(0, 10);
+      const mappedFirstBatch = firstBatch.map((p) => ({
+        ...p,
+        image: p.image,
+        size: p.size || undefined,
+      }));
+      
+      setProducts(mappedFirstBatch);
+      setLoading(false);
+      
+      // Load remaining products after a short delay
+      setTimeout(() => {
+        const remainingProducts = safariProducts.slice(10);
+        const mappedRemaining = remainingProducts.map((p) => ({
+          ...p,
+          image: p.image,
+          size: p.size || undefined,
+        }));
+        setProducts(prev => [...mappedFirstBatch, ...mappedRemaining]);
+        console.log('✅ All Safari products loaded');
+      }, 500);
+    };
+    
+    loadProductsInBatches();
   }, []);
 
   // Initialize filters
