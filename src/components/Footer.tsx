@@ -1,21 +1,39 @@
 import { useState } from "react";
 import { Instagram, Facebook, Twitter, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { FooterContent } from "@/hooks/usePageContent";
 import Logo from "./Logo";
 
 const footerSections = [
   {
     title: "Menu",
-    items: ["Home", "Safari Collection", "Paradise Collection", "Where to Buy", "Contact Us", "Our Story"],
+    items: [
+      { label: "Home", path: "/" },
+      { label: "Safari Collection", path: "/safari-collection" },
+      { label: "Paradise Collection", path: "/paradise-collection" },
+      { label: "Where to Buy", path: "/clearance" },
+      { label: "Contact Us", path: "/contact-us" },
+      { label: "Our Story", path: "/our-story" }
+    ],
   },
   {
     title: "Know Us",
-    items: ["About Us", "Contact", "Sizing Guide", "Boutique Locations"],
+    items: [
+      { label: "About Us", path: "/our-story" },
+      { label: "Contact", path: "/contact-us" },
+      { label: "Sizing Guide", path: "#" },
+      { label: "Boutique Locations", path: "#" }
+    ],
   },
   {
     title: "Policies",
-    items: ["Privacy Policy", "Shipping", "Returns", "Terms & Conditions"],
+    items: [
+      { label: "Privacy Policy", path: "#" },
+      { label: "Shipping", path: "#" },
+      { label: "Returns", path: "#" },
+      { label: "Terms & Conditions", path: "#" }
+    ],
   },
 ];
 
@@ -96,10 +114,22 @@ const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
           <CollapsibleSection key={section.title} title={section.title}>
             <ul className="space-y-3">
               {section.items.map((item) => (
-                <li key={item}>
-                  <a href="#" className="font-body text-sm text-primary-foreground/50 hover:text-gold transition-colors duration-300">
-                    {item}
-                  </a>
+                <li key={item.label}>
+                  {item.path === "#" ? (
+                    <a 
+                      href="#" 
+                      className="font-body text-sm text-primary-foreground/50 hover:text-gold transition-colors duration-300"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link 
+                      to={item.path} 
+                      className="font-body text-sm text-primary-foreground/50 hover:text-gold transition-colors duration-300"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -111,13 +141,31 @@ const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
       <div className="flex flex-col items-center gap-3 py-12 px-6">
         <h4 className="font-body text-xs tracking-[0.2em] uppercase text-primary-foreground/80">Follow Us</h4>
         <div className="flex gap-5">
-          <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" aria-label="Instagram">
+          <a 
+            href="https://instagram.com/fashionspectrum" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" 
+            aria-label="Instagram"
+          >
             <Instagram size={20} />
           </a>
-          <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" aria-label="Facebook">
+          <a 
+            href="https://facebook.com/fashionspectrum" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" 
+            aria-label="Facebook"
+          >
             <Facebook size={20} />
           </a>
-          <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" aria-label="Twitter">
+          <a 
+            href="https://twitter.com/fashionspectrum" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-primary-foreground/50 hover:text-gold transition-colors duration-300" 
+            aria-label="Twitter"
+          >
             <Twitter size={20} />
           </a>
         </div>
