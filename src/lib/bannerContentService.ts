@@ -1,0 +1,137 @@
+import { supabase } from '@/integrations/supabase/client';
+
+export interface BannerContent {
+  id?: string;
+  page_key: string;
+  hero_title_line1?: string;
+  hero_title_line2?: string;
+  hero_subtitle?: string;
+  hero_cta_text?: string;
+  hero_cta_link?: string;
+  hero_auto_slide?: boolean;
+  hero_slide_interval?: number;
+  announcement_text?: string;
+  announcement_enabled?: boolean;
+  collection_banner_subtitle?: string;
+  collection_banner_title?: string;
+  collection_banner_cta_text?: string;
+  collection_banner_cta_link?: string;
+  collection_image?: string;
+  about_title?: string;
+  about_paragraph1?: string;
+  about_paragraph2?: string;
+  about_cta_text?: string;
+  about_image?: string;
+  footer_newsletter_title?: string;
+  footer_newsletter_subtitle?: string;
+  footer_cta_text?: string;
+  footer_copyright?: string;
+  sections?: any[];
+  hero_slides?: any[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+class BannerContentService {
+  private tableName = 'banner_content';
+
+  // Get banner content for a specific page
+  async getBannerContent(pageKey: string): Promise<BannerContent | null> {
+    try {
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('page_key', pageKey)
+        .single();
+
+      if (error) {
+        // If no record exists, return null
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching banner content:', error);
+      return null;
+    }
+  }
+
+  // Save or update banner content
+  async saveBannerContent(pageKey: string, content: Omit<BannerContent, 'id' | 'page_key' | 'created_at' | 'updated_at'>): Promise<BannerContent | null> {
+    try {
+      // Check if record exists
+      const existing = await this.getBannerContent(pageKey);
+
+      if (existing) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from(this.tableName)
+          .update({
+            ...content,
+            updated_at: new Date().toISOString()
+          })
+          .eq('page_key', pageKey)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new record
+        const { data, error } = await supabase
+          .from(this.tableName)
+          .insert({
+            page_key: pageKey,
+            ...content,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error('Error saving banner content:', error);
+      return null;
+    }
+  }
+
+  // Delete banner content for a page
+  async deleteBannerContent(pageKey: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from(this.tableName)
+        .delete()
+        .eq('page_key', pageKey);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting banner content:', error);
+      return false;
+    }
+  }
+
+  // Get all banner content (for admin)
+  async getAllBannerContent(): Promise<BannerContent[]> {
+    try {
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching all banner content:', error);
+      return [];
+    }
+  }
+}
+
+export const bannerContentService = new BannerContentService();

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { bannerContentService } from "@/lib/bannerContentService";
 
 // Import default hero images
 import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
@@ -341,26 +342,72 @@ const AdminPageEditor = () => {
       const compressedCollectionImage = await compressBase64Image(collectionImage, 1920, 0.8);
       const compressedAboutImage = await compressBase64Image(aboutImage, 1920, 0.8);
 
-      const saveData = {
-        hero, 
-        heroSlides: compressedHeroSlides, 
-        announcement, 
-        collectionBanner, 
-        collectionImage: compressedCollectionImage, 
-        aboutImage: compressedAboutImage, 
-        about, 
-        footer, 
-        sections,
-      };
+      try {
+        const success = await bannerContentService.saveBannerContent(pageKey, {
+          hero_title_line1: hero.titleLine1,
+          hero_title_line2: hero.titleLine2,
+          hero_subtitle: hero.subtitle,
+          hero_cta_text: hero.ctaText,
+          hero_cta_link: hero.ctaLink,
+          hero_auto_slide: hero.autoSlide,
+          hero_slide_interval: hero.slideInterval,
+          hero_slides: compressedHeroSlides,
+          announcement_text: announcement.text,
+          announcement_enabled: announcement.enabled,
+          collection_banner_subtitle: collectionBanner.subtitle,
+          collection_banner_title: collectionBanner.title,
+          collection_banner_cta_text: collectionBanner.ctaText,
+          collection_banner_cta_link: collectionBanner.ctaLink,
+          collection_image: compressedCollectionImage,
+          about_title: about.title,
+          about_paragraph1: about.paragraph1,
+          about_paragraph2: about.paragraph2,
+          about_cta_text: about.ctaText,
+          about_image: compressedAboutImage,
+          footer_newsletter_title: footer.newsletterTitle,
+          footer_newsletter_subtitle: footer.newsletterSubtitle,
+          footer_cta_text: footer.ctaText,
+          footer_copyright: footer.copyright,
+          sections: sections,
+        });
 
-      const success = safeSetLocalStorage(`page_content_${pageKey}`, saveData);
-      if (!success) return;
+        if (!success) {
+          toast({ 
+            title: "Save Error", 
+            description: "Failed to save banner content to database.",
+            variant: "destructive" 
+          });
+          return;
+        }
+
+        // Also save to localStorage as backup
+        const saveData = {
+          hero, 
+          heroSlides: compressedHeroSlides, 
+          announcement, 
+          collectionBanner, 
+          collectionImage: compressedCollectionImage, 
+          aboutImage: compressedAboutImage, 
+          about, 
+          footer, 
+          sections,
+        };
+        safeSetLocalStorage(`page_content_${pageKey}`, saveData);
+      } catch (error) {
+        console.error('Error saving to Supabase:', error);
+        toast({ 
+          title: "Save Error", 
+          description: "Failed to save banner content. Please try again.",
+          variant: "destructive" 
+        });
+        return;
+      }
     } else {
       const success = safeSetLocalStorage(`page_content_${pageKey}`, catalogPage);
       if (!success) return;
     }
     setHasChanges(false);
-    toast({ title: "Page saved successfully" });
+    toast({ title: "Page saved successfully!" });
   };
 
   const toggleSection = (id: string) => {
