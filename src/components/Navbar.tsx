@@ -84,8 +84,26 @@ const Navbar = () => {
                         transition={{ duration: 0.2 }}
                         className="absolute top-full left-0 mt-2 min-w-[280px] bg-foreground rounded-md shadow-lg py-3 z-50"
                       >
-                        {/* Collections Section */}
+                        {/* Where to Buy Section */}
                         <div className="border-b border-foreground/20 pb-2 mb-2">
+                          <div className="px-5 py-1 text-xs font-body text-background/60 uppercase tracking-wider">
+                            Where to Buy
+                          </div>
+                          {whereToBuyLinks.map((item) => (
+                            <a
+                              key={item.label}
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block px-5 py-2 text-sm font-body text-background hover:text-primary-foreground/80 transition-colors"
+                            >
+                              {item.label}
+                            </a>
+                          ))}
+                        </div>
+
+                        {/* Collections Section */}
+                        <div>
                           <div className="px-5 py-1 text-xs font-body text-background/60 uppercase tracking-wider">
                             Collections
                           </div>
@@ -119,24 +137,6 @@ const Navbar = () => {
                           >
                             View All Collections →
                           </Link>
-                        </div>
-
-                        {/* Where to Buy Section */}
-                        <div>
-                          <div className="px-5 py-1 text-xs font-body text-background/60 uppercase tracking-wider">
-                            Where to Buy
-                          </div>
-                          {whereToBuyLinks.map((item) => (
-                            <a
-                              key={item.label}
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block px-5 py-2 text-sm font-body text-background hover:text-primary-foreground/80 transition-colors"
-                            >
-                              {item.label}
-                            </a>
-                          ))}
                         </div>
                       </motion.div>
                     )}

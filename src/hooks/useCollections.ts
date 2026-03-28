@@ -34,7 +34,21 @@ export const useCollections = () => {
 
         if (error) throw error;
 
-        setCollections(data || []);
+        // Custom sorting: Put "Doiang" collection first, then others by featured and name
+        const sortedCollections = (data || []).sort((a, b) => {
+          // Put Doiang collection first
+          if (a.name.toLowerCase().includes('doiang') && !b.name.toLowerCase().includes('doiang')) return -1;
+          if (!a.name.toLowerCase().includes('doiang') && b.name.toLowerCase().includes('doiang')) return 1;
+          
+          // Then sort by featured (featured first)
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          
+          // Then sort by name alphabetically
+          return a.name.localeCompare(b.name);
+        });
+
+        setCollections(sortedCollections);
       } catch (err) {
         console.error('Error fetching collections:', err);
         setError('Failed to load collections');
