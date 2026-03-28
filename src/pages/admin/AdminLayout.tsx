@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, Tag, Star,
   Settings, BarChart3, ChevronLeft, ChevronRight, LogOut, Bell,
   Search, Menu, X, FileText, Truck, MessageSquare, Image, Percent,
-  Server, Mail, Megaphone, ImageIcon, Database
+  Server, Mail, Megaphone, ImageIcon, Database, Settings2, Globe
 } from "lucide-react";
 import NotificationDropdown from "@/components/admin/NotificationDropdown";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ const navItems = [
   { label: "Collections", icon: FileText, path: "/admin/collections" },
   { label: "Inventory", icon: Truck, path: "/admin/inventory" },
   { label: "Pages", icon: FileText, path: "/admin/pages" },
+  { label: "Header & Footer", icon: Settings2, path: "/admin/header-footer" },
   { label: "Media", icon: Image, path: "/admin/media" },
   { label: "Messages", icon: MessageSquare, path: "/admin/messages" },
   { label: "Notifications", icon: Bell, path: "/admin/notifications" },

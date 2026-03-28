@@ -183,6 +183,11 @@ const Collection2026 = () => {
   }, [products]);
 
   const filtered = useMemo(() => {
+    console.log('=== Filtering Debug ===');
+    console.log('Search query:', searchQuery);
+    console.log('Filters:', filters);
+    console.log('Total products before filtering:', products.length);
+    
     console.log('Filtering by collections:', filters.categories);
     console.log('Available products:', products.map(p => ({ 
       id: p.id, 
@@ -192,26 +197,27 @@ const Collection2026 = () => {
     })));
     
     let filteredProducts = applyFilters(products, filters);
+    console.log('After filterUtils.applyFilters:', filteredProducts.length);
     
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
+      console.log('Applying search for query:', query);
+      const beforeSearch = filteredProducts.length;
       filteredProducts = filteredProducts.filter(p => 
         p.name.toLowerCase().includes(query) ||
         p.category.toLowerCase().includes(query) ||
         p.style?.toLowerCase().includes(query) ||
         p.color?.toLowerCase().includes(query)
       );
+      console.log(`Search filtered ${beforeSearch} to ${filteredProducts.length} products`);
     }
     
-    console.log('Filtered result count:', filteredProducts.length);
-    console.log('Filtered products:', filteredProducts.map(p => ({ 
-      id: p.id, 
-      name: p.name, 
-      category: p.category 
-    })));
+    const finalResult = sortProducts(filteredProducts, sortBy);
+    console.log('Final result after sorting:', finalResult.length);
+    console.log('=== End Filtering Debug ===');
     
-    return sortProducts(filteredProducts, sortBy);
+    return finalResult;
   }, [products, filters, sortBy, searchQuery]);
 
   if (loading) {
@@ -230,7 +236,7 @@ const Collection2026 = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       <AnnouncementBar content={{ text: "2026 Collection - Discover the Latest Trends!", enabled: true }} />
       <Navbar />
 
@@ -257,7 +263,10 @@ const Collection2026 = () => {
               type="text"
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                console.log('Search input changed:', e.target.value);
+                setSearchQuery(e.target.value);
+              }}
               className="w-full pl-9 pr-10 py-2 font-body text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
             />
             {searchQuery && (

@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { bannerContentService } from "@/lib/bannerContentService";
+import HeaderFooterEditor from "@/components/admin/HeaderFooterEditor";
 
 // Import default hero images
 import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
@@ -764,6 +765,7 @@ const HomePageEditor = ({
           <TabsTrigger value="collection" className="font-body text-xs">Collection Banner</TabsTrigger>
           <TabsTrigger value="about" className="font-body text-xs">About</TabsTrigger>
           <TabsTrigger value="footer" className="font-body text-xs">Footer</TabsTrigger>
+          <TabsTrigger value="header-footer" className="font-body text-xs">Header & Footer</TabsTrigger>
           <TabsTrigger value="seo" className="font-body text-xs">SEO</TabsTrigger>
         </TabsList>
 
@@ -950,6 +952,11 @@ const HomePageEditor = ({
               </div>
             </div>
           </EditorCard>
+        </TabsContent>
+
+        {/* Header & Footer */}
+        <TabsContent value="header-footer">
+          <HeaderFooterEditor />
         </TabsContent>
 
         {/* SEO */}

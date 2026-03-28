@@ -58,6 +58,7 @@ import RemovePrices from "./pages/admin/RemovePrices";
 import AdminBackup from "./pages/admin/AdminBackup";
 import AdminBackupSetupRedirect from "./pages/admin/AdminBackupSetupRedirect";
 import AdminBackupManualSetup from "./pages/admin/AdminBackupManualSetup";
+import AdminHeaderFooter from "./pages/admin/AdminHeaderFooter";
 import BuyClearance from "./pages/BuyClearance";
 import Collection2026 from "./pages/Collection2026";
 
@@ -196,6 +197,7 @@ const AnimatedRoutes = () => {
             <Route path="inventory" element={<AdminInventory />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="pages/edit/:pageId" element={<AdminPageEditor />} />
+            <Route path="header-footer" element={<AdminHeaderFooter />} />
             <Route path="media" element={<AdminMedia />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="notifications" element={<AdminNotifications />} />
