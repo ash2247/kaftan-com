@@ -216,7 +216,7 @@ const Collection2026 = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar content={{ text: "2026 Collection - Coming Soon!", enabled: true }} />
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">

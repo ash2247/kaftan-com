@@ -153,7 +153,7 @@ const CollectionPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar content={{ text: "Loading collection...", enabled: true }} />
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -169,7 +169,7 @@ const CollectionPage = () => {
 
   if (error || !collection) {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar content={{ text: "Collection not found", enabled: true }} />
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -187,7 +187,7 @@ const CollectionPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       <AnnouncementBar 
         content={{ 
           text: collection.featured ? `Featured: ${collection.name}` : collection.name, 

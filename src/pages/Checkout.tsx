@@ -596,7 +596,7 @@ const Checkout = () => {
 
   if (items.length === 0 && step !== "confirmation") {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar />
         <Navbar />
         <div className="flex flex-col items-center justify-center py-32 px-6 text-center">
@@ -613,7 +613,7 @@ const Checkout = () => {
   if (step === "confirmation") {
     if (!orderDetails && !orderDetailsLoading) {
       return (
-        <div className="min-h-screen bg-background pb-mobile-nav">
+        <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
           <AnnouncementBar />
           <Navbar />
           <div className="flex items-center justify-center py-32">
@@ -646,7 +646,7 @@ const Checkout = () => {
     }
 
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar />
         <Navbar />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center py-32 px-6 text-center">
@@ -715,7 +715,7 @@ const Checkout = () => {
   const currentStepIndex = steps.findIndex((s) => s.key === step);
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       <AnnouncementBar />
       <Navbar />
 

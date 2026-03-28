@@ -65,7 +65,7 @@ const Index = () => {
   const featuredProducts = products.filter(p => p.featured && p.in_stock).map(convertToProduct);
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       {isEnabled("announcement") && (
         <AnnouncementBar content={content.announcement} />
       )}

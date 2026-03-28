@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Package, X } from "lucide-react";
@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import HorizontalFilterBar from "@/components/HorizontalFilterBar";
 import type { FilterState } from "@/lib/filterUtils";
 import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
+import type { Product as FilterProduct } from "@/lib/products";
 
 interface Collection {
   id: string;
@@ -23,7 +24,7 @@ interface Collection {
   updated_at: string;
 }
 
-interface Product {
+interface DBProduct {
   id: string;
   name: string;
   slug: string;
@@ -37,7 +38,7 @@ interface Product {
 const CollectionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const [collection, setCollection] = useState<Collection | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<DBProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("latest");
@@ -112,20 +113,34 @@ const CollectionDetail = () => {
     fetchCollection();
   }, [slug]);
 
+  // Convert DB products to filter-compatible format
+  const convertedProducts: FilterProduct[] = useMemo(() => {
+    return products.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      image: p.images?.[0] || "/placeholder.svg",
+      images: p.images || [],
+      badge: p.in_stock ? undefined : "Sold out",
+      category: p.category,
+      in_stock: p.in_stock
+    }));
+  }, [products]);
+
   // Update price range when products change
   useEffect(() => {
-    if (products.length > 0) {
-      const priceRange = getPriceRange(products);
+    if (convertedProducts.length > 0) {
+      const priceRange = getPriceRange(convertedProducts);
       setFilters(prev => ({
         ...prev,
         priceRange: [priceRange.min, priceRange.max]
       }));
     }
-  }, [products]);
+  }, [convertedProducts]);
 
   // Apply filters and search
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...convertedProducts];
 
     // Apply filters
     result = applyFilters(result, filters);
@@ -136,17 +151,18 @@ const CollectionDetail = () => {
       result = result.filter(p => 
         p.name.toLowerCase().includes(query) ||
         p.category.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
+        p.style?.toLowerCase().includes(query) ||
+        p.color?.toLowerCase().includes(query)
       );
     }
     
     // Apply sorting
     return sortProducts(result, sortBy);
-  }, [products, filters, sortBy, searchQuery]);
+  }, [convertedProducts, filters, sortBy, searchQuery]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar />
         <Navbar />
         <div className="container mx-auto px-4 py-16">
@@ -162,7 +178,7 @@ const CollectionDetail = () => {
 
   if (error || !collection) {
     return (
-      <div className="min-h-screen bg-background pb-mobile-nav">
+      <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
         <AnnouncementBar />
         <Navbar />
         <div className="container mx-auto px-4 py-16">
@@ -179,7 +195,7 @@ const CollectionDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       <AnnouncementBar />
       <Navbar />
       <div className="container mx-auto px-4 py-8">
@@ -252,13 +268,13 @@ const CollectionDetail = () => {
 
         {/* Horizontal Filter Bar */}
         <HorizontalFilterBar
-          products={products}
+          products={convertedProducts}
           filters={filters}
           onFiltersChange={setFilters}
           sortBy={sortBy}
           onSortChange={handleSortChange}
           filteredCount={filteredProducts.length}
-          totalCount={products.length}
+          totalCount={convertedProducts.length}
           columns={currentColumns}
           onColumnsChange={setCurrentColumns}
         />
@@ -273,56 +289,60 @@ const CollectionDetail = () => {
           </div>
         ) : (
           <div className={getGridClassesForColumns(currentColumns) + " gap-6"}>
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="group"
-              >
-                <Link to={`/product/${product.slug}`} className="block">
-                  <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:border-primary/50">
-                    {/* Product Image */}
-                    <div className="relative overflow-hidden aspect-[3/4] bg-secondary">
-                      {product.images && product.images.length > 0 ? (
-                        <img 
-                          src={product.images[0]} 
-                          alt={product.name} 
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <div className="text-muted-foreground/30">
-                          <Package size={48} />
+            {filteredProducts.map((product, index) => {
+              // Find the original DB product to get slug and description
+              const originalProduct = products.find(p => p.id === product.id);
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="group"
+                >
+                  <Link to={`/product/${originalProduct?.slug || product.id}`} className="block">
+                    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:border-primary/50">
+                      {/* Product Image */}
+                      <div className="relative overflow-hidden aspect-[3/4] bg-secondary">
+                        {product.images && product.images.length > 0 ? (
+                          <img 
+                            src={product.images[0]} 
+                            alt={product.name} 
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-muted-foreground/30">
+                            <Package size={48} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Content */}
+                      <div className="p-4">
+                        <div className="mb-2">
+                          <h3 className="font-heading text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                            {product.name}
+                          </h3>
+                          <p className="font-body text-sm text-muted-foreground line-clamp-2">
+                            {originalProduct?.description || ''}
+                          </p>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Product Content */}
-                    <div className="p-4">
-                      <div className="mb-2">
-                        <h3 className="font-heading text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
-                        <p className="font-body text-sm text-muted-foreground line-clamp-2">
-                          {product.description}
-                        </p>
-                      </div>
-
-                      {/* Product Price */}
-                      <div className="flex items-center justify-between">
-                        <span className="font-heading text-lg font-semibold text-primary">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <span className="text-primary font-medium text-sm uppercase tracking-wider">
-                          View Details →
-                        </span>
+                        {/* Product Price */}
+                        <div className="flex items-center justify-between">
+                          <span className="font-heading text-lg font-semibold text-primary">
+                            ${product.price.toFixed(2)}
+                          </span>
+                          <span className="text-primary font-medium text-sm uppercase tracking-wider">
+                            View Details →
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

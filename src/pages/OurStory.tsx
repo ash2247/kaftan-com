@@ -8,7 +8,7 @@ import heroKaftan3 from "@/assets/hero-kaftan-3.jpg";
 
 const OurStory = () => {
   return (
-    <div className="min-h-screen bg-background pb-mobile-nav">
+    <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
       <AnnouncementBar />
       <Navbar />
 

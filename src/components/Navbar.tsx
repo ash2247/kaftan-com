@@ -48,7 +48,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.08)]">
+      <header className="fixed top-[32px] left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.08)]">
         {/* Desktop Layout */}
         <div className="hidden lg:flex items-center px-6 py-3 h-[60px]">
           {/* Logo */}
