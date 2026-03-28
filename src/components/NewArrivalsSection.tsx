@@ -18,11 +18,15 @@ const NewArrivalsSection = () => {
   const loadNewArrivals = async () => {
     try {
       const data = await productService.getProducts();
-      // Get the 8 most recent products that are in stock
-      const newArrivals = data
-        .filter(p => p.in_stock)
-        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-        .slice(0, 8);
+      // Get products that are in stock and shuffle them randomly
+      const inStockProducts = data.filter(p => p.in_stock);
+      
+      // Shuffle array randomly using Fisher-Yates algorithm
+      const shuffled = [...inStockProducts].sort(() => Math.random() - 0.5);
+      
+      // Take first 8 from shuffled array
+      const newArrivals = shuffled.slice(0, 8);
+      
       setProducts(newArrivals);
     } catch (error) {
       console.error('Error loading new arrivals:', error);
