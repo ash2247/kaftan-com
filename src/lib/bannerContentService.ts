@@ -39,7 +39,7 @@ class BannerContentService {
   async getBannerContent(pageKey: string): Promise<BannerContent | null> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .select('*')
         .eq('page_key', pageKey)
         .single();
@@ -52,7 +52,7 @@ class BannerContentService {
         throw error;
       }
 
-      return data;
+      return data as BannerContent;
     } catch (error) {
       console.error('Error fetching banner content:', error);
       return null;
@@ -68,7 +68,7 @@ class BannerContentService {
       if (existing) {
         // Update existing record
         const { data, error } = await supabase
-          .from(this.tableName)
+          .from(this.tableName as any)
           .update({
             ...content,
             updated_at: new Date().toISOString()
@@ -78,22 +78,22 @@ class BannerContentService {
           .single();
 
         if (error) throw error;
-        return data;
+        return data as BannerContent;
       } else {
         // Create new record
         const { data, error } = await supabase
-          .from(this.tableName)
+          .from(this.tableName as any)
           .insert({
             page_key: pageKey,
             ...content,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          })
+          } as any)
           .select()
           .single();
 
         if (error) throw error;
-        return data;
+        return data as BannerContent;
       }
     } catch (error) {
       console.error('Error saving banner content:', error);
@@ -105,7 +105,7 @@ class BannerContentService {
   async deleteBannerContent(pageKey: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .delete()
         .eq('page_key', pageKey);
 
@@ -121,12 +121,12 @@ class BannerContentService {
   async getAllBannerContent(): Promise<BannerContent[]> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .select('*')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data as BannerContent[]) || [];
     } catch (error) {
       console.error('Error fetching all banner content:', error);
       return [];
