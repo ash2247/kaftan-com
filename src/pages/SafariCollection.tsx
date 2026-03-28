@@ -12,6 +12,7 @@ import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/l
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/products";
+import { safariProducts } from "@/lib/safariProducts";
 
 const sortOptions = [
   { label: "Sort by popularity", value: "popular" },
@@ -30,54 +31,18 @@ const SafariCollection = () => {
   const [loading, setLoading] = useState(true);
   const { getGridClasses } = useCollectionSettings();
 
-  // Fetch Safari products from database
+  // Use static Safari products
   useEffect(() => {
-    const fetchSafariProducts = async () => {
-      try {
-        setLoading(true);
-        console.log('🔍 Fetching Safari products...');
-        // @ts-ignore - Suppress TypeScript error for complex Supabase query
-        const result = await supabase
-          .from('products')
-          .select('*')
-          .eq('display_page', 'safari')
-          .order('created_at', { ascending: false });
-        
-        const { data, error } = result as any;
-
-        console.log('📊 Safari products data:', data);
-        console.log('❌ Safari products error:', error);
-
-        if (error) {
-          console.error('Error fetching Safari products:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load Safari collection products",
-            variant: "destructive"
-          });
-        } else {
-          console.log(`✅ Found ${data?.length || 0} Safari products`);
-          // Map database products to Product interface
-          const mappedProducts = (data || []).map((p: any) => ({
-            ...p,
-            image: p.images?.[0] || "/placeholder.svg",
-            size: p.size || undefined,
-          }));
-          setProducts(mappedProducts);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load Safari collection products",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSafariProducts();
+    console.log('🦁 Loading static Safari products...');
+    console.log(`✅ Found ${safariProducts.length} Safari products`);
+    // Map static products to Product interface with proper image paths
+    const mappedProducts = safariProducts.map((p) => ({
+      ...p,
+      image: p.image, // Static imports already handle the path
+      size: p.size || undefined,
+    }));
+    setProducts(mappedProducts);
+    setLoading(false);
   }, []);
 
   // Initialize filters

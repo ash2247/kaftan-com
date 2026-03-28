@@ -12,6 +12,7 @@ import { getFilterOptions, getPriceRange, applyFilters, sortProducts } from "@/l
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/products";
+import { paradiseProducts } from "@/lib/paradiseProducts";
 
 const sortOptions = [
   { label: "Sort by popularity", value: "popular" },
@@ -30,54 +31,18 @@ const ParadiseCollection = () => {
   const [loading, setLoading] = useState(true);
   const { getGridClasses } = useCollectionSettings();
 
-  // Fetch Paradise products from database
+  // Use static Paradise products
   useEffect(() => {
-    const fetchParadiseProducts = async () => {
-      try {
-        setLoading(true);
-        console.log('🔍 Fetching Paradise products...');
-        // @ts-ignore - Suppress TypeScript error for complex Supabase query
-        const result = await supabase
-          .from('products')
-          .select('*')
-          .eq('display_page', 'paradise')
-          .order('created_at', { ascending: false });
-        
-        const { data, error } = result as any;
-
-        console.log('📊 Paradise products data:', data);
-        console.log('❌ Paradise products error:', error);
-
-        if (error) {
-          console.error('Error fetching Paradise products:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load Paradise collection products",
-            variant: "destructive"
-          });
-        } else {
-          console.log(`✅ Found ${data?.length || 0} Paradise products`);
-          // Map database products to Product interface
-          const mappedProducts = (data || []).map((p: any) => ({
-            ...p,
-            image: p.images?.[0] || "/placeholder.svg",
-            size: p.size || undefined,
-          }));
-          setProducts(mappedProducts);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load Paradise collection products",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchParadiseProducts();
+    console.log('🌺 Loading static Paradise products...');
+    console.log(`✅ Found ${paradiseProducts.length} Paradise products`);
+    // Map static products to Product interface with proper image paths
+    const mappedProducts = paradiseProducts.map((p) => ({
+      ...p,
+      image: p.image, // Static imports already handle the path
+      size: p.size || undefined,
+    }));
+    setProducts(mappedProducts);
+    setLoading(false);
   }, []);
 
   // Initialize filters
