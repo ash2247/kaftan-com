@@ -24,8 +24,8 @@ const NewArrivalsSection = () => {
       // Shuffle array randomly using Fisher-Yates algorithm
       const shuffled = [...inStockProducts].sort(() => Math.random() - 0.5);
       
-      // Take first 8 from shuffled array
-      const newArrivals = shuffled.slice(0, 8);
+      // Take first 9 from shuffled array
+      const newArrivals = shuffled.slice(0, 9);
       
       setProducts(newArrivals);
     } catch (error) {
