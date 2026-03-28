@@ -38,6 +38,7 @@ class BannerContentService {
   // Get banner content for a specific page
   async getBannerContent(pageKey: string): Promise<BannerContent | null> {
     try {
+      console.log('🔍 Fetching banner content for page:', pageKey);
       const { data, error } = await supabase
         .from(this.tableName as any)
         .select('*')
@@ -45,16 +46,19 @@ class BannerContentService {
         .single();
 
       if (error) {
+        console.log('❌ Supabase error:', error);
         // If no record exists, return null
         if (error.code === 'PGRST116') {
+          console.log('ℹ️ No banner content found for page:', pageKey);
           return null;
         }
         throw error;
       }
 
+      console.log('✅ Banner content fetched successfully:', data);
       return data as BannerContent;
     } catch (error) {
-      console.error('Error fetching banner content:', error);
+      console.error('❌ Error fetching banner content:', error);
       return null;
     }
   }
@@ -62,10 +66,14 @@ class BannerContentService {
   // Save or update banner content
   async saveBannerContent(pageKey: string, content: Omit<BannerContent, 'id' | 'page_key' | 'created_at' | 'updated_at'>): Promise<BannerContent | null> {
     try {
+      console.log('💾 Saving banner content for page:', pageKey);
+      console.log('📝 Content to save:', content);
+      
       // Check if record exists
       const existing = await this.getBannerContent(pageKey);
 
       if (existing) {
+        console.log('🔄 Updating existing banner content');
         // Update existing record
         const { data, error } = await supabase
           .from(this.tableName as any)
@@ -77,9 +85,14 @@ class BannerContentService {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Update error:', error);
+          throw error;
+        }
+        console.log('✅ Banner content updated successfully:', data);
         return data as BannerContent;
       } else {
+        console.log('➕ Creating new banner content');
         // Create new record
         const { data, error } = await supabase
           .from(this.tableName as any)
@@ -92,11 +105,15 @@ class BannerContentService {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Insert error:', error);
+          throw error;
+        }
+        console.log('✅ Banner content created successfully:', data);
         return data as BannerContent;
       }
     } catch (error) {
-      console.error('Error saving banner content:', error);
+      console.error('❌ Error saving banner content:', error);
       return null;
     }
   }

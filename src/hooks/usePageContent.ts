@@ -125,10 +125,12 @@ export function useHomePageContent(): HomePageContent {
 
   useEffect(() => {
     const fetchContent = async () => {
+      console.log('🚀 Starting to fetch home page content...');
       try {
         const bannerData = await bannerContentService.getBannerContent('home');
         
         if (bannerData) {
+          console.log('📦 Found banner data from Supabase:', bannerData);
           setContent(prev => ({
             hero: {
               titleLine1: bannerData.hero_title_line1 || prev.hero.titleLine1,
@@ -166,14 +168,18 @@ export function useHomePageContent(): HomePageContent {
             },
             sections: bannerData.sections || prev.sections,
           }));
+        } else {
+          console.log('⚠️ No banner data found in Supabase, checking localStorage...');
         }
       } catch (error) {
-        console.error("Failed to fetch banner content from Supabase:", error);
+        console.error("❌ Failed to fetch banner content from Supabase:", error);
         // Fallback to localStorage for backward compatibility
+        console.log('🔄 Falling back to localStorage...');
         const saved = localStorage.getItem("page_content_home");
         if (saved) {
           try {
             const data = JSON.parse(saved);
+            console.log('📦 Found localStorage data:', data);
             setContent(prev => ({
               hero: data.hero || prev.hero,
               heroSlides: data.heroSlides || prev.heroSlides,
@@ -186,8 +192,10 @@ export function useHomePageContent(): HomePageContent {
               sections: data.sections || prev.sections,
             }));
           } catch (e) {
-            console.error("Failed to parse localStorage content", e);
+            console.error("❌ Failed to parse localStorage content", e);
           }
+        } else {
+          console.log('📦 No localStorage data found, using defaults');
         }
       }
     };
