@@ -20,7 +20,18 @@ const Index = () => {
   const [products, setProducts] = useState<DBProduct[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const isEnabled = (id: string) => isSectionEnabled(content.sections, id);
+  const isEnabled = (id: string) => {
+    const enabled = isSectionEnabled(content.sections, id);
+    console.log(`🔍 Section "${id}" enabled:`, enabled);
+    return enabled;
+  };
+
+  useEffect(() => {
+    console.log('🏠 Index component mounted');
+    console.log('📊 Current content sections:', content.sections);
+    console.log('🦸 Hero enabled check:', isEnabled('hero'));
+    console.log('🎨 Hero slides:', content.heroSlides);
+  }, [content]);
 
   useEffect(() => {
     loadProducts();

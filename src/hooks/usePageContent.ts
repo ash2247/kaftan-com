@@ -131,43 +131,52 @@ export function useHomePageContent(): HomePageContent {
         
         if (bannerData) {
           console.log('📦 Found banner data from Supabase:', bannerData);
-          setContent(prev => ({
-            hero: {
-              titleLine1: bannerData.hero_title_line1 || prev.hero.titleLine1,
-              titleLine2: bannerData.hero_title_line2 || prev.hero.titleLine2,
-              subtitle: bannerData.hero_subtitle || prev.hero.subtitle,
-              ctaText: bannerData.hero_cta_text || prev.hero.ctaText,
-              ctaLink: bannerData.hero_cta_link || prev.hero.ctaLink,
-              autoSlide: bannerData.hero_auto_slide !== undefined ? bannerData.hero_auto_slide : prev.hero.autoSlide,
-              slideInterval: bannerData.hero_slide_interval || prev.hero.slideInterval,
-            },
-            heroSlides: bannerData.hero_slides || prev.heroSlides,
-            announcement: {
-              text: bannerData.announcement_text || prev.announcement.text,
-              enabled: bannerData.announcement_enabled !== undefined ? bannerData.announcement_enabled : prev.announcement.enabled,
-            },
-            collectionBanner: {
-              subtitle: bannerData.collection_banner_subtitle || prev.collectionBanner.subtitle,
-              title: bannerData.collection_banner_title || prev.collectionBanner.title,
-              ctaText: bannerData.collection_banner_cta_text || prev.collectionBanner.ctaText,
-              ctaLink: bannerData.collection_banner_cta_link || prev.collectionBanner.ctaLink,
-            },
-            collectionImage: bannerData.collection_image || prev.collectionImage,
-            aboutImage: bannerData.about_image || prev.aboutImage,
-            about: {
-              title: bannerData.about_title || prev.about.title,
-              paragraph1: bannerData.about_paragraph1 || prev.about.paragraph1,
-              paragraph2: bannerData.about_paragraph2 || prev.about.paragraph2,
-              ctaText: bannerData.about_cta_text || prev.about.ctaText,
-            },
-            footer: {
-              newsletterTitle: bannerData.footer_newsletter_title || prev.footer.newsletterTitle,
-              newsletterSubtitle: bannerData.footer_newsletter_subtitle || prev.footer.newsletterSubtitle,
-              ctaText: bannerData.footer_cta_text || prev.footer.ctaText,
-              copyright: bannerData.footer_copyright || prev.footer.copyright,
-            },
-            sections: bannerData.sections || prev.sections,
-          }));
+          console.log('🎯 Sections from Supabase:', bannerData.sections);
+          setContent(prev => {
+            const newContent = {
+              hero: {
+                titleLine1: bannerData.hero_title_line1 || prev.hero.titleLine1,
+                titleLine2: bannerData.hero_title_line2 || prev.hero.titleLine2,
+                subtitle: bannerData.hero_subtitle || prev.hero.subtitle,
+                ctaText: bannerData.hero_cta_text || prev.hero.ctaText,
+                ctaLink: bannerData.hero_cta_link || prev.hero.ctaLink,
+                autoSlide: bannerData.hero_auto_slide !== undefined ? bannerData.hero_auto_slide : prev.hero.autoSlide,
+                slideInterval: bannerData.hero_slide_interval || prev.hero.slideInterval,
+              },
+              heroSlides: bannerData.hero_slides || prev.heroSlides,
+              announcement: {
+                text: bannerData.announcement_text || prev.announcement.text,
+                enabled: bannerData.announcement_enabled !== undefined ? bannerData.announcement_enabled : prev.announcement.enabled,
+              },
+              collectionBanner: {
+                subtitle: bannerData.collection_banner_subtitle || prev.collectionBanner.subtitle,
+                title: bannerData.collection_banner_title || prev.collectionBanner.title,
+                ctaText: bannerData.collection_banner_cta_text || prev.collectionBanner.ctaText,
+                ctaLink: bannerData.collection_banner_cta_link || prev.collectionBanner.ctaLink,
+              },
+              collectionImage: bannerData.collection_image || prev.collectionImage,
+              aboutImage: bannerData.about_image || prev.aboutImage,
+              about: {
+                title: bannerData.about_title || prev.about.title,
+                paragraph1: bannerData.about_paragraph1 || prev.about.paragraph1,
+                paragraph2: bannerData.about_paragraph2 || prev.about.paragraph2,
+                ctaText: bannerData.about_cta_text || prev.about.ctaText,
+              },
+              footer: {
+                newsletterTitle: bannerData.footer_newsletter_title || prev.footer.newsletterTitle,
+                newsletterSubtitle: bannerData.footer_newsletter_subtitle || prev.footer.newsletterSubtitle,
+                ctaText: bannerData.footer_cta_text || prev.footer.ctaText,
+                copyright: bannerData.footer_copyright || prev.footer.copyright,
+              },
+              sections: bannerData.sections || prev.sections,
+            };
+            
+            console.log('🔍 New content sections:', newContent.sections);
+            console.log('🦸 Hero section enabled?', isSectionEnabled(newContent.sections, 'hero'));
+            console.log('🎨 Hero slides count:', newContent.heroSlides.length);
+            
+            return newContent;
+          });
         } else {
           console.log('⚠️ No banner data found in Supabase, checking localStorage...');
         }
@@ -180,22 +189,31 @@ export function useHomePageContent(): HomePageContent {
           try {
             const data = JSON.parse(saved);
             console.log('📦 Found localStorage data:', data);
-            setContent(prev => ({
-              hero: data.hero || prev.hero,
-              heroSlides: data.heroSlides || prev.heroSlides,
-              announcement: data.announcement || prev.announcement,
-              collectionBanner: data.collectionBanner || prev.collectionBanner,
-              collectionImage: data.collectionImage || prev.collectionImage,
-              aboutImage: data.aboutImage || prev.aboutImage,
-              about: data.about || prev.about,
-              footer: data.footer || prev.footer,
-              sections: data.sections || prev.sections,
-            }));
+            setContent(prev => {
+              const newContent = {
+                hero: data.hero || prev.hero,
+                heroSlides: data.heroSlides || prev.heroSlides,
+                announcement: data.announcement || prev.announcement,
+                collectionBanner: data.collectionBanner || prev.collectionBanner,
+                collectionImage: data.collectionImage || prev.collectionImage,
+                aboutImage: data.aboutImage || prev.aboutImage,
+                about: data.about || prev.about,
+                footer: data.footer || prev.footer,
+                sections: data.sections || prev.sections,
+              };
+              
+              console.log('🔍 localStorage content sections:', newContent.sections);
+              console.log('🦸 Hero section enabled from localStorage?', isSectionEnabled(newContent.sections, 'hero'));
+              
+              return newContent;
+            });
           } catch (e) {
             console.error("❌ Failed to parse localStorage content", e);
           }
         } else {
           console.log('📦 No localStorage data found, using defaults');
+          console.log('🔍 Default sections:', defaultSections);
+          console.log('🦸 Hero section enabled by default?', isSectionEnabled(defaultSections, 'hero'));
         }
       }
     };
