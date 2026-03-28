@@ -2,13 +2,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { z } from "zod";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { sendContactEmail } from "@/services/emailService";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -20,7 +21,6 @@ const contactSchema = z.object({
 type ContactForm = z.infer<typeof contactSchema>;
 
 const ContactUs = () => {
-  const { toast } = useToast();
   const [form, setForm] = useState<ContactForm>({ name: "", email: "", subject: "", message: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
   const [sending, setSending] = useState(false);
@@ -30,7 +30,7 @@ const ContactUs = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
@@ -42,12 +42,29 @@ const ContactUs = () => {
       setErrors(fieldErrors);
       return;
     }
+    
     setSending(true);
-    setTimeout(() => {
+    
+    try {
+      const success = await sendContactEmail({
+        name: form.name,
+        email: form.email,
+        subject: form.subject,
+        message: form.message
+      });
+      
+      if (success) {
+        toast.success("Message sent successfully! We'll get back to you soon.");
+        setForm({ name: "", email: "", subject: "", message: "" });
+      } else {
+        toast.error("Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending contact form:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
       setSending(false);
-      toast({ title: "Message sent!", description: "We'll get back to you as soon as possible." });
-      setForm({ name: "", email: "", subject: "", message: "" });
-    }, 1200);
+    }
   };
 
   return (
