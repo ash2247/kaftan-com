@@ -31,38 +31,21 @@ const ParadiseCollection = () => {
   const [loading, setLoading] = useState(true);
   const { getGridClasses } = useCollectionSettings();
 
-  // Use static Paradise products with lazy loading for better performance
+  // Load all Paradise products at once
   useEffect(() => {
     console.log('🌺 Loading static Paradise products...');
     console.log(`✅ Found ${paradiseProducts.length} Paradise products`);
     
-    // Lazy load products in batches to improve initial load time
-    const loadProductsInBatches = async () => {
-      // Load first 15 products immediately (larger batch for Paradise)
-      const firstBatch = paradiseProducts.slice(0, 15);
-      const mappedFirstBatch = firstBatch.map((p) => ({
-        ...p,
-        image: p.image,
-        size: p.size || undefined,
-      }));
-      
-      setProducts(mappedFirstBatch);
-      setLoading(false);
-      
-      // Load remaining products after a short delay
-      setTimeout(() => {
-        const remainingProducts = paradiseProducts.slice(15);
-        const mappedRemaining = remainingProducts.map((p) => ({
-          ...p,
-          image: p.image,
-          size: p.size || undefined,
-        }));
-        setProducts(prev => [...mappedFirstBatch, ...mappedRemaining]);
-        console.log('✅ All Paradise products loaded');
-      }, 800);
-    };
+    // Load all products immediately
+    const allProducts = paradiseProducts.map((p) => ({
+      ...p,
+      image: p.image,
+      size: p.size || undefined,
+    }));
     
-    loadProductsInBatches();
+    setProducts(allProducts);
+    setLoading(false);
+    console.log('✅ All Paradise products loaded at once');
   }, []);
 
   // Initialize filters
