@@ -127,6 +127,7 @@ const Collection2026 = () => {
         .from('products')
         .select('*')
         .eq('in_stock', true)
+        .eq('status', 'Active') // Only show active products
         .order('created_at', { ascending: false });
 
       if (error) {

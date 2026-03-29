@@ -25,6 +25,7 @@ export const productService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .eq('status', 'Active') // Only show active products
       .order('created_at', { ascending: false });
     
     if (error) throw error;
@@ -104,6 +105,7 @@ export const productService = {
       .from('products')
       .select('*')
       .eq('category', category)
+      .eq('status', 'Active') // Only show active products
       .order('created_at', { ascending: false });
     
     if (error) throw error;
@@ -117,6 +119,7 @@ export const productService = {
       .select('*')
       .eq('featured', true)
       .eq('in_stock', true)
+      .eq('status', 'Active') // Only show active products
       .order('created_at', { ascending: false });
     
     if (error) throw error;
@@ -129,6 +132,7 @@ export const productService = {
       .from('products')
       .select('*')
       .ilike('name', `%${query}%`)
+      .eq('status', 'Active') // Only show active products
       .order('created_at', { ascending: false });
     
     if (error) throw error;

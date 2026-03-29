@@ -32,6 +32,9 @@ export const useProducts = (options?: UseProductsOptions) => {
     queryFn: async () => {
       let query = supabase.from("products").select("*");
 
+      // Only show active products on frontend
+      query = query.eq("status", "Active");
+
       if (options?.collection) {
         query = query.eq("collection", options.collection);
       }
@@ -62,6 +65,7 @@ export const useProductBySlug = (slug: string) => {
         .from("products")
         .select("*")
         .eq("slug", slug)
+        .eq("status", "Active") // Only show active products
         .maybeSingle();
 
       if (error) throw error;
