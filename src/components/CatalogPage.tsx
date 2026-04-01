@@ -19,13 +19,14 @@ interface CatalogPageProps {
   subtitle?: string;
   products: Product[];
   bannerImage?: string;
+  showBanner?: boolean;
   cmsContent?: CatalogPageContent | null;
   columns?: 3 | 4;
 }
 
 type SortOption = "featured" | "price-low" | "price-high" | "name-az" | "name-za" | "collection-order";
 
-const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, columns = 4 }: CatalogPageProps) => {
+const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = false, cmsContent, columns = 4 }: CatalogPageProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,7 +63,8 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
   // Use CMS content if available, otherwise fall back to props
   const displayTitle = cmsContent?.title || title;
   const displaySubtitle = cmsContent?.subtitle || subtitle;
-  const displayBanner = cmsContent?.bannerImage || bannerImage;
+  const displayBanner = cmsContent?.showBanner && cmsContent?.bannerImage ? cmsContent.bannerImage : (showBanner ? bannerImage : null);
+  const managedProducts = cmsContent?.products || [];
 
   const announcementContent = cmsContent ? {
     text: cmsContent.announcementText,
@@ -205,12 +207,45 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, cmsContent, colum
 
           {/* Product Grid */}
           <div className="flex-1">
-            {filtered.length === 0 ? (
+            {managedProducts.length > 0 ? (
+              // Show managed products if available
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {managedProducts
+                  .filter(p => p.enabled)
+                  .sort((a, b) => a.order - b.order)
+                  .map((productItem) => {
+                    const sizeClasses = productItem.size === 'small' ? 'col-span-1' : 
+                                     productItem.size === 'medium' ? 'col-span-1 md:col-span-2' : 
+                                     'col-span-1 md:col-span-3';
+                    return (
+                      <div key={productItem.id} className={`${sizeClasses} bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow`}>
+                        <div className="aspect-square bg-gray-100">
+                          <img 
+                            src={productItem.image} 
+                            alt={productItem.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-body text-lg font-semibold text-foreground mb-2">{productItem.name}</h3>
+                          <div className="flex items-center justify-between">
+                            <span className="font-body text-lg text-primary">${productItem.price}</span>
+                            <span className="font-body text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                              {productItem.size}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="text-center py-20">
                 <p className="font-heading text-2xl text-foreground mb-2">No products found</p>
                 <p className="font-body text-xs text-muted-foreground">Try adjusting your filters or search query.</p>
               </div>
             ) : (
+              // Show regular filtered products
               <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
                 {filtered.map((product, i) => (
                   <ProductCard key={product.id} product={product} index={i} />

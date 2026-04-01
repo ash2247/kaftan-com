@@ -148,7 +148,7 @@ const Collection2026 = () => {
           style: product.description || '',
           color: product.colors?.[0] || '',
           collection: product.collection || '',
-          badge: product.featured ? 'New in' : (!product.in_stock ? 'Sold out' : product.original_price ? 'Sale' : undefined) as "New in" | "Sold out" | "Sale" | undefined,
+          badge: product.featured ? 'New in' : (!product.in_stock ? 'Sold out' : undefined) as "New in" | "Sold out" | undefined,
           sort_order: (product as any).sort_order || 999, // Add sort_order field with type assertion
           featured: product.featured || false, // Add featured field
           in_stock: product.in_stock !== false, // Add in_stock field

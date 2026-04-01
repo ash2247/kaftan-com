@@ -18,14 +18,14 @@ const NewArrivalsSection = () => {
   const loadNewArrivals = async () => {
     try {
       const data = await productService.getProducts();
-      // Get all products that are in stock and shuffle them randomly
+      // Get products that are in stock and shuffle them randomly
       const inStockProducts = data.filter(p => p.in_stock);
       
       // Shuffle array randomly using Fisher-Yates algorithm
       const shuffled = [...inStockProducts].sort(() => Math.random() - 0.5);
       
-      // Show all shuffled products, don't limit to 9
-      const newArrivals = shuffled;
+      // Take first 9 from shuffled array
+      const newArrivals = shuffled.slice(0, 9);
       
       setProducts(newArrivals);
     } catch (error) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Eye, GripVertical, Image as ImageIcon, Type, FileText, Layout, Mail, Globe, Upload, X, Plus, Replace, RotateCcw } from "lucide-react";
+import { ArrowLeft, Save, Eye, GripVertical, Image as ImageIcon, Type, FileText, Layout, Mail, Globe, Upload, X, Plus, Replace, RotateCcw, Package, Trash2, MoveUp, MoveDown } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useCatalogPageContent, type CatalogPageContent } from "@/hooks/usePageContent";
 import { bannerContentService } from "@/lib/bannerContentService";
+import { pagesService, type Page } from "@/lib/pagesService";
+import { useProducts } from "@/hooks/useProducts";
+import { supabase } from "@/integrations/supabase/client";
 import HeaderFooterEditor from "@/components/admin/HeaderFooterEditor";
 
 // Import default hero images
@@ -67,6 +72,32 @@ interface SectionMeta {
   label: string;
   icon: string;
   enabled: boolean;
+}
+
+// Product management interfaces
+interface ProductItem {
+  id: string;
+  productId: string;
+  name: string;
+  image: string;
+  price: number;
+  size: 'small' | 'medium' | 'large';
+  order: number;
+  enabled: boolean;
+}
+
+interface ProductPageContent {
+  title: string;
+  subtitle: string;
+  bannerImage: string;
+  showBanner: boolean;
+  announcementText: string;
+  announcementEnabled: boolean;
+  products: ProductItem[];
+  footerNewsletterTitle: string;
+  footerNewsletterSubtitle: string;
+  footerCtaText: string;
+  footerCopyright: string;
 }
 
 // ---- Defaults ----
@@ -126,29 +157,17 @@ const getIconComponent = (iconName: string) => {
   }
 };
 
-export interface CatalogPageContent {
-  title: string;
-  subtitle: string;
-  bannerImage: string;
-  metaDescription: string;
-  ogImage: string;
-  announcementText: string;
-  announcementEnabled: boolean;
-  footerNewsletterTitle: string;
-  footerNewsletterSubtitle: string;
-  footerCtaText: string;
-  footerCopyright: string;
-}
-
 const catalogPageDefaults: Record<string, CatalogPageContent> = {
   shop: {
     title: "Shop All",
     subtitle: "Explore our complete collection of luxury resort wear",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Browse our full collection",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -158,10 +177,12 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "Collections",
     subtitle: "Curated collections for every occasion",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Browse curated collections",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -171,10 +192,12 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "New Arrivals",
     subtitle: "The latest additions to our collection",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "See our latest pieces",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -184,10 +207,12 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "Summer Sale",
     subtitle: "Limited time offers on select styles",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Shop sale items",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -197,10 +222,12 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "Best Sellers",
     subtitle: "Our most loved pieces",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Shop our most popular",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -210,10 +237,12 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "About Us",
     subtitle: "",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Learn about FashionSpectrum",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
@@ -223,15 +252,247 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     title: "Contact Us",
     subtitle: "",
     bannerImage: "",
+    showBanner: false,
     metaDescription: "Get in touch",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
     announcementEnabled: true,
+    products: [],
     footerNewsletterTitle: "Join the FashionSpectrum World",
     footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.",
     footerCtaText: "Subscribe",
     footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved.",
   },
+};
+
+// ---- Product Manager Component ----
+const ProductManager = ({ products, onChange }: { products: ProductItem[]; onChange: (products: ProductItem[]) => void }) => {
+  console.log('🎯 ProductManager rendered with products:', products);
+  const { data: allProducts = [] } = useProducts();
+  const [availableProducts, setAvailableProducts] = useState(allProducts);
+  
+  useEffect(() => {
+    console.log('🎯 ProductManager useEffect - products:', products, 'allProducts:', allProducts);
+    // Filter out products that are already added
+    const addedProductIds = products.map(p => p.productId);
+    const available = allProducts.filter(p => !addedProductIds.includes(p.id));
+    setAvailableProducts(available);
+  }, [allProducts, products]);
+
+  const addProduct = (productId: string) => {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+    
+    const newProductItem: ProductItem = {
+      id: Date.now().toString(),
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      size: 'medium',
+      order: products.length,
+      enabled: true
+    };
+    
+    onChange([...products, newProductItem]);
+  };
+
+  const removeProduct = (id: string) => {
+    onChange(products.filter(p => p.id !== id));
+  };
+
+  const toggleProduct = (id: string) => {
+    onChange(products.map(p => 
+      p.id === id ? { ...p, enabled: !p.enabled } : p
+    ));
+  };
+
+  const moveProduct = (id: string, direction: 'up' | 'down') => {
+    const index = products.findIndex(p => p.id === id);
+    if (index === -1) return;
+    
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= products.length) return;
+    
+    const newProducts = [...products];
+    [newProducts[index], newProducts[newIndex]] = [newProducts[newIndex], newProducts[index]];
+    
+    // Update order values
+    newProducts.forEach((p, i) => {
+      p.order = i;
+    });
+    
+    onChange(newProducts);
+  };
+
+  const updateProductSize = (id: string, size: 'small' | 'medium' | 'large') => {
+    onChange(products.map(p => 
+      p.id === id ? { ...p, size } : p
+    ));
+  };
+
+  const getSizeClasses = (size: 'small' | 'medium' | 'large') => {
+    switch (size) {
+      case 'small': return 'col-span-1';
+      case 'medium': return 'col-span-1 md:col-span-2';
+      case 'large': return 'col-span-1 md:col-span-3';
+      default: return 'col-span-1';
+    }
+  };
+
+  console.log('🎯 ProductManager about to render, products count:', products.length);
+
+  return (
+    <div className="space-y-6">
+      {/* Add Product Section */}
+      <div className="space-y-4">
+        <Label className="font-body text-sm font-medium">Add Products</Label>
+        <div className="flex gap-2">
+          <Select onValueChange={addProduct}>
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Select a product to add..." />
+            </SelectTrigger>
+            <SelectContent>
+              {availableProducts.map(product => (
+                <SelectItem key={product.id} value={product.id}>
+                  {product.name} - ${product.price}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Products Grid */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="font-body text-sm font-medium">Manage Products ({products.length})</Label>
+          <p className="font-body text-xs text-muted-foreground">Drag to reorder, toggle to enable/disable</p>
+        </div>
+        
+        {products.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-border rounded-lg bg-secondary/20">
+            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="font-body text-sm text-muted-foreground">No products added yet</p>
+            <p className="font-body text-xs text-muted-foreground mt-1">Add products using the dropdown above</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {products.map((product, index) => (
+              <div key={product.id} className="bg-card border border-border rounded-lg p-4 space-y-4">
+                <div className="flex items-start gap-4">
+                  {/* Product Image */}
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-secondary/20 flex-shrink-0">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Product Info */}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-body text-sm font-medium text-foreground">{product.name}</h4>
+                        <p className="font-body text-xs text-muted-foreground">${product.price}</p>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <Switch 
+                          checked={product.enabled} 
+                          onCheckedChange={() => toggleProduct(product.id)}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => moveProduct(product.id, 'up')}
+                          disabled={index === 0}
+                        >
+                          <MoveUp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => moveProduct(product.id, 'down')}
+                          disabled={index === products.length - 1}
+                        >
+                          <MoveDown className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeProduct(product.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Size Control */}
+                    <div className="flex items-center gap-4">
+                      <Label className="font-body text-xs text-muted-foreground">Display Size:</Label>
+                      <Select 
+                        value={product.size} 
+                        onValueChange={(value: 'small' | 'medium' | 'large') => updateProductSize(product.id, value)}
+                      >
+                        <SelectTrigger className="w-32 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Small</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="large">Large</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {/* Size Preview */}
+                      <div className="flex items-center gap-1">
+                        <div className={`w-2 h-2 rounded ${product.size === 'small' ? 'bg-primary' : 'bg-muted'}`} />
+                        <div className={`w-3 h-2 rounded ${product.size === 'medium' ? 'bg-primary' : 'bg-muted'}`} />
+                        <div className={`w-4 h-2 rounded ${product.size === 'large' ? 'bg-primary' : 'bg-muted'}`} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Preview Section */}
+      <div className="space-y-4">
+        <Label className="font-body text-sm font-medium">Preview</Label>
+        <div className="border border-dashed border-border rounded-lg p-4 bg-secondary/10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {products.filter(p => p.enabled).map(product => (
+              <div key={product.id} className={`${getSizeClasses(product.size)} space-y-2`}>
+                <div className="aspect-square rounded-lg overflow-hidden bg-secondary/20">
+                  {product.image ? (
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="text-center">
+                  <p className="font-body text-xs font-medium text-foreground truncate">{product.name}</p>
+                  <p className="font-body text-xs text-muted-foreground">${product.price}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // ---- Main Component ----
@@ -242,6 +503,67 @@ const AdminPageEditor = () => {
 
   const isHome = pageId === "home" || pageId === "1";
   const pageKey = isHome ? "home" : (pageId || "");
+
+  // State for dynamic pages
+  const [dynamicPage, setDynamicPage] = useState<Page | null>(null);
+  const [isDynamicPage, setIsDynamicPage] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check if this is a dynamic page
+  useEffect(() => {
+    const checkPageType = async () => {
+      try {
+        console.log('🔍 Checking page type for pageId:', pageId);
+        
+        // For known catalog pages, treat them as catalog pages, not dynamic pages
+        const catalogPageKeys = ['shop', 'collections', 'new-arrivals', 'sale', 'best-sellers', 'about', 'contact'];
+        if (catalogPageKeys.includes(pageId || '')) {
+          console.log('🔍 Identified as catalog page:', pageId);
+          setIsDynamicPage(false);
+          return;
+        }
+        
+        // For test or invalid pages, don't try to fetch from database
+        if (pageId === 'test' || !pageId) {
+          console.log('🔍 Test or invalid page, treating as catalog page:', pageId);
+          setIsDynamicPage(false);
+          return;
+        }
+        
+        // For dynamic pages, we'll use the path-based approach
+        // First try to get by path (most common for dynamic pages)
+        const pathData = await pagesService.getPageByPath(`/${pageId}`);
+        if (pathData) {
+          setDynamicPage(pathData);
+          setIsDynamicPage(true);
+          console.log('🔍 Found dynamic page by path:', pathData);
+        } else {
+          // Try by ID only if it looks like a UUID
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          if (uuidRegex.test(pageId || "")) {
+            const pageData = await pagesService.getPageById(pageId || "");
+            if (pageData) {
+              setDynamicPage(pageData);
+              setIsDynamicPage(true);
+              console.log('🔍 Found dynamic page by ID:', pageData);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking page type:', error);
+        // Default to catalog page on error
+        setIsDynamicPage(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!isHome && pageId) {
+      checkPageType();
+    } else {
+      setLoading(false);
+    }
+  }, [pageId, isHome]);
 
   const [hero, setHero] = useState<HeroContent>(defaultHomeContent.hero);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
@@ -254,29 +576,46 @@ const AdminPageEditor = () => {
   const [sections, setSections] = useState<SectionMeta[]>(defaultSections);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // State for dynamic page editing
+  const [dynamicPageContent, setDynamicPageContent] = useState({
+    name: "",
+    path: "",
+    content: "",
+    meta_title: "",
+    meta_description: "",
+    status: "draft" as 'draft' | 'published',
+  });
+
+  // Use the same hook as the frontend!
+  const cmsContent = useCatalogPageContent(pageKey);
+  
   const [catalogPage, setCatalogPage] = useState<CatalogPageContent>(
-    catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." }
+    catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." }
   );
 
+  // Update catalogPage when cmsContent changes
   useEffect(() => {
-    const saved = localStorage.getItem(`page_content_${pageKey}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (isHome) {
-        if (data.hero) setHero(data.hero);
-        if (data.heroSlides) setHeroSlides(data.heroSlides);
-        if (data.announcement) setAnnouncement(data.announcement);
-        if (data.collectionBanner) setCollectionBanner(data.collectionBanner);
-        if (data.collectionImage) setCollectionImage(data.collectionImage);
-        if (data.aboutImage) setAboutImage(data.aboutImage);
-        if (data.about) setAbout(data.about);
-        if (data.footer) setFooter(data.footer);
-        if (data.sections) setSections(data.sections);
-      } else {
-        setCatalogPage(prev => ({ ...prev, ...data }));
-      }
+    if (cmsContent) {
+      console.log('🎯 Found CMS content for page:', pageKey, cmsContent);
+      setCatalogPage(cmsContent);
+    } else {
+      console.log('📦 No CMS content found for page:', pageKey, 'Using defaults');
     }
-  }, [pageKey, isHome]);
+  }, [cmsContent, pageKey]);
+
+  useEffect(() => {
+    if (isDynamicPage && dynamicPage) {
+      // Load dynamic page data
+      setDynamicPageContent({
+        name: dynamicPage.name,
+        path: dynamicPage.path,
+        content: dynamicPage.content,
+        meta_title: dynamicPage.meta_title,
+        meta_description: dynamicPage.meta_description,
+        status: dynamicPage.status,
+      });
+    }
+  }, [pageKey, isHome, isDynamicPage, dynamicPage]);
 
   const markChanged = () => setHasChanges(true);
 
@@ -331,7 +670,38 @@ const AdminPageEditor = () => {
   };
 
   const handleSave = async () => {
-    if (isHome) {
+    if (isDynamicPage && dynamicPage) {
+      // Save dynamic page
+      try {
+        const updatedPage = await pagesService.updatePage(dynamicPage.id, {
+          name: dynamicPageContent.name,
+          path: dynamicPageContent.path,
+          content: dynamicPageContent.content,
+          meta_title: dynamicPageContent.meta_title,
+          meta_description: dynamicPageContent.meta_description,
+          status: dynamicPageContent.status,
+        });
+
+        if (updatedPage) {
+          setDynamicPage(updatedPage);
+          setHasChanges(false);
+          toast({ title: "Page saved successfully!" });
+        } else {
+          toast({ 
+            title: "Save Error", 
+            description: "Failed to save page to database.",
+            variant: "destructive" 
+          });
+        }
+      } catch (error) {
+        console.error('Error saving dynamic page:', error);
+        toast({ 
+          title: "Save Error", 
+          description: "Failed to save page. Please try again.",
+          variant: "destructive" 
+        });
+      }
+    } else if (isHome) {
       // Compress images before saving
       const compressedHeroSlides = await Promise.all(
         heroSlides.map(async (slide) => ({
@@ -404,8 +774,16 @@ const AdminPageEditor = () => {
         return;
       }
     } else {
-      const success = safeSetLocalStorage(`page_content_${pageKey}`, catalogPage);
-      if (!success) return;
+      // Save catalog page to localStorage only
+      try {
+        const success = safeSetLocalStorage(`page_content_${pageKey}`, catalogPage);
+        if (!success) return;
+        
+        console.log('✅ Saved catalog page to localStorage:', pageKey);
+      } catch (error) {
+        console.error('Error saving catalog page:', error);
+        return;
+      }
     }
     setHasChanges(false);
     toast({ title: "Page saved successfully!" });
@@ -428,14 +806,14 @@ const AdminPageEditor = () => {
       setFooter(defaultHomeContent.footer);
       setSections(defaultSections);
     } else {
-      setCatalogPage(catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." });
+      setCatalogPage(catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." });
     }
     localStorage.removeItem(`page_content_${pageKey}`);
     setHasChanges(false);
     toast({ title: "Page reset to defaults" });
   };
 
-  const pageName = isHome ? "Home" : (catalogPageDefaults[pageKey]?.title || pageKey);
+  const pageName = isHome ? "Home" : (isDynamicPage ? dynamicPage?.name : (catalogPageDefaults[pageKey]?.title || pageKey));
 
   // ---- Image Uploader Component ----
   const ImageUploader = ({ src, alt, onUpload, onRemove, onAltChange, className = "" }: {
@@ -648,67 +1026,83 @@ const AdminPageEditor = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/pages")}>
-            <ArrowLeft size={20} />
-          </Button>
-          <div>
-            <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">Edit: {pageName}</h1>
-            <p className="font-body text-sm text-muted-foreground">Customize the content of your {pageName.toLowerCase()} page</p>
-          </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="font-body text-xl text-muted-foreground">Loading page...</p>
         </div>
-        <div className="flex items-center gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive">
-                <RotateCcw size={14} /> Reset
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will restore all content on the {pageName} page to its original defaults. Any customizations will be lost.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Reset
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <Button variant="outline" size="sm" asChild>
-            <a href={isHome ? "/" : `/${pageKey}`} target="_blank" rel="noopener noreferrer" className="gap-2">
-              <Eye size={14} /> Preview
-            </a>
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={!hasChanges} className="gap-2">
-            <Save size={14} /> Save Changes
-          </Button>
-        </div>
-      </div>
-
-      {isHome ? (
-        <HomePageEditor
-          hero={hero} setHero={(v) => { setHero(v); markChanged(); }}
-          heroSlides={heroSlides}
-          onSlideReplace={(i, src) => { const s = [...heroSlides]; s[i] = { ...s[i], src }; setHeroSlides(s); markChanged(); }}
-          onSlideAltChange={(i, alt) => { const s = [...heroSlides]; s[i] = { ...s[i], alt }; setHeroSlides(s); markChanged(); }}
-          onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
-          onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
-          announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
-          collectionBanner={collectionBanner} setCollectionBanner={(v) => { setCollectionBanner(v); markChanged(); }}
-          collectionImage={collectionImage} onCollectionImageChange={(src) => { setCollectionImage(src); markChanged(); }}
-          aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }}
-          about={about} setAbout={(v) => { setAbout(v); markChanged(); }}
-          footer={footer} setFooter={(v) => { setFooter(v); markChanged(); }}
-          sections={sections} toggleSection={toggleSection}
-        />
       ) : (
-        <CatalogPageEditor page={catalogPage} setPage={(v) => { setCatalogPage(v); markChanged(); }} pageKey={pageKey} />
+        <>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/admin/pages")}>
+                <ArrowLeft size={20} />
+              </Button>
+              <div>
+                <h1 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">Edit: {pageName}</h1>
+                <p className="font-body text-sm text-muted-foreground">Customize the content of your {pageName.toLowerCase()} page</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive">
+                    <RotateCcw size={14} /> Reset
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset to defaults?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will restore all content on the {pageName} page to its original defaults. Any customizations will be lost.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Reset
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button variant="outline" size="sm" asChild>
+                <a href={isHome ? "/" : (isDynamicPage ? dynamicPage?.path : `/${pageKey}`)} target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <Eye size={14} /> Preview
+                </a>
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={!hasChanges} className="gap-2">
+                <Save size={14} /> Save Changes
+              </Button>
+            </div>
+          </div>
+
+          {isDynamicPage ? (
+            <DynamicPageEditor 
+              page={dynamicPage} 
+              content={dynamicPageContent} 
+              setContent={setDynamicPageContent} 
+              markChanged={markChanged} 
+            />
+          ) : isHome ? (
+            <HomePageEditor
+              hero={hero} setHero={(v) => { setHero(v); markChanged(); }}
+              heroSlides={heroSlides}
+              onSlideReplace={(i, src) => { const s = [...heroSlides]; s[i] = { ...s[i], src }; setHeroSlides(s); markChanged(); }}
+              onSlideAltChange={(i, alt) => { const s = [...heroSlides]; s[i] = { ...s[i], alt }; setHeroSlides(s); markChanged(); }}
+              onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
+              onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
+              announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
+              collectionBanner={collectionBanner} setCollectionBanner={(v) => { setCollectionBanner(v); markChanged(); }}
+              collectionImage={collectionImage} onCollectionImageChange={(src) => { setCollectionImage(src); markChanged(); }}
+              aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }}
+              about={about} setAbout={(v) => { setAbout(v); markChanged(); }}
+              footer={footer} setFooter={(v) => { setFooter(v); markChanged(); }}
+              sections={sections} toggleSection={toggleSection}
+            />
+          ) : (
+            <CatalogPageEditor page={catalogPage} setPage={(v) => { setCatalogPage(v); markChanged(); }} pageKey={pageKey} />
+          )}
+        </>
       )}
     </div>
   );
@@ -989,6 +1383,7 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
     <Tabs defaultValue="banner" className="w-full">
       <TabsList className="w-full justify-start bg-card border border-border h-auto p-1 flex-wrap">
         <TabsTrigger value="banner" className="font-body text-xs">Banner & Content</TabsTrigger>
+        <TabsTrigger value="products" className="font-body text-xs">Products</TabsTrigger>
         <TabsTrigger value="announcement" className="font-body text-xs">Announcement</TabsTrigger>
         <TabsTrigger value="footer" className="font-body text-xs">Footer</TabsTrigger>
         <TabsTrigger value="seo" className="font-body text-xs">SEO</TabsTrigger>
@@ -997,11 +1392,19 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
       {/* Banner & Content */}
       <TabsContent value="banner">
         <EditorCard title="Page Banner & Content" description="Customize the banner image, title and subtitle">
-          <SingleImageUploader
-            src={page.bannerImage || "/placeholder.svg"}
-            label="Banner Image"
-            onUpload={(src) => setPage({ ...page, bannerImage: src })}
-          />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="font-body text-sm">Show Banner</Label>
+              <Switch checked={page.showBanner} onCheckedChange={v => setPage({ ...page, showBanner: v })} />
+            </div>
+            {page.showBanner && (
+              <SingleImageUploader
+                src={page.bannerImage || "/placeholder.svg"}
+                label="Banner Image"
+                onUpload={(src) => setPage({ ...page, bannerImage: src })}
+              />
+            )}
+          </div>
           <Separator />
           <div className="space-y-2">
             <Label className="font-body text-sm">Page Title</Label>
@@ -1013,7 +1416,7 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
           </div>
           <PreviewBox>
             <div className="relative rounded-lg overflow-hidden">
-              {page.bannerImage ? (
+              {page.showBanner && page.bannerImage ? (
                 <>
                   <img src={page.bannerImage} alt="" className="w-full h-40 object-cover" />
                   <div className="absolute inset-0 bg-charcoal/40 flex items-center justify-center text-center">
@@ -1031,6 +1434,16 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
               )}
             </div>
           </PreviewBox>
+        </EditorCard>
+      </TabsContent>
+
+      {/* Products */}
+      <TabsContent value="products">
+        <EditorCard title="Product Management" description="Manage products assigned to this page">
+          <ProductManager 
+            products={page.products} 
+            onChange={(products) => setPage({ ...page, products })} 
+          />
         </EditorCard>
       </TabsContent>
 
@@ -1278,6 +1691,120 @@ const SingleImageUploader = ({
           onChange={handleFileSelect}
           className="hidden"
         />
+      </div>
+    </div>
+  );
+};
+
+// ---- Dynamic Page Editor ----
+interface DynamicEditorProps {
+  page: Page | null;
+  content: {
+    name: string;
+    path: string;
+    content: string;
+    meta_title: string;
+    meta_description: string;
+    status: 'draft' | 'published';
+  };
+  setContent: (content: any) => void;
+  markChanged: () => void;
+}
+
+const DynamicPageEditor = ({ page, content, setContent, markChanged }: DynamicEditorProps) => {
+  return (
+    <div className="space-y-6">
+      <div className="bg-card border border-border rounded-xl p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Page Name</Label>
+            <Input 
+              value={content.name} 
+              onChange={(e) => { 
+                setContent({ ...content, name: e.target.value }); 
+                markChanged(); 
+              }} 
+              placeholder="Page name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Path</Label>
+            <Input 
+              value={content.path} 
+              onChange={(e) => { 
+                setContent({ ...content, path: e.target.value }); 
+                markChanged(); 
+              }} 
+              placeholder="/page-path"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-body text-sm">Status</Label>
+          <select 
+            value={content.status}
+            onChange={(e) => { 
+              setContent({ ...content, status: e.target.value as 'draft' | 'published' }); 
+              markChanged(); 
+            }}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-body text-sm">Meta Title</Label>
+          <Input 
+            value={content.meta_title} 
+            onChange={(e) => { 
+              setContent({ ...content, meta_title: e.target.value }); 
+              markChanged(); 
+            }} 
+            placeholder="SEO title"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-body text-sm">Meta Description</Label>
+          <Textarea 
+            value={content.meta_description} 
+            onChange={(e) => { 
+              setContent({ ...content, meta_description: e.target.value }); 
+              markChanged(); 
+            }} 
+            placeholder="SEO description"
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="font-body text-sm">Page Content</Label>
+          <Textarea 
+            value={content.content} 
+            onChange={(e) => { 
+              setContent({ ...content, content: e.target.value }); 
+              markChanged(); 
+            }} 
+            placeholder="HTML content for the page"
+            rows={15}
+            className="font-mono text-sm"
+          />
+        </div>
+
+        {page?.is_product_page && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Package size={16} className="text-blue-600 dark:text-blue-400" />
+              <span className="font-body text-sm font-medium text-blue-800 dark:text-blue-200">Product Page</span>
+            </div>
+            <p className="font-body text-xs text-blue-700 dark:text-blue-300">
+              This is a product page. Products assigned to this page will be displayed in a grid layout on the frontend.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

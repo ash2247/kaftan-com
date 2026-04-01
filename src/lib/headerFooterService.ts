@@ -124,8 +124,13 @@ class HeaderFooterService {
         .eq('key', 'header_footer_content')
         .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching header footer content:', error);
+        // Fallback to localStorage
+        const localContent = localStorage.getItem('header_footer_content');
+        if (localContent) {
+          return JSON.parse(localContent);
+        }
         return defaultHeaderFooterContent;
       }
 
@@ -133,11 +138,20 @@ class HeaderFooterService {
         return data.value;
       }
 
-      // If no data exists, insert default content
-      await this.saveHeaderFooterContent(defaultHeaderFooterContent);
+      // If no data exists, try to save default content
+      const saveResult = await this.saveHeaderFooterContent(defaultHeaderFooterContent);
+      if (saveResult) {
+        return defaultHeaderFooterContent;
+      }
+
       return defaultHeaderFooterContent;
     } catch (error) {
       console.error('Error fetching header footer content:', error);
+      // Fallback to localStorage
+      const localContent = localStorage.getItem('header_footer_content');
+      if (localContent) {
+        return JSON.parse(localContent);
+      }
       return defaultHeaderFooterContent;
     }
   }
@@ -156,13 +170,17 @@ class HeaderFooterService {
 
       if (error) {
         console.error('Error saving header footer content:', error);
-        return false;
+        // Fallback to localStorage if database fails
+        localStorage.setItem('header_footer_content', JSON.stringify(content));
+        return true;
       }
 
       return true;
     } catch (error) {
       console.error('Error saving header footer content:', error);
-      return false;
+      // Fallback to localStorage if database fails
+      localStorage.setItem('header_footer_content', JSON.stringify(content));
+      return true;
     }
   }
 

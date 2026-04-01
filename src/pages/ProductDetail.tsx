@@ -196,11 +196,7 @@ const ProductDetail = () => {
                   {product.original_price && product.original_price > product.price ? (
                     <>
                       {/* Original Price (strikethrough) */}
-                      <span className="font-heading text-xl sm:text-2xl text-muted-foreground line-through">
-                        ${product.original_price.toFixed(2)} AUD
-                      </span>
-                      {/* Sale Price */}
-                      <span className="font-heading text-xl sm:text-2xl text-foreground">
+                      <span className="font-heading text-xl sm:text-2xl text-muted-foreground">
                         ${product.price.toFixed(2)} AUD
                       </span>
                     </>

@@ -3,39 +3,8 @@ import { Instagram, Facebook, Twitter, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FooterContent } from "@/hooks/usePageContent";
+import { useNavigationPages } from "@/hooks/useNavigationPages";
 import Logo from "./Logo";
-
-const footerSections = [
-  {
-    title: "Menu",
-    items: [
-      { label: "Home", path: "/" },
-      { label: "Safari Collection", path: "/safari-collection" },
-      { label: "Paradise Collection", path: "/paradise-collection" },
-      { label: "Where to Buy", path: "/clearance" },
-      { label: "Contact Us", path: "/contact-us" },
-      { label: "Our Story", path: "/our-story" }
-    ],
-  },
-  {
-    title: "Know Us",
-    items: [
-      { label: "About Us", path: "/our-story" },
-      { label: "Contact", path: "/contact-us" },
-      { label: "Sizing Guide", path: "#" },
-      { label: "Boutique Locations", path: "#" }
-    ],
-  },
-  {
-    title: "Policies",
-    items: [
-      { label: "Privacy Policy", path: "#" },
-      { label: "Shipping", path: "#" },
-      { label: "Returns", path: "#" },
-      { label: "Terms & Conditions", path: "#" }
-    ],
-  },
-];
 
 const CollapsibleSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
@@ -81,10 +50,45 @@ interface Props {
 }
 
 const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
+  const { data: navigationPages = [] } = useNavigationPages();
   const newsletterTitle = content?.newsletterTitle || "Join the FashionSpectrum World";
   const newsletterSubtitle = content?.newsletterSubtitle || "Subscribe for exclusive access to new collections, special offers & more.";
   const ctaText = content?.ctaText || "Subscribe";
   const copyright = content?.copyright || "© 2026 FashionSpectrum. All Rights Reserved.";
+
+  // Create dynamic footer sections with navigation pages
+  const footerSections = [
+    {
+      title: "Menu",
+      items: [
+        { label: "Home", path: "/" },
+        { label: "Safari Collection", path: "/safari-collection" },
+        { label: "Paradise Collection", path: "/paradise-collection" },
+        { label: "Where to Buy", path: "/clearance" },
+        { label: "Contact Us", path: "/contact-us" },
+        { label: "Our Story", path: "/our-story" },
+        ...navigationPages.map(page => ({ label: page.name, path: page.path }))
+      ],
+    },
+    {
+      title: "Know Us",
+      items: [
+        { label: "About Us", path: "/our-story" },
+        { label: "Contact", path: "/contact-us" },
+        { label: "Sizing Guide", path: "#" },
+        { label: "Boutique Locations", path: "#" }
+      ],
+    },
+    {
+      title: "Policies",
+      items: [
+        { label: "Privacy Policy", path: "#" },
+        { label: "Shipping", path: "#" },
+        { label: "Returns", path: "#" },
+        { label: "Terms & Conditions", path: "#" }
+      ],
+    },
+  ];
 
   return (
     <footer className="bg-charcoal text-primary-foreground">

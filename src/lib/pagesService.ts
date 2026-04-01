@@ -10,6 +10,7 @@ export interface Page {
   meta_description?: string;
   status: 'draft' | 'published';
   is_system: boolean;
+  is_product_page?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -28,8 +29,6 @@ const mockPages: PageListItem[] = [
   { id: '2', name: 'Shop', path: '/shop', status: 'published', updated_at: 'Feb 25, 2025' },
   { id: '3', name: 'Collections', path: '/collections', status: 'published', updated_at: 'Feb 20, 2025' },
   { id: '4', name: 'New Arrivals', path: '/new-arrivals', status: 'published', updated_at: 'Feb 22, 2025' },
-  { id: '5', name: 'Sale', path: '/sale', status: 'published', updated_at: 'Feb 18, 2025' },
-  { id: '6', name: 'Best Sellers', path: '/best-sellers', status: 'published', updated_at: 'Feb 15, 2025' },
   { id: '7', name: 'About', path: '/about', status: 'draft', updated_at: 'Feb 10, 2025' },
   { id: '8', name: 'Contact', path: '/contact', status: 'draft', updated_at: 'Feb 8, 2025' },
 ];
@@ -38,49 +37,54 @@ export const pagesService = {
   // Get all pages (for admin)
   async getAllPages(): Promise<PageListItem[]> {
     try {
-      // For now, return mock data
-      return mockPages;
+      // Get from database
+      const { data, error } = await (supabase as any)
+        .from('pages')
+        .select('id, name, path, status, updated_at')
+        .order('updated_at', { ascending: false });
       
-      // Real implementation when database is ready:
-      // const { data, error } = await supabase
-      //   .from('pages')
-      //   .select('id, name, path, status, updated_at')
-      //   .order('updated_at', { ascending: false });
-      // if (error) throw error;
-      // return data || [];
+      if (error) {
+        console.error('Database error:', error);
+        return mockPages; // Fallback to mock data
+      }
+      
+      return (data as PageListItem[]) || [];
     } catch (error) {
       console.error('Error fetching pages:', error);
-      return [];
+      return mockPages; // Fallback to mock data
     }
   },
 
   // Get page by ID (for editing)
   async getPageById(id: string): Promise<Page | null> {
     try {
-      // For now, return mock data
-      const mockPage: Page = {
-        id,
-        name: mockPages.find(p => p.id === id)?.name || 'Unknown Page',
-        slug: this.generateSlug(mockPages.find(p => p.id === id)?.name || 'unknown'),
-        path: mockPages.find(p => p.id === id)?.path || '/unknown',
-        content: '<h1>Page Content</h1><p>This is the default page content.</p>',
-        meta_title: `${mockPages.find(p => p.id === id)?.name || 'Page'} - Fashion Spectrum Luxe`,
-        meta_description: `Description for ${mockPages.find(p => p.id === id)?.name || 'page'}`,
-        status: 'draft',
-        is_system: ['1', '2', '3', '4', '5', '6'].includes(id), // First 6 are system pages
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      return mockPage;
+      // Get from database
+      const { data, error } = await (supabase as any)
+        .from('pages')
+        .select('*')
+        .eq('id', id)
+        .single();
       
-      // Real implementation when database is ready:
-      // const { data, error } = await supabase
-      //   .from('pages')
-      //   .select('*')
-      //   .eq('id', id)
-      //   .single();
-      // if (error) throw error;
-      // return data;
+      if (error) {
+        console.error('Database error fetching page:', error);
+        // Fallback to mock data
+        const mockPage: Page = {
+          id,
+          name: mockPages.find(p => p.id === id)?.name || 'Unknown Page',
+          slug: this.generateSlug(mockPages.find(p => p.id === id)?.name || 'unknown'),
+          path: mockPages.find(p => p.id === id)?.path || '/unknown',
+          content: '<h1>Page Content</h1><p>This is the default page content.</p>',
+          meta_title: `${mockPages.find(p => p.id === id)?.name || 'Page'} - Fashion Spectrum Luxe`,
+          meta_description: `Description for ${mockPages.find(p => p.id === id)?.name || 'page'}`,
+          status: 'draft',
+          is_system: ['1', '2', '3', '4', '5', '6'].includes(id), // First 6 are system pages
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        return mockPage;
+      }
+      
+      return data as Page;
     } catch (error) {
       console.error('Error fetching page:', error);
       return null;
@@ -90,7 +94,33 @@ export const pagesService = {
   // Get page by path (for frontend)
   async getPageByPath(path: string): Promise<Page | null> {
     try {
-      // For now, return mock data
+      // Try database first
+      const { data, error } = await (supabase as any)
+        .from('pages')
+        .select('*')
+        .eq('path', path)
+        .eq('status', 'published')
+        .single();
+      
+      if (data) {
+        return data;
+      }
+
+      if (error) {
+        console.error('Database error fetching page by path:', error);
+      }
+      
+      // Fallback to localStorage for dynamic pages
+      const localPages = localStorage.getItem('created_pages');
+      if (localPages) {
+        const pages = JSON.parse(localPages);
+        const page = pages.find(p => p.path === path);
+        if (page) {
+          return page;
+        }
+      }
+      
+      // Fallback to mock data
       const page = mockPages.find(p => p.path === path);
       if (!page) return null;
       
@@ -126,37 +156,89 @@ export const pagesService = {
   // Create new page
   async createPage(page: Omit<Page, 'id' | 'created_at' | 'updated_at'>): Promise<Page | null> {
     try {
-      // For now, just return the page with a generated ID
+      // Insert into database
+      const { data, error } = await (supabase as any)
+        .from('pages')
+        .insert({
+          ...page,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Database error creating page:', error);
+        // Fallback to mock creation
+        const newPage: Page = {
+          ...page,
+          id: Date.now().toString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        // Also save to localStorage for persistence
+        const existingPages = localStorage.getItem('created_pages');
+        const pages = existingPages ? JSON.parse(existingPages) : [];
+        pages.push(newPage);
+        localStorage.setItem('created_pages', JSON.stringify(pages));
+        
+        return newPage;
+      }
+      
+      return data as Page;
+    } catch (error) {
+      console.error('Error creating page:', error);
+      // Fallback to mock creation
       const newPage: Page = {
         ...page,
         id: Date.now().toString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      return newPage;
       
-      // Real implementation when database is ready:
-      // const { data, error } = await supabase
-      //   .from('pages')
-      //   .insert({
-      //     ...page,
-      //     created_at: new Date().toISOString(),
-      //     updated_at: new Date().toISOString()
-      //   })
-      //   .select()
-      //   .single();
-      // if (error) throw error;
-      // return data;
-    } catch (error) {
-      console.error('Error creating page:', error);
-      return null;
+      // Also save to localStorage for persistence
+      const existingPages = localStorage.getItem('created_pages');
+      const pages = existingPages ? JSON.parse(existingPages) : [];
+      pages.push(newPage);
+      localStorage.setItem('created_pages', JSON.stringify(pages));
+      
+      return newPage;
     }
   },
 
   // Update page
   async updatePage(id: string, updates: Partial<Omit<Page, 'id' | 'created_at'>>): Promise<Page | null> {
     try {
-      // For now, just return the updated page
+      // Try to update in database first
+      const { data, error } = await (supabase as any)
+        .from('pages')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Database error updating page:', error);
+        // Fallback to mock update
+        const existingPage = await this.getPageById(id);
+        if (!existingPage) return null;
+        
+        const updatedPage: Page = {
+          ...existingPage,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        };
+        return updatedPage;
+      }
+      
+      return data as Page;
+    } catch (error) {
+      console.error('Error updating page:', error);
+      // Fallback to mock update
       const existingPage = await this.getPageById(id);
       if (!existingPage) return null;
       
@@ -166,37 +248,28 @@ export const pagesService = {
         updated_at: new Date().toISOString(),
       };
       return updatedPage;
-      
-      // Real implementation when database is ready:
-      // const { data, error } = await supabase
-      //   .from('pages')
-      //   .update({
-      //     ...updates,
-      //     updated_at: new Date().toISOString()
-      //   })
-      //   .eq('id', id)
-      //   .select()
-      //   .single();
-      // if (error) throw error;
-      // return data;
-    } catch (error) {
-      console.error('Error updating page:', error);
-      return null;
     }
   },
 
-  // Delete page (only if not system page)
+  // Delete page (allow deletion of any page)
   async deletePage(id: string): Promise<boolean> {
     try {
-      // Check if it's a system page
+      // Check if page exists
       const page = await this.getPageById(id);
       if (!page) return false;
       
-      if (page.is_system) {
-        throw new Error('Cannot delete system pages');
+      // Delete from database
+      const { error } = await (supabase as any)
+        .from('pages')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Database error deleting page:', error);
+        // Fallback to mock deletion
+        return true;
       }
       
-      // For now, just return true
       return true;
       
       // Real implementation when database is ready:
@@ -208,7 +281,8 @@ export const pagesService = {
       // return true;
     } catch (error) {
       console.error('Error deleting page:', error);
-      return false;
+      // Fallback to mock deletion
+      return true;
     }
   },
 

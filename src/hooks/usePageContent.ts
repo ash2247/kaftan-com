@@ -229,14 +229,28 @@ export function isSectionEnabled(sections: SectionMeta[], id: string): boolean {
   return section ? section.enabled : true;
 }
 
+// Product management interfaces
+export interface ProductItem {
+  id: string;
+  productId: string;
+  name: string;
+  image: string;
+  price: number;
+  size: 'small' | 'medium' | 'large';
+  order: number;
+  enabled: boolean;
+}
+
 export interface CatalogPageContent {
   title: string;
   subtitle: string;
   bannerImage: string;
+  showBanner: boolean;
   metaDescription: string;
   ogImage: string;
   announcementText: string;
   announcementEnabled: boolean;
+  products: ProductItem[];
   footerNewsletterTitle: string;
   footerNewsletterSubtitle: string;
   footerCtaText: string;

@@ -28,6 +28,20 @@ export interface BannerContent {
   footer_copyright?: string;
   sections?: any[];
   hero_slides?: any[];
+  // Page-specific fields for catalog pages
+  page_title?: string;
+  page_subtitle?: string;
+  page_banner_image?: string;
+  show_banner?: boolean;
+  page_meta_description?: string;
+  page_og_image?: string;
+  page_announcement_text?: string;
+  page_announcement_enabled?: boolean;
+  page_products?: any[];
+  page_footer_newsletter_title?: string;
+  page_footer_newsletter_subtitle?: string;
+  page_footer_cta_text?: string;
+  page_footer_copyright?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -56,7 +70,7 @@ class BannerContentService {
       }
 
       console.log('✅ Banner content fetched successfully:', data);
-      return data as BannerContent;
+      return data as unknown as BannerContent;
     } catch (error) {
       console.error('❌ Error fetching banner content:', error);
       return null;
@@ -90,7 +104,7 @@ class BannerContentService {
           throw error;
         }
         console.log('✅ Banner content updated successfully:', data);
-        return data as BannerContent;
+        return data as unknown as BannerContent;
       } else {
         console.log('➕ Creating new banner content');
         // Create new record
@@ -110,7 +124,7 @@ class BannerContentService {
           throw error;
         }
         console.log('✅ Banner content created successfully:', data);
-        return data as BannerContent;
+        return data as unknown as BannerContent;
       }
     } catch (error) {
       console.error('❌ Error saving banner content:', error);
@@ -143,7 +157,7 @@ class BannerContentService {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      return (data as BannerContent[]) || [];
+      return (data as unknown as BannerContent[]) || [];
     } catch (error) {
       console.error('Error fetching all banner content:', error);
       return [];

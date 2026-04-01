@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCollections } from "@/hooks/useCollections";
+import { useNavigationPages } from "@/hooks/useNavigationPages";
 import SearchOverlay from "./SearchOverlay";
 import Logo from "./Logo";
 
@@ -35,6 +36,7 @@ const Navbar = () => {
   const { totalItems: wishlistCount } = useWishlist();
   const { user, signOut } = useAuth();
   const { collections, loading: collectionsLoading } = useCollections();
+  const { data: navigationPages = [] } = useNavigationPages();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -156,6 +158,21 @@ const Navbar = () => {
                 </Link>
               )
             )}
+            
+            {/* Dynamic Navigation Pages */}
+            {navigationPages.map((page) => (
+              <Link
+                key={page.id}
+                to={page.path}
+                className={`font-body text-[10px] xl:text-[11px] tracking-[0.05em] xl:tracking-[0.08em] uppercase transition-colors duration-300 hover:text-primary whitespace-nowrap ${
+                  location.pathname === page.path
+                    ? "text-primary font-medium"
+                    : "text-foreground"
+                }`}
+              >
+                {page.name}
+              </Link>
+            ))}
           </nav>
 
           {/* Icons */}
@@ -364,6 +381,23 @@ const Navbar = () => {
                     </Link>
                   )
                 )}
+                
+                {/* Dynamic Navigation Pages */}
+                {navigationPages.map((page) => (
+                  <Link
+                    key={page.id}
+                    to={page.path}
+                    onClick={() => setMobileOpen(false)}
+                    className={`font-body text-sm tracking-[0.15em] uppercase ${
+                      location.pathname === page.path
+                        ? "text-primary font-medium"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {page.name}
+                  </Link>
+                ))}
+                
                 <Link
                   to="/wishlist"
                   onClick={() => setMobileOpen(false)}

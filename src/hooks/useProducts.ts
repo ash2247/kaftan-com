@@ -43,9 +43,11 @@ export const useProducts = (options?: UseProductsOptions) => {
       }
       if (options?.displayPage) {
         if (Array.isArray(options.displayPage)) {
-          query = query.in("display_page", options.displayPage);
+          // Check if any of the requested display pages are in the product's display_pages array
+          query = query.contains("display_pages", options.displayPage);
         } else {
-          query = query.eq("display_page", options.displayPage);
+          // Check if the requested display page is in the product's display_pages array
+          query = query.contains("display_pages", [options.displayPage]);
         }
       }
 

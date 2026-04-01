@@ -20,7 +20,6 @@ import Collections from "./pages/Collections";
 import CollectionsPage from "./pages/CollectionsPage";
 import CollectionDetail from "./pages/CollectionDetail";
 import NewArrivals from "./pages/NewArrivals";
-import Sale from "./pages/Sale";
 // Admin collections management
 import AdminCollections from "./pages/admin/AdminCollections";
 import SafariCollection from "./pages/SafariCollection";
@@ -33,6 +32,7 @@ import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import OurStory from "./pages/OurStory";
 import ContactUs from "./pages/ContactUs";
+import DynamicPage from "./pages/DynamicPage";
 import NotFound from "./pages/NotFound";
 
 // Admin
@@ -169,11 +169,11 @@ const AnimatedRoutes = () => {
           <Route path="/safari-collection" element={<PageTransition><SafariCollection /></PageTransition>} />
           <Route path="/paradise-collection" element={<PageTransition><ParadiseCollection /></PageTransition>} />
           <Route path="/new-arrivals" element={<PageTransition><NewArrivals /></PageTransition>} />
-          <Route path="/sale" element={<PageTransition><Sale /></PageTransition>} />
+          
           <Route path="/clearance" element={<PageTransition><BuyClearance /></PageTransition>} />
           <Route path="/collection-2026" element={<PageTransition><Collection2026 /></PageTransition>} />
           
-          <Route path="/product/:slug" element={<PageTransition><ProductDetail /></PageTransition>} />
+          <Route path="/product/*" element={<PageTransition><DynamicPage /></PageTransition>} />
           <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
           <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
@@ -181,6 +181,9 @@ const AnimatedRoutes = () => {
           <Route path="/account" element={<PageTransition><UserDashboard /></PageTransition>} />
           <Route path="/our-story" element={<PageTransition><OurStory /></PageTransition>} />
           <Route path="/contact-us" element={<PageTransition><ContactUs /></PageTransition>} />
+          
+          {/* Dynamic Pages */}
+          <Route path="/:path" element={<PageTransition><DynamicPage /></PageTransition>} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

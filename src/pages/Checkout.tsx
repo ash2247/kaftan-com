@@ -699,7 +699,7 @@ const Checkout = () => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={`w-full bg-transparent border px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors ${
-          errors[field] ? "border-sale focus:border-sale" : "border-border focus:border-primary"
+          errors[field] ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
         }`}
         placeholder={label}
       />

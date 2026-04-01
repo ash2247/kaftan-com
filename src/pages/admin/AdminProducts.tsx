@@ -15,10 +15,163 @@ import { productService } from "@/lib/productService";
 import { uploadService, type UploadProgress } from "@/lib/uploadService";
 import { categoryService } from "@/lib/categoryService";
 import { useCollections } from "@/hooks/useCollections";
+import { pagesService } from "@/lib/pagesService";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, AdminProduct } from "@/lib/productService";
 
 const initialProducts: AdminProduct[] = [];
+
+// Dynamic Page Display Component
+const DynamicPageDisplay = ({ selectedPages }: { selectedPages: string[] }) => {
+  const [pages, setPages] = useState<Array<{ displayId: string; name: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPages = async () => {
+      try {
+        const allPages = await pagesService.getAllPages();
+        const productPages = allPages
+          .filter(page => page.path !== '/' && page.status === 'published')
+          .map(page => ({
+            displayId: page.path.replace('/', '').replace('-', '') || 'home',
+            name: page.name
+          }));
+        
+        const hardcodedPages = [
+          { displayId: 'home', name: 'Home Page' },
+          { displayId: 'safari', name: 'Safari Collection' },
+          { displayId: 'paradise', name: 'Paradise Collection' },
+          { displayId: 'collection2026', name: 'Collection 2026' },
+          { displayId: 'clearance', name: 'Clearance Page' }
+        ];
+        
+        const allPagesCombined = [...hardcodedPages, ...productPages];
+        const uniquePages = allPagesCombined.filter((page, index, self) => 
+          index === self.findIndex(p => p.displayId === page.displayId)
+        );
+        
+        setPages(uniquePages);
+      } catch (error) {
+        console.error('Error loading pages:', error);
+        setPages([
+          { displayId: 'home', name: 'Home Page' },
+          { displayId: 'safari', name: 'Safari Collection' },
+          { displayId: 'paradise', name: 'Paradise Collection' },
+          { displayId: 'collection2026', name: 'Collection 2026' },
+          { displayId: 'clearance', name: 'Clearance Page' }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPages();
+  }, []);
+
+  if (loading) {
+    return "Loading...";
+  }
+
+  if (selectedPages.includes("all")) {
+    return "All Pages";
+  }
+
+  if (selectedPages.length === 0) {
+    return "No pages selected";
+  }
+
+  const selectedPageNames = selectedPages.map(pageId => {
+    const page = pages.find(p => p.displayId === pageId);
+    return page ? page.name : pageId;
+  });
+
+  return selectedPageNames.join(", ");
+};
+
+// Dynamic Page Selector Component
+const DynamicPageSelector = ({ selectedPages, onChange }: { selectedPages: string[]; onChange: (pages: string[]) => void }) => {
+  const [pages, setPages] = useState<Array<{ id: string; name: string; path: string; displayId: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPages = async () => {
+      try {
+        const allPages = await pagesService.getAllPages();
+        // Filter for product pages and convert to display format
+        const productPages = allPages
+          .filter(page => page.path !== '/' && page.status === 'published')
+          .map(page => ({
+            id: page.id,
+            name: page.name,
+            path: page.path,
+            displayId: page.path.replace('/', '').replace('-', '') || 'home'
+          }));
+        
+        // Add hardcoded pages that might not be in the database yet
+        const hardcodedPages = [
+          { id: 'home', name: 'Home Page', path: '/', displayId: 'home' },
+          { id: 'safari', name: 'Safari Collection', path: '/safari-collection', displayId: 'safari' },
+          { id: 'paradise', name: 'Paradise Collection', path: '/paradise-collection', displayId: 'paradise' },
+          { id: 'collection2026', name: 'Collection 2026', path: '/collection-2026', displayId: 'collection2026' },
+          { id: 'clearance', name: 'Clearance Page', path: '/clearance', displayId: 'clearance' }
+        ];
+        
+        // Combine and deduplicate by displayId
+        const allPagesCombined = [...hardcodedPages, ...productPages];
+        const uniquePages = allPagesCombined.filter((page, index, self) => 
+          index === self.findIndex(p => p.displayId === page.displayId)
+        );
+        
+        setPages(uniquePages);
+      } catch (error) {
+        console.error('Error loading pages:', error);
+        // Fallback to hardcoded pages
+        setPages([
+          { id: 'home', name: 'Home Page', path: '/', displayId: 'home' },
+          { id: 'safari', name: 'Safari Collection', path: '/safari-collection', displayId: 'safari' },
+          { id: 'paradise', name: 'Paradise Collection', path: '/paradise-collection', displayId: 'paradise' },
+          { id: 'collection2026', name: 'Collection 2026', path: '/collection-2026', displayId: 'collection2026' },
+          { id: 'clearance', name: 'Clearance Page', path: '/clearance', displayId: 'clearance' }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPages();
+  }, []);
+
+  const handlePageToggle = (displayId: string) => {
+    if (selectedPages.includes(displayId)) {
+      onChange(selectedPages.filter(p => p !== displayId));
+    } else {
+      onChange([...selectedPages, displayId]);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-xs text-muted-foreground ml-6">Loading pages...</div>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {pages.map((page) => (
+        <div key={page.displayId} className="flex items-center space-x-2 ml-6">
+          <input
+            type="checkbox"
+            id={`page-${page.displayId}`}
+            checked={selectedPages.includes(page.displayId)}
+            onChange={() => handlePageToggle(page.displayId)}
+            className="rounded border-border text-primary focus:ring-primary"
+          />
+          <Label htmlFor={`page-${page.displayId}`} className="font-body text-sm text-foreground">
+            {page.name}
+          </Label>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<AdminProduct[]>([]);
@@ -45,7 +198,7 @@ const AdminProducts = () => {
     style: string;
     color: string;
     size: string;
-    display_page: string;
+    display_pages: string[];
   }>({ 
     name: "", 
     price: "", 
@@ -58,7 +211,7 @@ const AdminProducts = () => {
     style: "",
     color: "",
     size: "",
-    display_page: "all"
+    display_pages: ["all"]
   });
 
   // Load products and categories from database
@@ -124,22 +277,25 @@ const AdminProducts = () => {
 
   const openAdd = () => {
     setEditProduct(null);
-    setForm({ 
-      name: "", 
-      price: "", 
-      original_price: "", 
-      category: "", 
-      stock: "", 
-      sku: "", 
-      status: "Active",
-      selectedCollections: [],
-      style: "",
-      color: "",
-      size: "",
-      display_page: "all"
-    });
-    setUploadedImages([]);
-    setShowModal(true);
+    const resetForm = () => {
+      setForm({
+        name: "",
+        price: "",
+        original_price: "",
+        category: "",
+        stock: "",
+        sku: "",
+        status: "Active",
+        selectedCollections: [],
+        style: "",
+        color: "",
+        size: "",
+        display_pages: ["all"]
+      });
+      setUploadedImages([]);
+      setShowModal(true);
+    };
+    resetForm();
   };
 
   const openEdit = (p: AdminProduct) => {
@@ -152,11 +308,11 @@ const AdminProducts = () => {
       stock: String(p.stock),
       sku: p.sku,
       status: p.status,
-      selectedCollections: (p as any).display_page && (p as any).display_page !== "all" ? [(p as any).display_page] : [],
+      selectedCollections: (p as any).collections || [],
       style: p.style || "",
       color: p.color || "",
       size: p.size || "",
-      display_page: (p as any).display_page || "all"
+      display_pages: (p as any).display_pages || ["all"]
     });
     setUploadedImages(p.images || []);
     setShowModal(true);
@@ -209,7 +365,7 @@ const AdminProducts = () => {
           style: form.style,
           color: form.color,
           size: form.size,
-          display_page: form.display_page,
+          display_pages: form.display_pages,
         };
         console.log('Update data:', updateData);
         
@@ -245,7 +401,7 @@ const AdminProducts = () => {
           style: form.style,
           color: form.color,
           size: form.size,
-          display_page: form.display_page,
+          display_pages: form.display_pages,
         };
         console.log('Create data:', createData);
         
@@ -643,27 +799,57 @@ const AdminProducts = () => {
                   Display Page Selection *
                   <span className="ml-2 text-xs font-normal text-muted-foreground">(Choose where this product appears)</span>
                 </Label>
-                <select 
-                  value={form.display_page} 
-                  onChange={e => {
-                    setForm(f => ({ ...f, display_page: e.target.value }));
-                    console.log('Display Page changed to:', e.target.value);
-                  }} 
-                  className="w-full h-12 rounded-md border border-border bg-background px-4 font-body text-base text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                >
-                  <option value="all">Show on All Pages (Recommended)</option>
-                  <option value="clearance">Show Only on Clearance Page</option>
-                  <option value="safari">Show Only on Safari Collection</option>
-                  <option value="paradise">Show Only on Paradise Collection</option>
-                  <option value="collection2026">Show Only on Collection 2026</option>
-                  <option value="home">Show Only on Home Page</option>
-                </select>
-                <div className="bg-muted border border-border rounded p-2 mt-2">
+                
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="all-pages"
+                      checked={form.display_pages.includes("all")}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm(f => ({ ...f, display_pages: ["all"] }));
+                        } else {
+                          setForm(f => ({ ...f, display_pages: [] }));
+                        }
+                      }}
+                      className="rounded border-border text-primary focus:ring-primary"
+                    />
+                    <Label htmlFor="all-pages" className="font-body text-sm text-foreground">
+                      Show on All Pages (Recommended)
+                    </Label>
+                  </div>
+                  
+                  {form.display_pages.includes("all") && (
+                    <div className="text-xs text-muted-foreground ml-6">
+                      When selected, product will appear everywhere including home, collections, and search results
+                    </div>
+                  )}
+                  
+                  {!form.display_pages.includes("all") && (
+                    <>
+                      <div className="text-xs text-muted-foreground font-semibold mt-3 mb-2">
+                        Select specific pages where this product should appear:
+                      </div>
+                      
+                      {/* Dynamic page selection from database */}
+                      <DynamicPageSelector 
+                        selectedPages={form.display_pages}
+                        onChange={(pages) => setForm(f => ({ ...f, display_pages: pages }))}
+                      />
+                    </>
+                  )}
+                </div>
+                
+                <div className="bg-muted border border-border rounded p-2 mt-3">
                   <div className="text-xs text-muted-foreground font-semibold">
                     IMPORTANT: This controls where customers can see this product
                   </div>
                   <div className="text-xs text-foreground mt-1">
-                    Current selection: <span className="font-bold text-foreground">"{form.display_page}"</span>
+                    Current selection: 
+                    <span className="font-bold text-foreground ml-1">
+                      <DynamicPageDisplay selectedPages={form.display_pages} />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -691,24 +877,16 @@ const AdminProducts = () => {
                   <div className="text-sm text-muted-foreground">Loading collections...</div>
                 ) : (
                   <Select
-                    value={form.display_page || "all"}
+                    value={form.selectedCollections[0] || "none"}
                     onValueChange={(value) => {
-                      setForm(f => ({ ...f, display_page: value, selectedCollections: value !== "all" ? [value] : [] }));
+                      setForm(f => ({ ...f, selectedCollections: value !== "none" ? [value] : [] }));
                     }}
                   >
                     <SelectTrigger className="h-10 bg-card border-border font-body">
                       <SelectValue placeholder="Select a collection (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Show on All Pages (Recommended)</SelectItem>
-                      <SelectItem value="safari">Show Only on Safari Collection</SelectItem>
-                      <SelectItem value="paradise">Show Only on Paradise Collection</SelectItem>
-                      <SelectItem value="clearance">Show Only on Clearance Page</SelectItem>
-                      <SelectItem value="collection2026">Show Only on Collection 2026</SelectItem>
-                      <SelectItem value="home">Show Only on Home Page</SelectItem>
-                      {collections.length > 0 && (
-                        <div className="border-t border-border my-1"></div>
-                      )}
+                      <SelectItem value="none">No Collection</SelectItem>
                       {collections.map((collection) => (
                         <SelectItem key={collection.id} value={collection.id}>
                           <div className="flex items-center gap-2">
@@ -722,14 +900,9 @@ const AdminProducts = () => {
                     </SelectContent>
                   </Select>
                 )}
-                {form.display_page && form.display_page !== "all" && (
+                {form.selectedCollections.length > 0 && (
                   <div className="text-xs text-muted-foreground mt-1">
-                    Selected: {form.display_page === "safari" ? "Safari Collection" : 
-                              form.display_page === "paradise" ? "Paradise Collection" :
-                              form.display_page === "clearance" ? "Clearance Page" :
-                              form.display_page === "collection2026" ? "Collection 2026" :
-                              form.display_page === "home" ? "Home Page" :
-                              collections.find(c => c.id === form.display_page)?.name || 'Unknown Collection'}
+                    Selected: {collections.find(c => c.id === form.selectedCollections[0])?.name || 'Unknown Collection'}
                   </div>
                 )}
               </div>

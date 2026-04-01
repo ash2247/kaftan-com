@@ -18,10 +18,10 @@ const BestSellersSection = () => {
   const loadBestSellers = async () => {
     try {
       const data = await productService.getProducts();
-      // Get all featured products as best sellers (in a real app, this would be based on sales data)
+      // Get featured products as best sellers (in a real app, this would be based on sales data)
       const bestSellers = data
-        .filter(p => p.featured && p.in_stock);
-      // Show all featured products, don't limit to 8
+        .filter(p => p.featured && p.in_stock)
+        .slice(0, 8);
       setProducts(bestSellers);
     } catch (error) {
       console.error('Error loading best sellers:', error);

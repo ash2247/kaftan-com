@@ -62,7 +62,7 @@ const Wishlist = () => {
             <div className="flex justify-end mb-6">
               <button
                 onClick={clearWishlist}
-                className="flex items-center gap-2 font-body text-xs tracking-wider uppercase text-muted-foreground hover:text-sale transition-colors"
+                className="flex items-center gap-2 font-body text-xs tracking-wider uppercase text-muted-foreground hover:text-destructive transition-colors"
               >
                 <Trash2 size={14} />
                 Clear All
