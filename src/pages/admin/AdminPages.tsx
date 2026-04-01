@@ -34,6 +34,7 @@ const initialPages: PageItem[] = [
   { id: 6, name: "Best Sellers", path: "/best-sellers", status: "Published", updated: "Feb 15, 2025" },
   { id: 7, name: "About", path: "/about", status: "Draft", updated: "Feb 10, 2025" },
   { id: 8, name: "Contact", path: "/contact", status: "Draft", updated: "Feb 8, 2025" },
+  { id: 9, name: "Collection 2026", path: "/collection-2026", status: "Published", updated: "Feb 1, 2026" },
 ];
 
 const today = () => {

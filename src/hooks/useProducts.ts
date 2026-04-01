@@ -63,6 +63,8 @@ export const useProductBySlug = (slug: string) => {
   return useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
+      console.log('🔍 useProductBySlug - searching for slug:', slug);
+      
       // First try to find by slug
       let { data, error } = await supabase
         .from("products")
@@ -70,15 +72,22 @@ export const useProductBySlug = (slug: string) => {
         .eq("slug", slug)
         .eq("status", "Active")
         .maybeSingle();
+      
+      console.log('🔍 useProductBySlug - by slug result:', { data, error });
 
       // If not found, try to find by name (slugified)
       if (!data && !error) {
+        const searchName = slug.replace(/-/g, " ");
+        console.log('🔍 useProductBySlug - trying by name:', searchName);
+        
         const { data: dataByName, error: errorByName } = await supabase
           .from("products")
           .select("*")
           .eq("status", "Active")
-          .ilike("name", slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
+          .ilike("name", searchName)
           .maybeSingle();
+        
+        console.log('🔍 useProductBySlug - by name result:', { dataByName, errorByName });
         
         if (errorByName) throw errorByName;
         data = dataByName;
@@ -86,19 +95,28 @@ export const useProductBySlug = (slug: string) => {
 
       // If still not found, try partial name match
       if (!data && !error) {
+        const partialSearch = `%${slug.replace(/-/g, "%")}%`;
+        console.log('🔍 useProductBySlug - trying partial:', partialSearch);
+        
         const { data: dataPartial, error: errorPartial } = await supabase
           .from("products")
           .select("*")
           .eq("status", "Active")
-          .ilike("name", `%${slug.replace(/-/g, "%")}%`)
+          .ilike("name", partialSearch)
           .maybeSingle();
+        
+        console.log('🔍 useProductBySlug - by partial result:', { dataPartial, errorPartial });
         
         if (errorPartial) throw errorPartial;
         data = dataPartial;
       }
 
       if (error) throw error;
-      if (!data) return null;
+      if (!data) {
+        console.log('🔍 useProductBySlug - no product found');
+        return null;
+      }
+      console.log('🔍 useProductBySlug - found product:', data.name);
       return mapDbProductToProduct(data);
     },
     enabled: !!slug,

@@ -13,10 +13,25 @@ import ProductCard from "@/components/ProductCard";
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: dbProduct, isLoading } = useProductBySlug(slug || "");
+  
+  // DEBUG: Log the slug
+  console.log('🔍 ProductDetail - slug from URL:', slug);
+  
+  const { data: dbProduct, isLoading, error } = useProductBySlug(slug || "");
+  
+  // DEBUG: Log database lookup result
+  console.log('🔍 ProductDetail - dbProduct:', dbProduct, 'error:', error);
+  
   const staticProduct = getProductBySlug(slug || "");
+  
+  // DEBUG: Log static product lookup
+  console.log('🔍 ProductDetail - staticProduct:', staticProduct);
+  
   const product = dbProduct || staticProduct;
-
+  
+  // DEBUG: Log final product
+  console.log('🔍 ProductDetail - final product:', product);
+  
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
