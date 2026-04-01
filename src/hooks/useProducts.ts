@@ -63,12 +63,39 @@ export const useProductBySlug = (slug: string) => {
   return useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First try to find by slug
+      let { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("slug", slug)
-        .eq("status", "Active") // Only show active products
+        .eq("status", "Active")
         .maybeSingle();
+
+      // If not found, try to find by name (slugified)
+      if (!data && !error) {
+        const { data: dataByName, error: errorByName } = await supabase
+          .from("products")
+          .select("*")
+          .eq("status", "Active")
+          .ilike("name", slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
+          .maybeSingle();
+        
+        if (errorByName) throw errorByName;
+        data = dataByName;
+      }
+
+      // If still not found, try partial name match
+      if (!data && !error) {
+        const { data: dataPartial, error: errorPartial } = await supabase
+          .from("products")
+          .select("*")
+          .eq("status", "Active")
+          .ilike("name", `%${slug.replace(/-/g, "%")}%`)
+          .maybeSingle();
+        
+        if (errorPartial) throw errorPartial;
+        data = dataPartial;
+      }
 
       if (error) throw error;
       if (!data) return null;
