@@ -29,11 +29,20 @@ export const getActiveFiltersCount = (filters: FilterState, products: Product[])
 };
 
 export const getFilterOptions = (products: Product[]) => {
+  console.log('Getting filter options from products:', products);
+  
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
+  const colors = Array.from(new Set(products.map(p => p.color).filter(Boolean)));
+  const sizes = Array.from(new Set(products.map(p => p.size).filter(Boolean)));
+  const badges = Array.from(new Set(products.map(p => p.badge).filter(Boolean)));
+  
+  console.log('Filter options:', { categories, colors, sizes, badges });
+  
   return {
-    categories: Array.from(new Set(products.map(p => p.category))).filter(Boolean),
-    colors: Array.from(new Set(products.map(p => p.color).filter(Boolean))),
-    sizes: Array.from(new Set(products.map(p => p.size).filter(Boolean))),
-    badges: Array.from(new Set(products.map(p => p.badge).filter(Boolean))),
+    categories,
+    colors,
+    sizes,
+    badges,
   };
 };
 
@@ -46,42 +55,58 @@ export const getPriceRange = (products: Product[]) => {
 };
 
 export const applyFilters = (products: Product[], filters: FilterState): Product[] => {
+  console.log('Applying filters:', filters);
+  console.log('Products before filtering:', products.length);
+  
   let result = [...products];
 
   // Apply collection filter (categories array actually contains collections)
   if (filters.categories.length > 0) {
+    console.log('Filtering by categories:', filters.categories);
     result = result.filter((p) => {
       // Check if product has collection field that matches any selected collection
       return filters.categories.includes(p.category); // p.category now contains collection name
     });
+    console.log('After category filter:', result.length);
   }
 
   // Apply price range filter
   if (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000) {
+    console.log('Filtering by price range:', filters.priceRange);
     result = result.filter((p) => p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]);
+    console.log('After price filter:', result.length);
   }
 
   // Apply color filter
   if (filters.colors.length > 0) {
+    console.log('Filtering by colors:', filters.colors);
     result = result.filter((p) => p.color && filters.colors.includes(p.color));
+    console.log('After color filter:', result.length);
   }
 
   // Apply size filter (placeholder for when size data is available)
   if (filters.sizes.length > 0) {
+    console.log('Filtering by sizes:', filters.sizes);
     // This would need size data in product schema
     // For now, we'll skip size filtering
+    console.log('Size filtering not implemented yet');
   }
 
   // Apply badge filter
   if (filters.badges.length > 0) {
+    console.log('Filtering by badges:', filters.badges);
     result = result.filter((p) => p.badge && filters.badges.includes(p.badge));
+    console.log('After badge filter:', result.length);
   }
 
   // Apply stock filter
   if (filters.inStockOnly) {
+    console.log('Filtering in stock only');
     result = result.filter((p) => p.badge !== "Sold out");
+    console.log('After stock filter:', result.length);
   }
 
+  console.log('Final filtered products:', result.length);
   return result;
 };
 

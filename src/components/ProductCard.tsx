@@ -57,11 +57,11 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       className="group cursor-pointer"
     >
       <Link to={`/product/${slugify(product.name)}`}>
-        <div className={`relative overflow-hidden aspect-[3/4] ${isParadiseProduct ? 'bg-secondary' : 'bg-secondary'}`}>
+        <div className={`relative overflow-hidden ${isParadiseProduct ? 'bg-secondary' : 'bg-secondary'}`}>
           <motion.img
             src={product.image}
             alt={product.name}
-            className={`w-full h-full ${isParadiseProduct ? 'object-cover' : 'object-contain'}`}
+            className="w-full h-auto object-contain"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
             loading="eager"

@@ -81,7 +81,7 @@ const DynamicPage = () => {
     );
   }
 
-  // For product pages, use CatalogPage component (same layout as Collection 2026)
+  // For product pages, use CatalogPage component with updated UI to match Collection2026
   if (page.is_product_page) {
     return (
       <CatalogPage
@@ -91,6 +91,7 @@ const DynamicPage = () => {
         bannerImage={collectionBanner}
         cmsContent={cmsContent}
         columns={3}
+        useCollection2026Layout={true}
       />
     );
   }
