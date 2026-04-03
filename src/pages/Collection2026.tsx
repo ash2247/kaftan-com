@@ -29,6 +29,8 @@ const Collection2026 = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentColumns, setCurrentColumns] = useState<3 | 4>(3); // Default to 3 columns for larger images
+  const [currentPage, setCurrentPage] = useState(0);
+  const PRODUCTS_PER_PAGE = 25;
 
   const handleSortChange = (newSortBy: string) => {
     setSortBy(newSortBy);
@@ -67,6 +69,11 @@ const Collection2026 = () => {
     fetchProducts();
     fetchCollections();
   }, []);
+
+  // Reset pagination when filters or search changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters, searchQuery, sortBy]);
 
   const fetchCollections = async () => {
     try {
@@ -222,6 +229,12 @@ const Collection2026 = () => {
     return finalResult;
   }, [products, filters, sortBy, searchQuery]);
 
+  // Limit displayed products to current page for better performance
+  const displayedProducts = useMemo(() => {
+    const endIndex = Math.min(filtered.length, (currentPage + 1) * PRODUCTS_PER_PAGE);
+    return filtered.slice(0, endIndex);
+  }, [filtered, currentPage]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
@@ -338,21 +351,44 @@ const Collection2026 = () => {
             </p>
           </div>
         ) : (
-          <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
-            {filtered.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ProductCard
-                  product={product}
-                  index={index}
-                />
-              </motion.div>
-            ))}
-          </div>
+          <>
+            <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
+              {displayedProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ProductCard
+                    product={product}
+                    index={index}
+                  />
+                </motion.div>
+              ))}
+            </div>
+            
+            {/* Load More Button */}
+            {displayedProducts.length < filtered.length && !loading && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  {`Load More Products (${displayedProducts.length} of ${filtered.length})`}
+                </button>
+              </div>
+            )}
+            
+            {/* End of Products Message */}
+            {displayedProducts.length === filtered.length && !loading && filtered.length > 0 && (
+              <div className="text-center mt-8 py-4">
+                <p className="text-muted-foreground">
+                  Showing all {filtered.length} products
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
