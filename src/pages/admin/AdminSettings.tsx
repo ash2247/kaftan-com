@@ -185,11 +185,13 @@ const AdminSettings = () => {
           description: `Please enter your ${stripe.liveMode ? "Live" : "Test"} Publishable Key and Secret Key to enable Stripe.`,
           variant: "destructive",
         });
+        setSavingStripe(false);
         return;
       }
       localStorage.setItem("stripe_settings", JSON.stringify(stripe));
       toast({ title: "Stripe settings saved!", description: "Keys stored securely in browser storage." });
-    } catch {
+    } catch (error) {
+      console.error("Error saving Stripe settings:", error);
       toast({ title: "Failed to save Stripe settings", variant: "destructive" });
     } finally {
       setSavingStripe(false);

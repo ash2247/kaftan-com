@@ -81,9 +81,9 @@ const HorizontalFilterBar = ({
   return (
     <div className="border-b border-border bg-background">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4">
           {/* Left side - Filter dropdowns */}
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 sm:overflow-visible flex-1 min-w-0 scrollbar-hide">
             {filterCategories.map((category) => {
               const activeCount = getActiveFilterCount(category.key as keyof FilterState);
               const hasOptions = category.options.length > 0;
@@ -151,7 +151,7 @@ const HorizontalFilterBar = ({
           </div>
 
           {/* Right side - View options and sort */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Product count */}
             <span className="text-sm text-muted-foreground">
               {filteredCount} of {totalCount} products

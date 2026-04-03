@@ -128,6 +128,7 @@ const Collection2026 = () => {
         .select('*')
         .eq('in_stock', true)
         .eq('status', 'Active') // Only show active products
+        .neq('display_page', 'clearance') // Exclude clearance items
         .order('created_at', { ascending: false });
 
       if (error) {

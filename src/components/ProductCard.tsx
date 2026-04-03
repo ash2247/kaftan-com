@@ -94,7 +94,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           )}
 
           {/* Action buttons */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <div className="absolute top-3 right-3 flex flex-col gap-2 hidden md:flex">
             <button
               onClick={handleWishlist}
               className={`p-2 transition-all duration-300 shadow-sm ${
@@ -177,17 +177,17 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               <>
                 {/* Compare Price (strikethrough) */}
                 <span className="font-body text-xs text-muted-foreground line-through">
-                  ${product.original_price.toFixed(2)} AUD
+                  ${product.original_price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                 </span>
                 {/* Sale Price */}
                 <span className="font-body text-sm font-semibold text-red-600">
-                  ${product.price.toFixed(2)} AUD
+                  ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                 </span>
               </>
             ) : (
               /* Regular Price (no discount) */
               <span className="font-body text-sm font-semibold text-foreground">
-                ${product.price.toFixed(2)} AUD
+                ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
               </span>
             )}
           </div>
