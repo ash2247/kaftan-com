@@ -236,6 +236,7 @@ export interface ProductItem {
   name: string;
   image: string;
   price: number;
+  original_price?: number;
   size: 'small' | 'medium' | 'large';
   order: number;
   enabled: boolean;

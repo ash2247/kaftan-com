@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useCatalogPageContent, type CatalogPageContent } from "@/hooks/usePageContent";
+import { useCatalogPageContent, type CatalogPageContent, type ProductItem } from "@/hooks/usePageContent";
 import { bannerContentService } from "@/lib/bannerContentService";
 import { pagesService, type Page } from "@/lib/pagesService";
 import { useProducts } from "@/hooks/useProducts";
@@ -75,16 +75,6 @@ interface SectionMeta {
 }
 
 // Product management interfaces
-interface ProductItem {
-  id: string;
-  productId: string;
-  name: string;
-  image: string;
-  price: number;
-  size: 'small' | 'medium' | 'large';
-  order: number;
-  enabled: boolean;
-}
 
 interface ProductPageContent {
   title: string;
@@ -289,6 +279,7 @@ const ProductManager = ({ products, onChange }: { products: ProductItem[]; onCha
       name: product.name,
       image: product.image,
       price: product.price,
+      original_price: product.original_price,
       size: 'medium',
       order: products.length,
       enabled: true
@@ -399,7 +390,12 @@ const ProductManager = ({ products, onChange }: { products: ProductItem[]; onCha
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="font-body text-sm font-medium text-foreground">{product.name}</h4>
-                        <p className="font-body text-xs text-muted-foreground">${product.price}</p>
+                        <div className="flex items-center gap-2">
+                          {product.original_price && product.original_price > product.price ? (
+                            <p className="font-body text-xs text-muted-foreground line-through">${product.original_price}</p>
+                          ) : null}
+                          <p className="font-body text-xs text-red-500">${product.price}</p>
+                        </div>
                       </div>
                       
                       {/* Actions */}
@@ -484,7 +480,12 @@ const ProductManager = ({ products, onChange }: { products: ProductItem[]; onCha
                 </div>
                 <div className="text-center">
                   <p className="font-body text-xs font-medium text-foreground truncate">{product.name}</p>
-                  <p className="font-body text-xs text-muted-foreground">${product.price}</p>
+                  <div className="flex items-center justify-center gap-1">
+                    {product.original_price && product.original_price > product.price ? (
+                      <p className="font-body text-xs text-muted-foreground line-through">${product.original_price}</p>
+                    ) : null}
+                    <p className="font-body text-xs text-red-500">${product.price}</p>
+                  </div>
                 </div>
               </div>
             ))}

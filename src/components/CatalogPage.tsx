@@ -13,6 +13,7 @@ import type { CatalogPageContent } from "@/hooks/usePageContent";
 import { useCollectionSettings } from "@/hooks/useCollectionSettings";
 import { getActiveFiltersCount, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
 import type { FilterState } from "@/lib/filterUtils";
+import { slugify } from "@/lib/productUtils";
 
 interface CatalogPageProps {
   title: string;
@@ -83,6 +84,8 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
   const filteredManagedProducts = useMemo(() => {
     if (managedProducts.length === 0) return [];
     
+    console.log('Managed Products Data:', managedProducts);
+    
     // Convert managed products to Product format for filtering
     const convertedProducts = managedProducts.map(item => {
       // Extract color, style, category from the product name
@@ -91,10 +94,13 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
       const category = nameParts[1] || '';
       const color = nameParts[2] || '';
       
+      console.log(`Product: ${item.name}, Price: ${item.price}, Original Price: ${item.original_price}`);
+      
       return {
         id: item.id,
         name: item.name,
         price: item.price,
+        original_price: item.original_price,
         category: category,
         color: color,
         size: item.size,
@@ -124,6 +130,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
           id: item.id,
           name: item.name,
           price: item.price,
+          original_price: item.original_price,
           category: category,
           color: color,
           size: item.size,
@@ -227,8 +234,8 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               onSortChange={handleSortChange}
               filteredCount={managedProducts.length > 0 ? filteredManagedProducts.length : filtered.length}
               totalCount={managedProducts.length > 0 ? managedProducts.filter(p => p.enabled).length : products.length}
-              columns={3}
-              onColumnsChange={() => {}}
+              columns={currentColumns}
+              onColumnsChange={setCurrentColumns}
             />
           </div>
 
@@ -275,15 +282,15 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
                   {filteredManagedProducts
                     .map((product) => {
                       const managedItem = managedProducts.find(item => item.id === product.id);
                       if (!managedItem) return null;
                       
                       return (
-                        <div key={product.id} className="col-span-1 bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                          <div className="bg-gray-100">
+                        <Link key={product.id} to={`/product/${slugify(product.name)}`} className="col-span-1 bg-card rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                          <div className="bg-secondary">
                             <img 
                               src={product.image} 
                               alt={product.name}
@@ -292,14 +299,29 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                           </div>
                           <div className="p-4">
                             <h3 className="font-body text-lg font-semibold text-foreground mb-2">{product.name}</h3>
-                            <div className="flex items-center justify-between">
-                              <span className="font-body text-lg text-primary">${product.price}</span>
-                              <span className="font-body text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                {product.size}
-                              </span>
-                            </div>
+                            {(product.price > 0 || product.original_price > 0) && (
+                              <div className="flex items-center justify-between">
+                                {product.original_price && product.original_price > product.price ? (
+                                  <>
+                                    {/* Original Price (strikethrough) */}
+                                    <span className="font-body text-sm text-muted-foreground line-through">
+                                      ${product.original_price}
+                                    </span>
+                                    {/* Sale Price */}
+                                    <span className="font-body text-lg text-primary">
+                                      ${product.price}
+                                    </span>
+                                  </>
+                                ) : (
+                                  /* Regular Price */
+                                  <span className="font-body text-lg text-primary">
+                                    ${product.price}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
+                        </Link>
                       );
                     })}
                 </div>
@@ -312,7 +334,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               </div>
             ) : (
               // Show regular filtered products
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
                 {filtered.map((product, index) => (
                   <motion.div
                     key={product.id}
@@ -433,15 +455,15 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               <div className="flex-1">
                 {managedProducts.length > 0 ? (
                   // Show managed products if available
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
                     {managedProducts
                       .filter(p => p.enabled)
                       .sort((a, b) => a.order - b.order)
                       .map((productItem) => {
                         // Always use col-span-1 to show 3 products per row consistently
                         return (
-                          <div key={productItem.id} className="col-span-1 bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                            <div className="bg-gray-100">
+                          <Link key={productItem.id} to={`/product/${slugify(productItem.name)}`} className="col-span-1 bg-card rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                            <div className="bg-secondary">
                               <img 
                                 src={productItem.image} 
                                 alt={productItem.name}
@@ -450,14 +472,29 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                             </div>
                             <div className="p-4">
                               <h3 className="font-body text-lg font-semibold text-foreground mb-2">{productItem.name}</h3>
-                              <div className="flex items-center justify-between">
-                                <span className="font-body text-lg text-primary">${productItem.price}</span>
-                                <span className="font-body text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                  {productItem.size}
-                                </span>
-                              </div>
+                              {(productItem.price > 0 || productItem.original_price > 0) && (
+                                <div className="flex items-center justify-between">
+                                  {productItem.original_price && productItem.original_price > productItem.price ? (
+                                    <>
+                                      {/* Original Price (strikethrough) */}
+                                      <span className="font-body text-sm text-muted-foreground line-through">
+                                        ${productItem.original_price}
+                                      </span>
+                                      {/* Sale Price */}
+                                      <span className="font-body text-lg text-primary">
+                                        ${productItem.price}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    /* Regular Price */
+                                    <span className="font-body text-lg text-primary">
+                                      ${productItem.price}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                          </div>
+                          </Link>
                         );
                       })}
                   </div>
