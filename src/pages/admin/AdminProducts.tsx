@@ -351,12 +351,27 @@ const AdminProducts = () => {
       console.log('📝 Updating existing product:', editProduct.id);
       // Update existing product
       try {
+        // Delete old images if new images are uploaded
+        if (uploadedImages.length > 0 && editProduct.images && editProduct.images.length > 0) {
+          console.log('🗑️ Deleting old images:', editProduct.images);
+          for (const oldImage of editProduct.images) {
+            if (oldImage && oldImage !== '/placeholder.svg') {
+              try {
+                await uploadService.deleteImage(oldImage);
+                console.log('✅ Deleted old image:', oldImage);
+              } catch (error) {
+                console.warn('⚠️ Failed to delete old image:', oldImage, error);
+              }
+            }
+          }
+        }
+
         const updateData = {
           name: form.name,
           price: form.price ? Number(form.price) : 0,
           original_price: form.original_price ? Number(form.original_price) : null,
           category: form.category,
-          images: uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],
+          images: uploadedImages.length > 0 ? uploadedImages : editProduct.images || ["/placeholder.svg"],
           featured: false,
           in_stock: Number(form.stock) > 0,
           stock: Number(form.stock),

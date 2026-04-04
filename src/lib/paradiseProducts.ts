@@ -66,7 +66,7 @@ import { Product } from "./products";
 
 export const paradiseProducts: Product[] = [
   // Paradise Resort - Green
-  { id: "pr1", name: "Paradise Resort Long Kaftan - Green", price: 0, image: paradise1, category: "Long Kaftan", style: "Long Kaftan", color: "Green" },
+  { id: "pr1", name: "Paradise Resort Long Kaftan - Green", price: 89.99, original_price: 129.99, image: paradise1, category: "Long Kaftan", style: "Long Kaftan", color: "Green" },
   { id: "pr2", name: "Paradise Resort Hi-Low Dress - Green", price: 0, image: paradise2, category: "Hi-Low Dress", style: "High-Low Dress", color: "Green" },
   { id: "pr3", name: "Paradise Resort Shirt - Green", price: 0, image: paradise3, category: "Shirt", style: "Shirt", color: "Green" },
 

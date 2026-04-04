@@ -196,7 +196,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               {displayTitle}
             </motion.h1>
             <p className="font-body text-sm text-muted-foreground mt-3 tracking-wide">
-              {filtered.length} Products
+              {managedProducts.length > 0 ? filteredManagedProducts.length : filtered.length} Products
             </p>
           </div>
 
@@ -298,24 +298,24 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                             />
                           </div>
                           <div className="p-4">
-                            <h3 className="font-body text-lg font-semibold text-foreground mb-2">{product.name}</h3>
+                            <h3 className="font-heading text-base font-semibold text-gray-800 mb-2 leading-tight">{product.name}</h3>
                             {(product.price > 0 || product.original_price > 0) && (
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
                                 {product.original_price && product.original_price > product.price ? (
                                   <>
                                     {/* Original Price (strikethrough) */}
-                                    <span className="font-body text-sm text-muted-foreground line-through">
-                                      ${product.original_price}
+                                    <span className="font-body text-xs text-muted-foreground line-through">
+                                      ${product.original_price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                     </span>
                                     {/* Sale Price */}
-                                    <span className="font-body text-lg text-primary">
-                                      ${product.price}
+                                    <span className="font-body text-sm font-semibold text-red-600">
+                                      ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                     </span>
                                   </>
                                 ) : (
                                   /* Regular Price */
-                                  <span className="font-body text-lg text-primary">
-                                    ${product.price}
+                                  <span className="font-body text-sm font-semibold text-foreground">
+                                    ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                   </span>
                                 )}
                               </div>
@@ -471,24 +471,24 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                               />
                             </div>
                             <div className="p-4">
-                              <h3 className="font-body text-lg font-semibold text-foreground mb-2">{productItem.name}</h3>
+                              <h3 className="font-heading text-base font-semibold text-gray-800 mb-2 leading-tight">{productItem.name}</h3>
                               {(productItem.price > 0 || productItem.original_price > 0) && (
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
                                   {productItem.original_price && productItem.original_price > productItem.price ? (
                                     <>
                                       {/* Original Price (strikethrough) */}
-                                      <span className="font-body text-sm text-muted-foreground line-through">
-                                        ${productItem.original_price}
+                                      <span className="font-body text-xs text-muted-foreground line-through">
+                                        ${productItem.original_price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                       </span>
                                       {/* Sale Price */}
-                                      <span className="font-body text-lg text-primary">
-                                        ${productItem.price}
+                                      <span className="font-body text-sm font-semibold text-red-600">
+                                        ${productItem.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                       </span>
                                     </>
                                   ) : (
                                     /* Regular Price */
-                                    <span className="font-body text-lg text-primary">
-                                      ${productItem.price}
+                                    <span className="font-body text-sm font-semibold text-foreground">
+                                      ${productItem.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
                                     </span>
                                   )}
                                 </div>

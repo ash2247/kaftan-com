@@ -320,19 +320,33 @@ const CollectionDetail = () => {
                       {/* Product Content */}
                       <div className="p-4">
                         <div className="mb-2">
-                          <h3 className="font-heading text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                          <h3 className="font-heading text-sm font-light text-foreground mb-1 group-hover:text-primary transition-colors leading-tight">
                             {product.name}
                           </h3>
-                          <p className="font-body text-sm text-muted-foreground line-clamp-2">
+                          <p className="font-body text-sm text-muted-foreground/80 line-clamp-2">
                             {originalProduct?.description || ''}
                           </p>
                         </div>
 
                         {/* Product Price */}
-                        <div className="flex items-center justify-between">
-                          <span className="font-heading text-lg font-semibold text-primary">
-                            ${product.price.toFixed(2)}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          {product.original_price && product.original_price > product.price ? (
+                            <>
+                              {/* Compare Price (strikethrough) */}
+                              <span className="font-body text-xs text-muted-foreground line-through">
+                                ${product.original_price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
+                              </span>
+                              {/* Sale Price */}
+                              <span className="font-body text-sm font-semibold text-red-600">
+                                ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
+                              </span>
+                            </>
+                          ) : (
+                            /* Regular Price (no discount) */
+                            <span className="font-body text-sm font-semibold text-foreground">
+                              ${product.price.toFixed(2)} <span className="hidden sm:inline">AUD</span>
+                            </span>
+                          )}
                           <span className="text-primary font-medium text-sm uppercase tracking-wider">
                             View Details →
                           </span>

@@ -210,39 +210,63 @@ const ProductDetail = () => {
                 <div className="flex items-center gap-3 mb-6">
                   {product.original_price && product.original_price > product.price ? (
                     <>
-                      {/* Original Price (strikethrough) */}
-                      <span className="font-heading text-xl sm:text-2xl text-muted-foreground">
-                        ${product.price.toFixed(2)} AUD
+                      {/* Compare Price (strikethrough) */}
+                      <span className="font-body text-lg text-muted-foreground/70 line-through">
+                        ${product.original_price.toFixed(2)}
+                      </span>
+                      {/* Sale Price */}
+                      <span className="font-heading text-2xl sm:text-3xl font-light text-foreground">
+                        ${product.price.toFixed(2)}
                       </span>
                     </>
                   ) : (
                     /* Regular Price (no discount) */
-                    <span className="font-heading text-xl sm:text-2xl text-foreground">
-                      ${product.price.toFixed(2)} AUD
+                    <span className="font-heading text-2xl sm:text-3xl font-light text-foreground">
+                      ${product.price.toFixed(2)}
                     </span>
                   )}
                 </div>
               )}
 
               {/* Description */}
-              <div className="mb-8 space-y-2">
+              <div className="mb-8 space-y-3">
                 {(product as any).description && (
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                  <p className="font-body text-sm leading-relaxed text-foreground/80">
                     {(product as any).description}
                   </p>
                 )}
                 {(product as any).style && (
-                  <p className="font-body text-sm text-muted-foreground">
-                    <span className="text-foreground font-medium">Style :</span> {(product as any).style}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-body text-sm text-muted-foreground/60 uppercase tracking-wide">
+                      Style:
+                    </span>
+                    <span className="font-body text-sm text-foreground/80">
+                      {(product as any).style}
+                    </span>
+                  </div>
                 )}
                 {(product as any).color && (
-                  <p className="font-body text-sm text-muted-foreground">
-                    <span className="text-foreground font-medium">Color :</span> {(product as any).color}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-body text-sm text-muted-foreground/60 uppercase tracking-wide">
+                      Colour:
+                    </span>
+                    <span className="font-body text-sm text-foreground/80">
+                      {(product as any).color}
+                    </span>
+                  </div>
                 )}
-                {!(product as any).description && !(product as any).style && !(product as any).color && (
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                {(product as any).size && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-body text-sm text-muted-foreground/60 uppercase tracking-wide">
+                      Size:
+                    </span>
+                    <span className="font-body text-sm text-foreground/80">
+                      {(product as any).size}
+                    </span>
+                  </div>
+                )}
+                {!(product as any).description && !(product as any).style && !(product as any).color && !(product as any).size && (
+                  <p className="font-body text-sm leading-relaxed text-foreground/80">
                     A beautifully crafted piece from FashionSpectrum's latest collection.
                   </p>
                 )}

@@ -86,6 +86,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               className={`absolute top-3 left-3 font-body text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 ${
                 product.badge === "Sold out"
                   ? "bg-charcoal text-primary-foreground"
+                  : product.badge === "Sale"
+                  ? "bg-red-600 text-white"
                   : "text-foreground"
               }`}
             >

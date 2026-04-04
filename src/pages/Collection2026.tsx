@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/products";
 import type { FilterState } from "@/lib/filterUtils";
 import { getActiveFiltersCount, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
-import { getAllProducts } from "@/lib/productUtils";
+import { getAllProducts, slugify } from "@/lib/productUtils";
 
 const sortOptions = [
   { label: "Sort by latest", value: "latest" },
@@ -156,7 +157,7 @@ const Collection2026 = () => {
           style: product.description || '',
           color: product.colors?.[0] || '',
           collection: product.collection || '',
-          badge: product.featured ? 'New in' : (!product.in_stock ? 'Sold out' : undefined) as "New in" | "Sold out" | undefined,
+          badge: product.featured ? 'New in' : (!product.in_stock ? 'Sold out' : (product.original_price && product.original_price > product.price ? 'Sale' : undefined)) as "New in" | "Sold out" | "Sale" | undefined,
           sort_order: (product as any).sort_order || 999, // Add sort_order field with type assertion
           featured: product.featured || false, // Add featured field
           in_stock: product.in_stock !== false, // Add in_stock field
@@ -359,11 +360,120 @@ const Collection2026 = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="group cursor-pointer"
                 >
-                  <ProductCard
-                    product={product}
-                    index={index}
-                  />
+                  <Link to={`/product/${slugify(product.name)}`}>
+                    <div className="relative overflow-hidden bg-secondary">
+                      <motion.img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-auto object-contain"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
+                        loading="eager"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      />
+                      
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      
+                      {product.badge && (
+                        <motion.span
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 + index * 0.05 }}
+                          className={`absolute top-3 left-3 font-body text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 ${
+                            product.badge === "Sold out"
+                              ? "bg-charcoal text-primary-foreground"
+                              : product.badge === "Sale"
+                              ? "bg-red-600 text-white"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {product.badge}
+                        </motion.span>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="pt-4 space-y-3">
+                    {/* Product Details */}
+                    <div className="space-y-2">
+                      <h3 className="font-heading text-sm font-light text-foreground group-hover:text-primary transition-colors duration-300 leading-tight">
+                        {product.name}
+                      </h3>
+                      
+                      {/* Style */}
+                      {product.style && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-[10px] text-muted-foreground/60 uppercase tracking-wide">
+                            Style:
+                          </span>
+                          <span className="font-body text-[10px] text-foreground/80">
+                            {product.style}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Colour */}
+                      {product.color && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-[10px] text-muted-foreground/60 uppercase tracking-wide">
+                            Colour:
+                          </span>
+                          <span className="font-body text-[10px] text-foreground/80">
+                            {product.color}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Size */}
+                      {product.size && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-[10px] text-muted-foreground/60 uppercase tracking-wide">
+                            Size:
+                          </span>
+                          <span className="font-body text-[10px] text-foreground/80">
+                            {product.size}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Collection */}
+                      {product.collection && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-[10px] text-muted-foreground/60 uppercase tracking-wide">
+                            Collection:
+                          </span>
+                          <span className="font-body text-[10px] text-foreground/80">
+                            {product.collection}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Price Display - Only show if price is valid */}
+                    {(product.price != null && product.price !== undefined && product.price > 0) && (
+                      <div className="flex items-center gap-3 mt-1">
+                        {product.original_price && product.original_price > product.price ? (
+                          <>
+                            {/* Compare Price (strikethrough) */}
+                            <span className="font-body text-xs text-muted-foreground/70 line-through">
+                              ${product.original_price.toFixed(2)}
+                            </span>
+                            {/* Sale Price */}
+                            <span className="font-heading text-base font-light text-foreground">
+                              ${product.price.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          /* Regular Price (no discount) */
+                          <span className="font-heading text-base font-light text-foreground">
+                            ${product.price.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>
