@@ -392,18 +392,20 @@ const AdminPages = () => {
                       <a href={p.path} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground">
                         <Eye size={14} />
                       </a>
-                      <button 
-                        onClick={() => toggleStatus(p.id)}
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
-                        title={p.status === "published" ? "Set to Draft" : "Publish"}
-                      >
-                        {p.status === "published" ? (
-                          <EyeOff size={14} />
-                        ) : (
-                          <FileCheck size={14} />
-                        )}
-                      </button>
-                      {p.status === "draft" && (
+                      {p.path !== "/" && (
+                        <button 
+                          onClick={() => toggleStatus(p.id)}
+                          className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+                          title={p.status === "published" ? "Set to Draft" : "Publish"}
+                        >
+                          {p.status === "published" ? (
+                            <EyeOff size={14} />
+                          ) : (
+                            <FileCheck size={14} />
+                          )}
+                        </button>
+                      )}
+                      {(p.path === "/" || p.status === "draft") && (
                         <button 
                           onClick={() => {
                             // Check if this is a product page and show special dialog
