@@ -403,22 +403,24 @@ const AdminPages = () => {
                           <FileCheck size={14} />
                         )}
                       </button>
-                      <button 
-                        onClick={() => {
-                          // Check if this is a product page and show special dialog
-                          const isProductPage = p.name.toLowerCase().includes('product page') || p.path.includes('product-page');
-                          if (isProductPage) {
-                            // Show product page options dialog
-                            handleProductPageClick(p);
-                          } else {
-                            // Normal edit navigation
-                            navigate(`/admin/pages/edit/${p.path === "/" ? "home" : p.path.replace(/^\//, "")}`);
-                          }
-                        }} 
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      {p.status === "draft" && (
+                        <button 
+                          onClick={() => {
+                            // Check if this is a product page and show special dialog
+                            const isProductPage = p.name.toLowerCase().includes('product page') || p.path.includes('product-page');
+                            if (isProductPage) {
+                              // Show product page options dialog
+                              handleProductPageClick(p);
+                            } else {
+                              // Normal edit navigation
+                              navigate(`/admin/pages/edit/${p.path === "/" ? "home" : p.path.replace(/^\//, "")}`);
+                            }
+                          }} 
+                          className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      )}
                       <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
                         <Trash2 size={14} />
                       </button>
