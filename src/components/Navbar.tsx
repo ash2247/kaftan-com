@@ -7,23 +7,14 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCollections } from "@/hooks/useCollections";
 import { useNavigationPages } from "@/hooks/useNavigationPages";
+import { useQuery } from "@tanstack/react-query";
+import { headerFooterService } from "@/lib/headerFooterService";
 import SearchOverlay from "./SearchOverlay";
 import Logo from "./Logo";
 
 const whereToBuyLinks = [
   { label: "Ambia collections", url: "https://www.ambia.com.au/" },
   { label: "Pizzaz boutique", url: "https://pizazzboutique.com.au/" },
-];
-
-const navLinks = [
-  { label: "Home", to: "/" },
-  { label: "2026 Collection", to: "/collection-2026" },
-  { label: "Safari Collection", to: "/safari-collection" },
-  { label: "Paradise Collection", to: "/paradise-collection" },
-  { label: "Clearance", to: "/clearance" },
-  { label: "Where to Buy", to: "/shop" },
-  { label: "Contact Us", to: "/contact-us" },
-  { label: "Our Story", to: "/our-story" },
 ];
 
 const Navbar = () => {
@@ -39,6 +30,14 @@ const Navbar = () => {
   const { data: navigationPages = [] } = useNavigationPages();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Get navigation from Header & Footer service
+  const { data: headerFooterContent } = useQuery({
+    queryKey: ["headerFooter-content"],
+    queryFn: () => headerFooterService.getHeaderFooterContent(),
+  });
+
+  const navItems = headerFooterContent?.header?.navItems || [];
 
   const handleWhereToBuyEnter = () => {
     if (whereToBuyTimeout.current) clearTimeout(whereToBuyTimeout.current);
@@ -60,22 +59,22 @@ const Navbar = () => {
 
           {/* Nav Links */}
           <nav className="flex items-center gap-2 xl:gap-3 ml-2 xl:ml-3">
-            {navLinks.map((link) =>
-              link.label === "Where to Buy" ? (
+            {navItems.map((item) =>
+              item.label === "Where to Buy" ? (
                 <div
-                  key={link.label}
+                  key={item.id}
                   className="relative flex items-center"
                   onMouseEnter={handleWhereToBuyEnter}
                   onMouseLeave={handleWhereToBuyLeave}
                 >
                   <span
                     className={`font-body text-[10px] xl:text-[11px] tracking-[0.05em] xl:tracking-[0.08em] uppercase transition-colors duration-300 hover:text-primary cursor-pointer whitespace-nowrap inline-block leading-none h-[45px] flex items-center ${
-                      location.pathname === link.to
+                      location.pathname === item.to
                         ? "text-primary font-medium"
                         : "text-foreground"
                     }`}
                   >
-                    {link.label}
+                    {item.label}
                   </span>
                   <AnimatePresence>
                     {whereToBuyOpen && (
@@ -146,21 +145,21 @@ const Navbar = () => {
                 </div>
               ) : (
                 <Link
-                  key={link.label}
-                  to={link.to}
+                  key={item.id}
+                  to={item.to}
                   className={`font-body text-[10px] xl:text-[11px] tracking-[0.05em] xl:tracking-[0.08em] uppercase transition-colors duration-300 hover:text-primary whitespace-nowrap ${
-                    location.pathname === link.to
+                    location.pathname === item.to
                       ? "text-primary font-medium"
                       : "text-foreground"
                   }`}
                 >
-                  {link.label}
+                  {item.label}
                 </Link>
               )
             )}
             
-            {/* Dynamic Navigation Pages */}
-            {navigationPages.map((page) => (
+            {/* Dynamic Navigation Pages - only show if not already in navItems */}
+            {navigationPages.filter(page => !navItems.some(navItem => navItem.to === page.path)).map((page) => (
               <Link
                 key={page.id}
                 to={page.path}
@@ -290,14 +289,14 @@ const Navbar = () => {
               className="lg:hidden overflow-hidden border-t border-border bg-background"
             >
               <div className="flex flex-col py-4 px-6 gap-4">
-                {navLinks.map((link) =>
-                  link.label === "Where to Buy" ? (
-                    <div key={link.label}>
+                {navItems.map((item) =>
+                  item.label === "Where to Buy" ? (
+                    <div key={item.id}>
                       <button
                         onClick={() => setMobileWhereToBuyOpen(!mobileWhereToBuyOpen)}
                         className="font-body text-sm tracking-[0.15em] uppercase text-foreground w-full text-left"
                       >
-                        {link.label}
+                        {item.label}
                       </button>
                       <AnimatePresence>
                         {mobileWhereToBuyOpen && (
@@ -368,16 +367,16 @@ const Navbar = () => {
                     </div>
                   ) : (
                     <Link
-                      key={link.label}
-                      to={link.to}
+                      key={item.id}
+                      to={item.to}
                       onClick={() => setMobileOpen(false)}
                       className={`font-body text-sm tracking-[0.15em] uppercase ${
-                        location.pathname === link.to
+                        location.pathname === item.to
                           ? "text-primary font-medium"
                           : "text-foreground"
                       }`}
                     >
-                      {link.label}
+                      {item.label}
                     </Link>
                   )
                 )}
