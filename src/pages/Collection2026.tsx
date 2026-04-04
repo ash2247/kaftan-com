@@ -437,18 +437,6 @@ const Collection2026 = () => {
                           </span>
                         </div>
                       )}
-
-                      {/* Collection */}
-                      {product.collection && (
-                        <div className="flex items-center gap-2">
-                          <span className="font-body text-[10px] text-muted-foreground/60 uppercase tracking-wide">
-                            Collection:
-                          </span>
-                          <span className="font-body text-[10px] text-foreground/80">
-                            {product.collection}
-                          </span>
-                        </div>
-                      )}
                     </div>
 
                     {/* Price Display - Only show if price is valid */}
