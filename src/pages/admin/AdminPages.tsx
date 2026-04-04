@@ -421,9 +421,11 @@ const AdminPages = () => {
                           <Edit2 size={14} />
                         </button>
                       )}
-                      <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
-                        <Trash2 size={14} />
-                      </button>
+                      {p.path !== "/" && (
+                        <button onClick={() => setDeleteId(p.id)} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
