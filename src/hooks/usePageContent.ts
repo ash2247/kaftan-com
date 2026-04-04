@@ -240,6 +240,9 @@ export interface ProductItem {
   size: 'small' | 'medium' | 'large';
   order: number;
   enabled: boolean;
+  category?: string;
+  color?: string;
+  style?: string;
 }
 
 export interface CatalogPageContent {

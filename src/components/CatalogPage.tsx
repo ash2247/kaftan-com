@@ -9,7 +9,7 @@ import HorizontalFilterBar from "./HorizontalFilterBar";
 import AnnouncementBar from "./AnnouncementBar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import type { CatalogPageContent } from "@/hooks/usePageContent";
+import type { CatalogPageContent, ProductItem } from "@/hooks/usePageContent";
 import { useCollectionSettings } from "@/hooks/useCollectionSettings";
 import { getActiveFiltersCount, getPriceRange, applyFilters, sortProducts } from "@/lib/filterUtils";
 import type { FilterState } from "@/lib/filterUtils";
@@ -88,23 +88,22 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
     
     // Convert managed products to Product format for filtering
     const convertedProducts = managedProducts.map(item => {
-      // Extract color, style, category from the product name
+      // Extract style, color from name if available, but use proper category field
       const nameParts = item.name.split(' - ');
-      const style = nameParts[0] || '';
-      const category = nameParts[1] || '';
-      const color = nameParts[2] || '';
+      const styleFromName = nameParts[0] || '';
+      const colorFromName = nameParts[2] || '';
       
-      console.log(`Product: ${item.name}, Price: ${item.price}, Original Price: ${item.original_price}`);
+      console.log(`Product: ${item.name}, Category: ${item.category}, Price: ${item.price}, Original Price: ${item.original_price}`);
       
       return {
         id: item.id,
         name: item.name,
         price: item.price,
         original_price: item.original_price,
-        category: category,
-        color: color,
+        category: item.category || nameParts[1] || '', // Use actual category field from admin
+        color: item.color || colorFromName || '', // Use actual color field from admin
         size: item.size,
-        style: style,
+        style: item.style || styleFromName || '', // Use actual style field from admin
         badge: undefined,
         image: item.image,
         in_stock: true
@@ -121,20 +120,20 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
     if (managedProducts.length > 0) {
       // Use managed products converted to Product format
       return managedProducts.map(item => {
+        // Extract style, color from name if available, but use proper category field
         const nameParts = item.name.split(' - ');
         const style = nameParts[0] || '';
-        const category = nameParts[1] || '';
-        const color = nameParts[2] || '';
+        const colorFromName = nameParts[2] || '';
         
         return {
           id: item.id,
           name: item.name,
           price: item.price,
           original_price: item.original_price,
-          category: category,
-          color: color,
+          category: item.category || nameParts[1] || '', // Use actual category field from admin
+          color: item.color || colorFromName || '', // Use actual color field from admin
           size: item.size,
-          style: style,
+          style: item.style || style || '', // Use actual style field from admin
           badge: undefined,
           image: item.image,
           in_stock: true
