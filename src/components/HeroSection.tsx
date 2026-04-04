@@ -4,24 +4,25 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Star } from "lucide-react";
 import { HeroContent, HeroSlide } from "@/hooks/usePageContent";
 
-// Default imports as fallback
-import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
-import heroKaftan2 from "@/assets/hero-kaftan-2.jpg";
-import heroKaftan3 from "@/assets/hero-kaftan-3.jpg";
-
-const defaultSlides: HeroSlide[] = [
-  { src: heroKaftan1, alt: "Safari Collection - Premium Kaftans" },
-  { src: heroKaftan2, alt: "Elegant Fashion Collection" },
-  { src: heroKaftan3, alt: "Luxury Resort Wear" },
-];
-
 interface Props {
   content?: HeroContent;
   slides?: HeroSlide[];
 }
 
 const HeroSection = ({ content, slides }: Props) => {
-  const activeSlides = slides && slides.length > 0 ? slides : defaultSlides;
+  // Don't show anything if slides haven't loaded yet
+  if (!slides || slides.length === 0) {
+    return (
+      <section className="relative h-[60vh] md:h-[75vh] bg-secondary flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 w-32 bg-muted rounded mb-4 mx-auto"></div>
+          <div className="h-4 w-48 bg-muted rounded mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
+  const activeSlides = slides;
   const titleLine1 = content?.titleLine1 || "Luxurious";
   const titleLine2 = content?.titleLine2 || "Kaftan Collection";
   const subtitle = content?.subtitle || "Discover our latest collection of handcrafted kaftans, dresses & resort wear designed for the modern woman.";
