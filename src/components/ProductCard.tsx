@@ -123,30 +123,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             {product.name}
           </h3>
           
-          {/* Style */}
-          {product.style && (
-            <div className="flex items-center gap-2">
-              <span className="font-body text-[10px] text-muted-foreground uppercase">
-                Style:
-              </span>
-              <span className="font-body text-[10px] text-foreground">
-                {product.style}
-              </span>
-            </div>
-          )}
-
-          {/* Colour */}
-          {product.color && (
-            <div className="flex items-center gap-2">
-              <span className="font-body text-[10px] text-muted-foreground uppercase">
-                Colour:
-              </span>
-              <span className="font-body text-[10px] text-foreground">
-                {product.color}
-              </span>
-            </div>
-          )}
-
           {/* Size */}
           {product.size && (
             <div className="flex items-center gap-2">
@@ -155,18 +131,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               </span>
               <span className="font-body text-[10px] text-foreground">
                 {product.size}
-              </span>
-            </div>
-          )}
-
-          {/* Collection */}
-          {product.collection && (
-            <div className="flex items-center gap-2">
-              <span className="font-body text-[10px] text-muted-foreground uppercase">
-                Collection:
-              </span>
-              <span className="font-body text-[10px] text-foreground">
-                {product.collection}
               </span>
             </div>
           )}
