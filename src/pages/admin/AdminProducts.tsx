@@ -92,6 +92,7 @@ const DynamicPageDisplay = ({ selectedPages }: { selectedPages: string[] }) => {
 const DynamicPageSelector = ({ selectedPages, onChange }: { selectedPages: string[]; onChange: (pages: string[]) => void }) => {
   const [pages, setPages] = useState<Array<{ id: string; name: string; path: string; displayId: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadPages = async () => {
@@ -149,26 +150,57 @@ const DynamicPageSelector = ({ selectedPages, onChange }: { selectedPages: strin
     }
   };
 
+  // Filter pages based on search query
+  const filteredPages = pages.filter(page => 
+    page.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    page.path.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return <div className="text-xs text-muted-foreground ml-6">Loading pages...</div>;
   }
 
   return (
-    <div className="space-y-2">
-      {pages.map((page) => (
-        <div key={page.displayId} className="flex items-center space-x-2 ml-6">
+    <div className="space-y-3">
+      {/* Search Field */}
+      <div className="ml-6">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
-            type="checkbox"
-            id={`page-${page.displayId}`}
-            checked={selectedPages.includes(page.displayId)}
-            onChange={() => handlePageToggle(page.displayId)}
-            className="rounded border-border text-primary focus:ring-primary"
+            type="text"
+            placeholder="Search pages by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-10 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent hover:border-primary transition-colors"
           />
-          <Label htmlFor={`page-${page.displayId}`} className="font-body text-sm text-foreground">
-            {page.name}
-          </Label>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
-      ))}
+      </div>
+
+      {/* Page List */}
+      <div className="space-y-2">
+        {filteredPages.map((page) => (
+          <div key={page.displayId} className="flex items-center space-x-2 ml-6">
+            <input
+              type="checkbox"
+              id={`page-${page.displayId}`}
+              checked={selectedPages.includes(page.displayId)}
+              onChange={() => handlePageToggle(page.displayId)}
+              className="rounded border-border text-primary focus:ring-primary"
+            />
+            <Label htmlFor={`page-${page.displayId}`} className="font-body text-sm text-foreground">
+              {page.name}
+            </Label>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
