@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { bannerContentService, BannerContent } from "@/lib/bannerContentService";
 
 // Import defaults
-import collectionBannerImg from "@/assets/collection-banner.jpg";
 import aboutBrandImg from "@/assets/about-brand.jpg";
 
 export interface HeroSlide {
@@ -110,7 +109,7 @@ export function useHomePageContent(): HomePageContent {
     heroSlides: [],
     announcement: defaultHomeContent.announcement,
     collectionBanner: defaultHomeContent.collectionBanner,
-    collectionImage: collectionBannerImg,
+    collectionImage: "",
     aboutImage: aboutBrandImg,
     about: defaultHomeContent.about,
     footer: defaultHomeContent.footer,
@@ -238,6 +237,8 @@ export interface CatalogPageContent {
   subtitle: string;
   bannerImage: string;
   showBanner: boolean;
+  showHeroText: boolean;
+  showCtaButton: boolean;
   metaDescription: string;
   ogImage: string;
   announcementText: string;

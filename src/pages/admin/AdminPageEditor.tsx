@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import HeaderFooterEditor from "@/components/admin/HeaderFooterEditor";
 
 // Import default hero images
-import collectionBannerImg from "@/assets/collection-banner.jpg";
 import aboutBrandImg from "@/assets/about-brand.jpg";
 
 // ---- Interfaces ----
@@ -146,6 +145,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "Explore our complete collection of luxury resort wear",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Browse our full collection",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -161,6 +162,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "Curated collections for every occasion",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Browse curated collections",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -176,6 +179,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "The latest additions to our collection",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "See our latest pieces",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -191,6 +196,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "Limited time offers on select styles",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Shop sale items",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -206,6 +213,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "Our most loved pieces",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Shop our most popular",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -221,6 +230,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Learn about FashionSpectrum",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -236,6 +247,8 @@ const catalogPageDefaults: Record<string, CatalogPageContent> = {
     subtitle: "",
     bannerImage: "",
     showBanner: false,
+    showHeroText: true,
+    showCtaButton: true,
     metaDescription: "Get in touch",
     ogImage: "",
     announcementText: "Free Shipping Over $300",
@@ -563,7 +576,7 @@ const AdminPageEditor = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [announcement, setAnnouncement] = useState<AnnouncementContent>(defaultHomeContent.announcement);
   const [collectionBanner, setCollectionBanner] = useState<CollectionBannerContent>(defaultHomeContent.collectionBanner);
-  const [collectionImage, setCollectionImage] = useState<string>(collectionBannerImg);
+  const [collectionImage, setCollectionImage] = useState<string>("");
   const [aboutImage, setAboutImage] = useState<string>(aboutBrandImg);
   const [about, setAbout] = useState<AboutContent>(defaultHomeContent.about);
   const [footer, setFooter] = useState<FooterContent>(defaultHomeContent.footer);
@@ -584,7 +597,23 @@ const AdminPageEditor = () => {
   const cmsContent = useCatalogPageContent(pageKey);
   
   const [catalogPage, setCatalogPage] = useState<CatalogPageContent>(
-    catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: " 2026 FashionSpectrum. All Rights Reserved." }
+    catalogPageDefaults[pageKey] || { 
+      title: "", 
+      subtitle: "", 
+      bannerImage: "", 
+      showBanner: false, 
+      showHeroText: true, 
+      showCtaButton: true, 
+      metaDescription: "", 
+      ogImage: "", 
+      announcementText: "Free Shipping Over $300", 
+      announcementEnabled: true, 
+      products: [], 
+      footerNewsletterTitle: "Join the FashionSpectrum World", 
+      footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", 
+      footerCtaText: "Subscribe", 
+      footerCopyright: " 2026 FashionSpectrum. All Rights Reserved." 
+    }
   );
 
   // Load banner content for home page
@@ -878,13 +907,13 @@ const AdminPageEditor = () => {
       setHeroSlides(defaultHeroSlides);
       setAnnouncement(defaultHomeContent.announcement);
       setCollectionBanner(defaultHomeContent.collectionBanner);
-      setCollectionImage(collectionBannerImg);
+      setCollectionImage("");
       setAboutImage(aboutBrandImg);
       setAbout(defaultHomeContent.about);
       setFooter(defaultHomeContent.footer);
       setSections(defaultSections);
     } else {
-      setCatalogPage(catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." });
+      setCatalogPage(catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, showHeroText: true, showCtaButton: true, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." });
     }
     localStorage.removeItem(`page_content_${pageKey}`);
     setHasChanges(false);
