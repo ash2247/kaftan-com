@@ -70,7 +70,7 @@ const Index = () => {
         <AnnouncementBar content={content.announcement} />
       )}
       <Navbar />
-      {isEnabled("hero") && (
+      {isEnabled("hero") && !content.loading && (
         <HeroSection content={content.hero} slides={content.heroSlides} />
       )}
 

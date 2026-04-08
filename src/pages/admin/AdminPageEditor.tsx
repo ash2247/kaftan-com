@@ -19,9 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 import HeaderFooterEditor from "@/components/admin/HeaderFooterEditor";
 
 // Import default hero images
-import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
-import heroKaftan2 from "@/assets/hero-kaftan-2.jpg";
-import heroKaftan3 from "@/assets/hero-kaftan-3.jpg";
 import collectionBannerImg from "@/assets/collection-banner.jpg";
 import aboutBrandImg from "@/assets/about-brand.jpg";
 
@@ -91,11 +88,7 @@ interface ProductPageContent {
 }
 
 // ---- Defaults ----
-const defaultHeroSlides: HeroSlide[] = [
-  { src: heroKaftan1, alt: "Safari Collection - Premium Kaftans" },
-  { src: heroKaftan2, alt: "Elegant Fashion Collection" },
-  { src: heroKaftan3, alt: "Luxury Resort Wear" },
-];
+const defaultHeroSlides: HeroSlide[] = [];
 
 const defaultHomeContent = {
   hero: {
@@ -591,16 +584,100 @@ const AdminPageEditor = () => {
   const cmsContent = useCatalogPageContent(pageKey);
   
   const [catalogPage, setCatalogPage] = useState<CatalogPageContent>(
-    catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: "© 2026 FashionSpectrum. All Rights Reserved." }
+    catalogPageDefaults[pageKey] || { title: "", subtitle: "", bannerImage: "", showBanner: false, metaDescription: "", ogImage: "", announcementText: "Free Shipping Over $300", announcementEnabled: true, products: [], footerNewsletterTitle: "Join the FashionSpectrum World", footerNewsletterSubtitle: "Subscribe for exclusive access to new collections, special offers & more.", footerCtaText: "Subscribe", footerCopyright: " 2026 FashionSpectrum. All Rights Reserved." }
   );
+
+  // Load banner content for home page
+  useEffect(() => {
+    if (isHome) {
+      const loadHomeContent = async () => {
+        try {
+          console.log('Loading home page banner content...');
+          const bannerData = await bannerContentService.getBannerContent('home');
+          
+          if (bannerData) {
+            console.log('Found home banner data:', bannerData);
+            // Update all the state with the loaded data
+            if (bannerData.hero_title_line1 || bannerData.hero_title_line2) {
+              setHero({
+                titleLine1: bannerData.hero_title_line1 || defaultHomeContent.hero.titleLine1,
+                titleLine2: bannerData.hero_title_line2 || defaultHomeContent.hero.titleLine2,
+                subtitle: bannerData.hero_subtitle || defaultHomeContent.hero.subtitle,
+                ctaText: bannerData.hero_cta_text || defaultHomeContent.hero.ctaText,
+                ctaLink: bannerData.hero_cta_link || defaultHomeContent.hero.ctaLink,
+                autoSlide: bannerData.hero_auto_slide !== undefined ? bannerData.hero_auto_slide : defaultHomeContent.hero.autoSlide,
+                slideInterval: bannerData.hero_slide_interval || defaultHomeContent.hero.slideInterval,
+              });
+            }
+            
+            if (bannerData.hero_slides && bannerData.hero_slides.length > 0) {
+              setHeroSlides(bannerData.hero_slides);
+            }
+            
+            if (bannerData.announcement_text) {
+              setAnnouncement({
+                text: bannerData.announcement_text,
+                enabled: bannerData.announcement_enabled !== undefined ? bannerData.announcement_enabled : defaultHomeContent.announcement.enabled,
+              });
+            }
+            
+            if (bannerData.collection_banner_title) {
+              setCollectionBanner({
+                subtitle: bannerData.collection_banner_subtitle || defaultHomeContent.collectionBanner.subtitle,
+                title: bannerData.collection_banner_title || defaultHomeContent.collectionBanner.title,
+                ctaText: bannerData.collection_banner_cta_text || defaultHomeContent.collectionBanner.ctaText,
+                ctaLink: bannerData.collection_banner_cta_link || defaultHomeContent.collectionBanner.ctaLink,
+              });
+            }
+            
+            if (bannerData.collection_image) {
+              setCollectionImage(bannerData.collection_image);
+            }
+            
+            if (bannerData.about_image) {
+              setAboutImage(bannerData.about_image);
+            }
+            
+            if (bannerData.about_title) {
+              setAbout({
+                title: bannerData.about_title || defaultHomeContent.about.title,
+                paragraph1: bannerData.about_paragraph1 || defaultHomeContent.about.paragraph1,
+                paragraph2: bannerData.about_paragraph2 || defaultHomeContent.about.paragraph2,
+                ctaText: bannerData.about_cta_text || defaultHomeContent.about.ctaText,
+              });
+            }
+            
+            if (bannerData.footer_newsletter_title) {
+              setFooter({
+                newsletterTitle: bannerData.footer_newsletter_title || defaultHomeContent.footer.newsletterTitle,
+                newsletterSubtitle: bannerData.footer_newsletter_subtitle || defaultHomeContent.footer.newsletterSubtitle,
+                ctaText: bannerData.footer_cta_text || defaultHomeContent.footer.ctaText,
+                copyright: bannerData.footer_copyright || defaultHomeContent.footer.copyright,
+              });
+            }
+            
+            if (bannerData.sections) {
+              setSections(bannerData.sections);
+            }
+          } else {
+            console.log('No home banner data found, using defaults');
+          }
+        } catch (error) {
+          console.error('Error loading home banner content:', error);
+        }
+      };
+      
+      loadHomeContent();
+    }
+  }, [isHome]);
 
   // Update catalogPage when cmsContent changes
   useEffect(() => {
     if (cmsContent) {
-      console.log('🎯 Found CMS content for page:', pageKey, cmsContent);
+      console.log(' Found CMS content for page:', pageKey, cmsContent);
       setCatalogPage(cmsContent);
     } else {
-      console.log('📦 No CMS content found for page:', pageKey, 'Using defaults');
+      console.log(' No CMS content found for page:', pageKey, 'Using defaults');
     }
   }, [cmsContent, pageKey]);
 

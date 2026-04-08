@@ -1,6 +1,5 @@
 import CatalogPage from "@/components/CatalogPage";
 import { getAllProducts } from "@/lib/productUtils";
-import collectionBanner from "@/assets/collection-banner.jpg";
 import { useCatalogPageContent } from "@/hooks/usePageContent";
 import { useProducts } from "@/hooks/useProducts";
 
@@ -14,7 +13,7 @@ const Shop = () => {
       title="Shop All"
       subtitle="Explore our complete collection of luxury resort wear"
       products={products}
-      bannerImage={collectionBanner}
+      bannerImage=""
       cmsContent={cmsContent}
       columns={3}
     />

@@ -10,7 +10,7 @@ interface Props {
 }
 
 const HeroSection = ({ content, slides }: Props) => {
-  // Don't show anything if slides haven't loaded yet
+  // Don't show anything if slides haven't loaded yet or if there are no slides
   if (!slides || slides.length === 0) {
     return (
       <section className="relative h-[60vh] md:h-[75vh] bg-secondary flex items-center justify-center">
@@ -94,8 +94,40 @@ const HeroSection = ({ content, slides }: Props) => {
         style={{ opacity }}
       >
         <div className="text-center max-w-4xl mx-auto">
-                    
-                  </div>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="font-heading text-4xl md:text-6xl lg:text-7xl font-light text-white mb-4 italic"
+          >
+            {titleLine1}
+            <br />
+            {titleLine2}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="font-body text-sm md:text-base text-white/90 mb-8 max-w-2xl mx-auto"
+          >
+            {subtitle}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link
+              to={ctaLink}
+              className="inline-flex items-center gap-2 bg-white text-black px-8 py-3 font-body text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gray-100"
+            >
+              {ctaText}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Slide indicators */}

@@ -1,6 +1,5 @@
 import CatalogPage from "@/components/CatalogPage";
 import { getAllProducts } from "@/lib/productUtils";
-import heroBanner from "@/assets/hero-kaftan-1.jpg";
 import { useCatalogPageContent } from "@/hooks/usePageContent";
 
 const Collections = () => {
@@ -10,7 +9,7 @@ const Collections = () => {
       title="Collections"
       subtitle="Curated collections for every occasion"
       products={getAllProducts()}
-      bannerImage={heroBanner}
+      bannerImage=""
       cmsContent={cmsContent}
       columns={3}
     />

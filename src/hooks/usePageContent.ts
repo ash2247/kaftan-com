@@ -2,9 +2,6 @@ import { useState, useEffect } from "react";
 import { bannerContentService, BannerContent } from "@/lib/bannerContentService";
 
 // Import defaults
-import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
-import heroKaftan2 from "@/assets/hero-kaftan-2.jpg";
-import heroKaftan3 from "@/assets/hero-kaftan-3.jpg";
 import collectionBannerImg from "@/assets/collection-banner.jpg";
 import aboutBrandImg from "@/assets/about-brand.jpg";
 
@@ -55,11 +52,7 @@ export interface SectionMeta {
   enabled: boolean;
 }
 
-export const defaultHeroSlides: HeroSlide[] = [
-  { src: heroKaftan1, alt: "Safari Collection - Premium Kaftans" },
-  { src: heroKaftan2, alt: "Elegant Fashion Collection" },
-  { src: heroKaftan3, alt: "Luxury Resort Wear" },
-];
+export const defaultHeroSlides: HeroSlide[] = [];
 
 export const defaultHomeContent = {
   hero: {
@@ -108,12 +101,13 @@ export interface HomePageContent {
   about: AboutContent;
   footer: FooterContent;
   sections: SectionMeta[];
+  loading?: boolean;
 }
 
 export function useHomePageContent(): HomePageContent {
   const [content, setContent] = useState<HomePageContent>({
     hero: defaultHomeContent.hero,
-    heroSlides: defaultHeroSlides,
+    heroSlides: [],
     announcement: defaultHomeContent.announcement,
     collectionBanner: defaultHomeContent.collectionBanner,
     collectionImage: collectionBannerImg,
@@ -122,16 +116,39 @@ export function useHomePageContent(): HomePageContent {
     footer: defaultHomeContent.footer,
     sections: defaultSections,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchContent = async () => {
-      console.log('🚀 Starting to fetch home page content...');
+      console.log(' Starting to fetch home page content...');
+      // Clear all localStorage cache to force refresh and remove old banner data
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('page_content') || key.includes('banner') || key.includes('hero') || key.includes('slide'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log(' Cleared localStorage keys:', keysToRemove);
+      
+      // Clear session storage as well
+      const sessionKeysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && (key.includes('page_content') || key.includes('banner') || key.includes('hero') || key.includes('slide'))) {
+          sessionKeysToRemove.push(key);
+        }
+      }
+      sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+      console.log(' Cleared sessionStorage keys:', sessionKeysToRemove);
+      
       try {
         const bannerData = await bannerContentService.getBannerContent('home');
         
         if (bannerData) {
-          console.log('📦 Found banner data from Supabase:', bannerData);
-          console.log('🎯 Sections from Supabase:', bannerData.sections);
+          console.log(' Found banner data from Supabase:', bannerData);
+          console.log(' Sections from Supabase:', bannerData.sections);
           setContent(prev => {
             const newContent = {
               hero: {
@@ -143,7 +160,7 @@ export function useHomePageContent(): HomePageContent {
                 autoSlide: bannerData.hero_auto_slide !== undefined ? bannerData.hero_auto_slide : prev.hero.autoSlide,
                 slideInterval: bannerData.hero_slide_interval || prev.hero.slideInterval,
               },
-              heroSlides: bannerData.hero_slides || prev.heroSlides,
+              heroSlides: (bannerData.hero_slides && bannerData.hero_slides.length > 0) ? bannerData.hero_slides : [],
               announcement: {
                 text: bannerData.announcement_text || prev.announcement.text,
                 enabled: bannerData.announcement_enabled !== undefined ? bannerData.announcement_enabled : prev.announcement.enabled,
@@ -178,50 +195,21 @@ export function useHomePageContent(): HomePageContent {
             return newContent;
           });
         } else {
-          console.log('⚠️ No banner data found in Supabase, checking localStorage...');
+          console.log(' No banner data found in Supabase, checking localStorage...');
         }
       } catch (error) {
-        console.error("❌ Failed to fetch banner content from Supabase:", error);
-        // Fallback to localStorage for backward compatibility
-        console.log('🔄 Falling back to localStorage...');
-        const saved = localStorage.getItem("page_content_home");
-        if (saved) {
-          try {
-            const data = JSON.parse(saved);
-            console.log('📦 Found localStorage data:', data);
-            setContent(prev => {
-              const newContent = {
-                hero: data.hero || prev.hero,
-                heroSlides: data.heroSlides || prev.heroSlides,
-                announcement: data.announcement || prev.announcement,
-                collectionBanner: data.collectionBanner || prev.collectionBanner,
-                collectionImage: data.collectionImage || prev.collectionImage,
-                aboutImage: data.aboutImage || prev.aboutImage,
-                about: data.about || prev.about,
-                footer: data.footer || prev.footer,
-                sections: data.sections || prev.sections,
-              };
-              
-              console.log('🔍 localStorage content sections:', newContent.sections);
-              console.log('🦸 Hero section enabled from localStorage?', isSectionEnabled(newContent.sections, 'hero'));
-              
-              return newContent;
-            });
-          } catch (e) {
-            console.error("❌ Failed to parse localStorage content", e);
-          }
-        } else {
-          console.log('📦 No localStorage data found, using defaults');
-          console.log('🔍 Default sections:', defaultSections);
-          console.log('🦸 Hero section enabled by default?', isSectionEnabled(defaultSections, 'hero'));
-        }
+        console.error(" Failed to fetch banner content from Supabase:", error);
+        console.log(' No localStorage fallback - using empty defaults to prevent old banner data');
+        // No localStorage fallback to prevent old banner data from showing
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchContent();
   }, []);
 
-  return content;
+  return { ...content, loading };
 }
 
 export function isSectionEnabled(sections: SectionMeta[], id: string): boolean {
