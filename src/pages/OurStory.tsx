@@ -3,8 +3,6 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import aboutBrandImg from "@/assets/about-brand.jpg";
-import heroKaftan1 from "@/assets/hero-kaftan-1.jpg";
-import heroKaftan3 from "@/assets/hero-kaftan-3.jpg";
 
 const OurStory = () => {
   return (
@@ -67,7 +65,7 @@ const OurStory = () => {
             transition={{ duration: 0.7 }}
           >
             <img
-              src={heroKaftan1}
+              src={aboutBrandImg}
               alt="Handcrafted silk kaftan"
               className="w-full h-[400px] md:h-[500px] object-cover"
             />
@@ -79,7 +77,7 @@ const OurStory = () => {
             transition={{ duration: 0.7, delay: 0.15 }}
           >
             <img
-              src={heroKaftan3}
+              src={aboutBrandImg}
               alt="Embellished luxury resort wear"
               className="w-full h-[400px] md:h-[500px] object-cover"
             />
