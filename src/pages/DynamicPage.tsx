@@ -7,6 +7,7 @@ import { pagesService } from "@/lib/pagesService";
 import CatalogPage from "@/components/CatalogPage";
 import { useCatalogPageContent } from "@/hooks/usePageContent";
 import { useProducts } from "@/hooks/useProducts";
+import collectionBanner from "@/assets/collection-banner.jpg";
 
 const DynamicPage = () => {
   const { path } = useParams();
@@ -87,7 +88,7 @@ const DynamicPage = () => {
         title={page.name}
         subtitle={page.meta_description || `Explore our ${page.name} collection`}
         products={products}
-        bannerImage=""
+        bannerImage={collectionBanner}
         cmsContent={cmsContent}
         columns={3}
         useCollection2026Layout={true}

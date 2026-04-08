@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProductCard from "@/components/ProductCard";
 import aboutBrandImg from "@/assets/about-brand.jpg";
+import { safariProducts } from "@/lib/safariProducts";
 
 const OurStory = () => {
   return (
@@ -55,33 +57,30 @@ const OurStory = () => {
         </motion.div>
       </section>
 
-      {/* Two Image Feature */}
+      {/* Featured Products */}
       <section className="px-6 md:px-16 pb-16 md:pb-24">
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+        <div className="max-w-5xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            className="font-heading text-3xl md:text-4xl font-light text-foreground text-center mb-12"
           >
-            <img
-              src={aboutBrandImg}
-              alt="Handcrafted silk kaftan"
-              className="w-full h-[400px] md:h-[500px] object-cover"
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-          >
-            <img
-              src={aboutBrandImg}
-              alt="Embellished luxury resort wear"
-              className="w-full h-[400px] md:h-[500px] object-cover"
-            />
-          </motion.div>
+            Featured Safari Collection
+          </motion.h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {safariProducts.slice(0, 4).map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: index * 0.15 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
