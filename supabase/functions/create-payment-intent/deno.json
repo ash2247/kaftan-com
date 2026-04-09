@@ -1,0 +1,8 @@
+{
+  "name": "create-payment-intent",
+  "version": "1.0.0",
+  "imports": {
+    "stripe": "https://esm.sh/stripe@14.21.0",
+    "supabase": "https://esm.sh/@supabase/supabase-js@2"
+  }
+}

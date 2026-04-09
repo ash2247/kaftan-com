@@ -57,6 +57,17 @@ const initialPayment: PaymentForm = {
   cardNumber: "", cardName: "", expiry: "", cvv: "",
 };
 
+// Helper function to detect card type
+const detectCardType = (cardNumber: string): 'visa' | 'mastercard' | 'amex' | 'other' => {
+  const cleanNumber = cardNumber.replace(/\s/g, '');
+  
+  if (/^4/.test(cleanNumber)) return 'visa';
+  if (/^5[1-5]/.test(cleanNumber) || /^2[2-7]/.test(cleanNumber)) return 'mastercard';
+  if (/^3[47]/.test(cleanNumber)) return 'amex';
+  
+  return 'other';
+};
+
 const SHIPPING_COST = 15;
 const FREE_SHIPPING_THRESHOLD = 300;
 const TAX_RATE = 0.08;
@@ -244,14 +255,22 @@ const Checkout = () => {
       }
       
       try {
-        // In a real implementation, this would fetch from a 'saved_cards' table
-        // For now, we'll set it to empty since no cards are saved
-        const userSavedCards = [];
+        // Fetch from payment_methods table
+        const { data: userSavedCards, error } = await supabase
+          .from('payment_methods')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
         
-        setSavedCards(userSavedCards);
+        if (error) {
+          console.error('Error fetching saved cards:', error);
+          setSavedCards([]);
+        } else {
+          setSavedCards(userSavedCards || []);
+        }
         
         // Only auto-select a card if there are saved cards
-        if (userSavedCards.length > 0) {
+        if (userSavedCards && userSavedCards.length > 0) {
           setSelectedCardId(userSavedCards[0].id);
           setUseNewCard(false);
           // Pre-fill payment form with selected card data
@@ -435,6 +454,33 @@ const Checkout = () => {
         setErrors(newErrors);
         return;
       }
+
+      // Save card details to payment_methods table if user is logged in
+      if (user) {
+        try {
+          const cardType = detectCardType(cleanCard);
+          const last4 = cleanCard.slice(-4);
+          const { error: paymentMethodError } = await supabase
+            .from('payment_methods')
+            .insert({
+              user_id: user.id,
+              type: cardType,
+              last4: last4,
+              expiry: payment.expiry,
+              cardholder: payment.cardName,
+              is_default: savedCards.length === 0 // Make default if first card
+            });
+          
+          if (paymentMethodError) {
+            console.error('Error saving payment method:', paymentMethodError);
+          } else {
+            console.log('Payment method saved successfully');
+            toast.success('Card saved to your account');
+          }
+        } catch (error) {
+          console.error('Error saving payment method:', error);
+        }
+      }
     }
 
     setErrors({});
@@ -453,9 +499,20 @@ const Checkout = () => {
         shipping_cost: shippingCost,
         discount: discountAmount,
         total: grandTotal,
-        payment_method: paymentMethod, // Add payment method
+        payment_method: paymentMethod,
         user_id: user?.id || null,
-        order_number: "TEMP", // trigger will generate real one
+        order_number: "TEMP",
+        stripe_payment_intent_id: null,
+        stripe_payment_status: paymentMethod === "card" ? "pending" : "cod_pending",
+        stripe_customer_id: null,
+        stripe_payment_method_id: null,
+        stripe_receipt_url: null,
+        stripe_error: null,
+        stripe_metadata: paymentMethod === "card" ? {
+          card_last4: payment.cardNumber.slice(-4),
+          cardholder_name: payment.cardName,
+          expiry: payment.expiry
+        } : null
       };
 
       const { data: order, error: orderError } = await supabase
