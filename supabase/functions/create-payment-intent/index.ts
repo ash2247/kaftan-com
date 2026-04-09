@@ -1,5 +1,6 @@
+// @ts-ignore - Deno imports are not recognized by TypeScript but work in Deno runtime
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// @ts-ignore - esm.sh imports are not recognized by TypeScript but work in Deno runtime
 import Stripe from "https://esm.sh/stripe@14.21.0";
 
 const corsHeaders = {
@@ -7,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -24,6 +25,7 @@ serve(async (req) => {
     }
 
     // Get Stripe settings from environment or use test mode
+    // @ts-ignore - Deno.env is not recognized by TypeScript but works in Deno runtime
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
     
     if (!stripeSecretKey) {
@@ -61,7 +63,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error creating payment intent:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message || 'Unknown error' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
