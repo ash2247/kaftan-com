@@ -1314,58 +1314,6 @@ const HomePageEditor = ({
               <p className="font-body text-xs text-muted-foreground">{heroSlides.length} slide{heroSlides.length !== 1 ? "s" : ""} · Max 10 slides · No size limit per image</p>
             </EditorCard>
 
-            {/* Hero Text */}
-            <EditorCard title="Hero Text & CTA" description="Overlay text on the hero banner">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">Title Line 1</Label>
-                  <Input value={hero.titleLine1} onChange={e => setHero({ ...hero, titleLine1: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">Title Line 2 (italic)</Label>
-                  <Input value={hero.titleLine2} onChange={e => setHero({ ...hero, titleLine2: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body text-sm">Subtitle</Label>
-                <Textarea value={hero.subtitle} onChange={e => setHero({ ...hero, subtitle: e.target.value })} rows={3} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">CTA Button Text</Label>
-                  <Input value={hero.ctaText} onChange={e => setHero({ ...hero, ctaText: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">CTA Link</Label>
-                  <Input value={hero.ctaLink} onChange={e => setHero({ ...hero, ctaLink: e.target.value })} />
-                </div>
-              </div>
-              <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between">
-                  <Label className="font-body text-sm">Auto-slide</Label>
-                  <Switch checked={hero.autoSlide} onCheckedChange={v => setHero({ ...hero, autoSlide: v })} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">Slide Interval (ms)</Label>
-                  <Input type="number" value={hero.slideInterval} onChange={e => setHero({ ...hero, slideInterval: Number(e.target.value) })} />
-                </div>
-              </div>
-              <PreviewBox>
-                <div className="relative rounded-lg overflow-hidden">
-                  <img src={heroSlides[0]?.src} alt="" className="w-full h-48 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-charcoal/50 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4">
-                    <p className="font-heading text-xl font-light text-primary-foreground leading-tight">
-                      {hero.titleLine1}<br />
-                      <span className="font-semibold italic">{hero.titleLine2}</span>
-                    </p>
-                    <p className="font-body text-[10px] text-primary-foreground/70 mt-1 max-w-[200px]">{hero.subtitle}</p>
-                    <span className="inline-block mt-2 bg-primary-foreground text-charcoal px-3 py-1.5 font-body text-[9px] tracking-[0.15em] uppercase">{hero.ctaText}</span>
-                  </div>
-                </div>
-              </PreviewBox>
-            </EditorCard>
           </div>
         </TabsContent>
 
@@ -1520,6 +1468,11 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
           <div className="space-y-2">
             <Label className="font-body text-sm">Subtitle</Label>
             <Input value={page.subtitle} onChange={e => setPage({ ...page, subtitle: e.target.value })} placeholder="Short description shown below the title" />
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <Label className="font-body text-sm">Show Action Button</Label>
+            <Switch checked={page.showCtaButton} onCheckedChange={v => setPage({ ...page, showCtaButton: v })} />
           </div>
           <PreviewBox>
             <div className="relative rounded-lg overflow-hidden">

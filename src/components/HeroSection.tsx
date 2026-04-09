@@ -83,52 +83,6 @@ const HeroSection = ({ content, slides }: Props) => {
           style={{ y }}
         />
       ))}
-      {/* Hero Content Overlay */}
-      <motion.div 
-        className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent z-10"
-        style={{ opacity }}
-      />
-      
-      <motion.div 
-        className="absolute inset-0 flex items-center justify-center z-20 px-6"
-        style={{ opacity }}
-      >
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-heading text-4xl md:text-6xl lg:text-7xl font-light text-white mb-4 italic"
-          >
-            {titleLine1}
-            <br />
-            {titleLine2}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="font-body text-sm md:text-base text-white/90 mb-8 max-w-2xl mx-auto"
-          >
-            {subtitle}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link
-              to={ctaLink}
-              className="inline-flex items-center gap-2 bg-white text-black px-8 py-3 font-body text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gray-100"
-            >
-              {ctaText}
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </motion.div>
-        </div>
-      </motion.div>
 
       {/* Slide indicators */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
