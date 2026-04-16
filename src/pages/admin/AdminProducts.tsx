@@ -403,6 +403,7 @@ const AdminProducts = () => {
           price: form.price ? Number(form.price) : 0,
           original_price: form.original_price ? Number(form.original_price) : null,
           category: form.category,
+          collection: form.category,
           images: uploadedImages.length > 0 ? uploadedImages : editProduct.images || ["/placeholder.svg"],
           featured: false,
           in_stock: Number(form.stock) > 0,
