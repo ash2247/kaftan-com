@@ -6,7 +6,7 @@ import { FooterContent } from "@/hooks/usePageContent";
 import { useNavigationPages } from "@/hooks/useNavigationPages";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import emailjs from "@emailjs/browser";
+import { sendNewsletterEmail } from "@/services/emailService";
 import Logo from "./Logo";
 
 const CollapsibleSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
@@ -83,26 +83,9 @@ const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
         // Don't block on DB error - still show success to user
       }
 
-      // 2. Send confirmation email via EmailJS
+      // 2. Send confirmation email via Mailgun
       try {
-        const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-        const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-        const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-
-        if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
-          await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            {
-              to_email: email,
-              to_name: email.split('@')[0],
-              from_name: 'FashionSpectrum',
-              subject: 'Welcome to FashionSpectrum!',
-              message: 'Thank you for subscribing to our newsletter! You will now receive updates about new collections, special offers, and exclusive deals.',
-            },
-            EMAILJS_PUBLIC_KEY
-          );
-        }
+        await sendNewsletterEmail(email);
       } catch (emailError) {
         console.error('Email sending error:', emailError);
         // Don't block on email error

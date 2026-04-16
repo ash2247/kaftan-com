@@ -1,12 +1,16 @@
-import emailjs from '@emailjs/browser';
+import FormData from 'form-data';
+import Mailgun from 'mailgun.js';
 
-// EmailJS configuration
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+// Mailgun configuration
+const MAILGUN_API_KEY = import.meta.env.VITE_MAILGUN_API_KEY;
+const MAILGUN_DOMAIN = import.meta.env.VITE_MAILGUN_DOMAIN;
 
-// Initialize EmailJS with your public key
-emailjs.init(EMAILJS_PUBLIC_KEY);
+// Initialize Mailgun
+const mailgun = new Mailgun(FormData);
+const mg = mailgun.client({
+  username: 'api',
+  key: MAILGUN_API_KEY
+});
 
 export interface EmailParams {
   to_email: string;
@@ -19,16 +23,19 @@ export interface EmailParams {
 
 export const sendEmail = async (params: EmailParams): Promise<boolean> => {
   try {
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      params
-    );
-    
-    console.log('Email sent successfully:', response);
+    const data = {
+      from: `${params.from_name} <noreply@${MAILGUN_DOMAIN}>`,
+      to: params.to_email,
+      subject: params.subject || 'No Subject',
+      text: params.message,
+      html: params.html || `<p>${params.message}</p>`
+    };
+
+    await mg.messages.create(MAILGUN_DOMAIN, data);
+    console.log('Email sent successfully via Mailgun');
     return true;
   } catch (error) {
-    console.error('Failed to send email:', error);
+    console.error('Failed to send email via Mailgun:', error);
     return false;
   }
 };
@@ -41,33 +48,39 @@ export const sendContactEmail = async (formData: {
 }): Promise<boolean> => {
   const adminEmails = ['sendthistoash1@gmail.com', 'anjudeepak84@gmail.com'];
   
-  const emailParams = {
-    to_name: 'Admin',
-    from_name: formData.name,
-    message: formData.message,
-    subject: formData.subject || 'New Contact Form Submission',
-    customer_email: formData.email,
-    customer_name: formData.name
-  };
+  const emailContent = `
+    New Contact Form Submission
+    
+    From: ${formData.name} (${formData.email})
+    Subject: ${formData.subject || 'New Contact Form Submission'}
+    
+    Message:
+    ${formData.message}
+  `;
 
   try {
     // Send to all admin emails
     const promises = adminEmails.map(adminEmail => 
-      emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          ...emailParams,
-          to_email: adminEmail
-        }
-      )
+      mg.messages.create(MAILGUN_DOMAIN, {
+        from: `FashionSpectrum Contact Form <noreply@${MAILGUN_DOMAIN}>`,
+        to: adminEmail,
+        subject: formData.subject || 'New Contact Form Submission',
+        text: emailContent,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>From:</strong> ${formData.name} (${formData.email})</p>
+          <p><strong>Subject:</strong> ${formData.subject || 'New Contact Form Submission'}</p>
+          <h3>Message:</h3>
+          <p>${formData.message}</p>
+        `
+      })
     );
     
     await Promise.all(promises);
-    console.log('Contact emails sent successfully to all admins');
+    console.log('Contact emails sent successfully to all admins via Mailgun');
     return true;
   } catch (error) {
-    console.error('Failed to send contact emails:', error);
+    console.error('Failed to send contact emails via Mailgun:', error);
     return false;
   }
 };
@@ -79,16 +92,61 @@ export const sendOrderConfirmationEmail = async (orderData: {
   orderTotal: number;
   items: any[];
 }): Promise<boolean> => {
+  const itemsList = orderData.items.map((item: any) => 
+    `<li>${item.name || item.product_name} - $${item.price || item.total}</li>`
+  ).join('');
+
+  const emailContent = `
+    Order Confirmation - ${orderData.orderId}
+    
+    Dear ${orderData.customerName},
+    
+    Thank you for your order! Your order ${orderData.orderId} has been confirmed.
+    
+    Order Total: $${orderData.orderTotal}
+    
+    Items:
+    ${orderData.items.map((item: any) => `- ${item.name || item.product_name}: $${item.price || item.total}`).join('\n')}
+  `;
+
   return sendEmail({
     to_email: orderData.customerEmail,
     to_name: orderData.customerName,
     from_name: 'Kaftan Store',
-    message: `Your order ${orderData.orderId} has been confirmed. Total: $${orderData.orderTotal}`,
+    message: emailContent,
     subject: `Order Confirmation - ${orderData.orderId}`,
-    order_id: orderData.orderId,
-    order_total: orderData.orderTotal,
-    items: orderData.items
+    html: `
+      <h2>Order Confirmation - ${orderData.orderId}</h2>
+      <p>Dear ${orderData.customerName},</p>
+      <p>Thank you for your order! Your order ${orderData.orderId} has been confirmed.</p>
+      <h3>Order Total: $${orderData.orderTotal}</h3>
+      <h3>Items:</h3>
+      <ul>${itemsList}</ul>
+    `
   });
 };
 
-export default emailjs;
+export const sendNewsletterEmail = async (email: string): Promise<boolean> => {
+  try {
+    const data = {
+      from: `FashionSpectrum <noreply@${MAILGUN_DOMAIN}>`,
+      to: email,
+      subject: 'Welcome to FashionSpectrum!',
+      text: 'Thank you for subscribing to our newsletter! You will now receive updates about new collections, special offers, and exclusive deals.',
+      html: `
+        <h2>Welcome to FashionSpectrum!</h2>
+        <p>Thank you for subscribing to our newsletter!</p>
+        <p>You will now receive updates about new collections, special offers, and exclusive deals.</p>
+      `
+    };
+
+    await mg.messages.create(MAILGUN_DOMAIN, data);
+    console.log('Newsletter email sent successfully via Mailgun');
+    return true;
+  } catch (error) {
+    console.error('Failed to send newsletter email via Mailgun:', error);
+    return false;
+  }
+};
+
+export default mg;
