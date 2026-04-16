@@ -51,11 +51,15 @@ export const useProducts = (options?: UseProductsOptions) => {
         }
       }
 
-      const { data, error } = await query.order("created_at", { ascending: false });
+      // Add limit to prevent loading too many products at once
+      const limit = options?.displayPage === 'all' ? 100 : 50;
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(limit);
 
       if (error) throw error;
       return (data || []).map(mapDbProductToProduct);
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 };
 
