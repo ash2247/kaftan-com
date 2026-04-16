@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Instagram, Facebook, Twitter, ChevronDown } from "lucide-react";
+import { Instagram, Facebook, Twitter, ChevronDown, CheckCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FooterContent } from "@/hooks/usePageContent";
 import { useNavigationPages } from "@/hooks/useNavigationPages";
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import emailjs from "@emailjs/browser";
 import Logo from "./Logo";
 
 const CollapsibleSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
@@ -51,10 +54,77 @@ interface Props {
 
 const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
   const { data: navigationPages = [] } = useNavigationPages();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const newsletterTitle = content?.newsletterTitle || "Join the FashionSpectrum World";
   const newsletterSubtitle = content?.newsletterSubtitle || "Subscribe for exclusive access to new collections, special offers & more.";
   const ctaText = content?.ctaText || "Subscribe";
   const copyright = content?.copyright || "© 2026 FashionSpectrum. All Rights Reserved.";
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Save to database
+      const { error: dbError } = await supabase
+        .from('subscribers' as any)
+        .upsert({ email: email.toLowerCase(), subscribed_at: new Date().toISOString(), is_active: true } as any, { onConflict: 'email' });
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        // Don't block on DB error - still show success to user
+      }
+
+      // 2. Send confirmation email via EmailJS
+      try {
+        const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+        const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+
+        if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
+          await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+              to_email: email,
+              to_name: email.split('@')[0],
+              from_name: 'FashionSpectrum',
+              subject: 'Welcome to FashionSpectrum!',
+              message: 'Thank you for subscribing to our newsletter! You will now receive updates about new collections, special offers, and exclusive deals.',
+            },
+            EMAILJS_PUBLIC_KEY
+          );
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't block on email error
+      }
+
+      // 3. Show success
+      setIsSubscribed(true);
+      toast.success("Successfully subscribed! Check your email for confirmation.");
+      setEmail("");
+
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setIsSubscribed(false);
+      }, 5000);
+
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Create dynamic footer sections with navigation pages
   const footerSections = [
@@ -99,16 +169,43 @@ const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
           <p className="font-body text-xs text-primary-foreground/60 tracking-wide mb-6">
             {newsletterSubtitle}
           </p>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 bg-transparent border border-primary-foreground/20 px-4 py-3 font-body text-xs tracking-wider text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold"
-            />
-            <button className="bg-primary text-primary-foreground px-6 py-3 font-body text-xs tracking-[0.2em] uppercase hover:bg-gold transition-colors duration-300">
-              {ctaText}
-            </button>
-          </div>
+          {!isSubscribed ? (
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={isSubmitting}
+                className="flex-1 bg-transparent border border-primary-foreground/20 px-4 py-3 font-body text-xs tracking-wider text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-primary text-primary-foreground px-6 py-3 font-body text-xs tracking-[0.2em] uppercase hover:bg-gold transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Subscribing...
+                  </>
+                ) : (
+                  ctaText
+                )}
+              </button>
+            </form>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center justify-center gap-3 py-3 bg-green-500/20 rounded-lg"
+            >
+              <CheckCircle className="text-green-400" size={20} />
+              <span className="font-body text-sm text-green-400">
+                You're subscribed! Check your email.
+              </span>
+            </motion.div>
+          )}
         </div>
       </div>
 
