@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Heart, Globe, Users, Award, ArrowRight } from "lucide-react";
+import { useHomePageContent } from "@/hooks/usePageContent";
 
 // Import actual images
-import aboutBrandImage from "@/assets/about-brand.jpg";
+import aboutBrandImage from "@/assets/safari/safari-1.png";
 import paradiseImage from "@/assets/paradise/paradise-2.jpg";
 
 const BrandStorySection = () => {
+  const content = useHomePageContent();
   const values = [
     {
       icon: Heart,
@@ -41,7 +43,7 @@ const BrandStorySection = () => {
           className="text-center mb-16"
         >
           <h2 className="font-heading text-3xl md:text-5xl font-light text-foreground mb-4">
-            Our Story
+            {content.about.title}
           </h2>
         </motion.div>
 
@@ -55,14 +57,14 @@ const BrandStorySection = () => {
             className="space-y-6 lg:col-span-1"
           >
             <p className="font-body text-lg text-muted-foreground leading-relaxed max-w-lg">
-              Welcome to Fashion Spectrum, your go-to destination for all things kaftans in Australia! With over two decades of experience, we offer an extensive range of kaftan dresses, tops and plus size kaftans, made from luxurious silk fabrics.
+              {content.about.paragraph1}
             </p>
             <div>
               <h3 className="font-heading text-2xl font-light text-foreground mb-4">
                 Heritage Meets Modernity
               </h3>
               <p className="font-body text-muted-foreground leading-relaxed max-w-lg">
-                Our silk kaftans are handcrafted in Australia and are perfect for the beach or a night out. Every piece reflects our commitment to quality craftsmanship, unique design, and timeless elegance.
+                {content.about.paragraph2}
               </p>
             </div>
             
@@ -70,7 +72,7 @@ const BrandStorySection = () => {
               to="/our-story"
               className="inline-flex items-center gap-2 font-body text-sm tracking-[0.2em] uppercase text-foreground hover:text-primary transition-colors duration-300 border-b border-foreground hover:border-primary pb-1"
             >
-              Learn Our Story
+              {content.about.ctaText}
               <ArrowRight size={16} />
             </Link>
           </motion.div>
@@ -97,11 +99,11 @@ const BrandStorySection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-6 rounded-lg shadow-lg"
+              className="absolute -bottom-4 -left-4 lg:-bottom-6 lg:-left-6 bg-primary text-primary-foreground p-4 lg:p-6 rounded-lg shadow-lg"
             >
               <div className="text-center">
-                <div className="font-heading text-3xl font-light mb-1">20+</div>
-                <div className="font-body text-sm">Years of Excellence</div>
+                <div className="font-heading text-2xl lg:text-3xl font-light mb-1">20+</div>
+                <div className="font-body text-xs lg:text-sm">Years of Excellence</div>
               </div>
             </motion.div>
           </motion.div>

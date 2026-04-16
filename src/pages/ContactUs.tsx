@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
-import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,6 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen bg-background pt-[92px] pb-mobile-nav">
-      <AnnouncementBar />
       <Navbar />
 
       {/* Header */}

@@ -3,7 +3,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import aboutBrandImg from "@/assets/about-brand.jpg";
+import aboutBrandImg from "@/assets/safari/safari-1.png";
 import { safariProducts } from "@/lib/safariProducts";
 
 const OurStory = () => {

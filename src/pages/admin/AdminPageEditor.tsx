@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import HeaderFooterEditor from "@/components/admin/HeaderFooterEditor";
 
 // Import default hero images
-import aboutBrandImg from "@/assets/about-brand.jpg";
+import aboutBrandImg from "@/assets/safari/safari-1.png";
 
 // ---- Interfaces ----
 interface HeroSlide {
@@ -40,13 +40,6 @@ interface HeroContent {
 interface AnnouncementContent {
   text: string;
   enabled: boolean;
-}
-
-interface CollectionBannerContent {
-  subtitle: string;
-  title: string;
-  ctaText: string;
-  ctaLink: string;
 }
 
 interface AboutContent {
@@ -100,7 +93,6 @@ const defaultHomeContent = {
     slideInterval: 4500,
   } as HeroContent,
   announcement: { text: "Free Shipping Over $300", enabled: true } as AnnouncementContent,
-  collectionBanner: { subtitle: "Latest Collection", title: "Golden Lady", ctaText: "Explore Collection", ctaLink: "#" } as CollectionBannerContent,
   about: {
     title: "About The Brand",
     paragraph1: "FashionSpectrum is the zenith of luxury resort wear, crafted for the modern woman who embraces elegance in every moment. Our collections blend cultural artistry with contemporary design, creating pieces that transcend seasons and boundaries.",
@@ -119,7 +111,6 @@ const defaultSections: SectionMeta[] = [
   { id: "announcement", label: "Announcement Bar", icon: "Globe", enabled: true },
   { id: "hero", label: "Hero Section", icon: "ImageIcon", enabled: true },
   { id: "newArrivals", label: "New Arrivals", icon: "Layout", enabled: true },
-  { id: "collectionBanner", label: "Collection Banner", icon: "ImageIcon", enabled: true },
   { id: "saleBanner", label: "Summer Sale", icon: "Layout", enabled: true },
   { id: "bestSellers", label: "Best Sellers", icon: "Layout", enabled: true },
   { id: "about", label: "About Brand", icon: "FileText", enabled: true },
@@ -575,8 +566,6 @@ const AdminPageEditor = () => {
   const [hero, setHero] = useState<HeroContent>(defaultHomeContent.hero);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [announcement, setAnnouncement] = useState<AnnouncementContent>(defaultHomeContent.announcement);
-  const [collectionBanner, setCollectionBanner] = useState<CollectionBannerContent>(defaultHomeContent.collectionBanner);
-  const [collectionImage, setCollectionImage] = useState<string>("");
   const [aboutImage, setAboutImage] = useState<string>(aboutBrandImg);
   const [about, setAbout] = useState<AboutContent>(defaultHomeContent.about);
   const [footer, setFooter] = useState<FooterContent>(defaultHomeContent.footer);
@@ -648,19 +637,6 @@ const AdminPageEditor = () => {
                 text: bannerData.announcement_text,
                 enabled: bannerData.announcement_enabled !== undefined ? bannerData.announcement_enabled : defaultHomeContent.announcement.enabled,
               });
-            }
-            
-            if (bannerData.collection_banner_title) {
-              setCollectionBanner({
-                subtitle: bannerData.collection_banner_subtitle || defaultHomeContent.collectionBanner.subtitle,
-                title: bannerData.collection_banner_title || defaultHomeContent.collectionBanner.title,
-                ctaText: bannerData.collection_banner_cta_text || defaultHomeContent.collectionBanner.ctaText,
-                ctaLink: bannerData.collection_banner_cta_link || defaultHomeContent.collectionBanner.ctaLink,
-              });
-            }
-            
-            if (bannerData.collection_image) {
-              setCollectionImage(bannerData.collection_image);
             }
             
             if (bannerData.about_image) {
@@ -817,7 +793,6 @@ const AdminPageEditor = () => {
         }))
       );
       
-      const compressedCollectionImage = await compressBase64Image(collectionImage, 1920, 0.8);
       const compressedAboutImage = await compressBase64Image(aboutImage, 1920, 0.8);
 
       try {
@@ -832,11 +807,6 @@ const AdminPageEditor = () => {
           hero_slides: compressedHeroSlides,
           announcement_text: announcement.text,
           announcement_enabled: announcement.enabled,
-          collection_banner_subtitle: collectionBanner.subtitle,
-          collection_banner_title: collectionBanner.title,
-          collection_banner_cta_text: collectionBanner.ctaText,
-          collection_banner_cta_link: collectionBanner.ctaLink,
-          collection_image: compressedCollectionImage,
           about_title: about.title,
           about_paragraph1: about.paragraph1,
           about_paragraph2: about.paragraph2,
@@ -863,8 +833,6 @@ const AdminPageEditor = () => {
           hero, 
           heroSlides: compressedHeroSlides, 
           announcement, 
-          collectionBanner, 
-          collectionImage: compressedCollectionImage, 
           aboutImage: compressedAboutImage, 
           about, 
           footer, 
@@ -906,8 +874,6 @@ const AdminPageEditor = () => {
       setHero(defaultHomeContent.hero);
       setHeroSlides(defaultHeroSlides);
       setAnnouncement(defaultHomeContent.announcement);
-      setCollectionBanner(defaultHomeContent.collectionBanner);
-      setCollectionImage("");
       setAboutImage(aboutBrandImg);
       setAbout(defaultHomeContent.about);
       setFooter(defaultHomeContent.footer);
@@ -1199,8 +1165,6 @@ const AdminPageEditor = () => {
               onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
               onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
               announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
-              collectionBanner={collectionBanner} setCollectionBanner={(v) => { setCollectionBanner(v); markChanged(); }}
-              collectionImage={collectionImage} onCollectionImageChange={(src) => { setCollectionImage(src); markChanged(); }}
               aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }}
               about={about} setAbout={(v) => { setAbout(v); markChanged(); }}
               footer={footer} setFooter={(v) => { setFooter(v); markChanged(); }}
@@ -1224,8 +1188,6 @@ interface HomeEditorProps {
   onSlideRemove: (index: number) => void;
   onSlideAdd: (src: string) => void;
   announcement: AnnouncementContent; setAnnouncement: (v: AnnouncementContent) => void;
-  collectionBanner: CollectionBannerContent; setCollectionBanner: (v: CollectionBannerContent) => void;
-  collectionImage: string; onCollectionImageChange: (src: string) => void;
   aboutImage: string; onAboutImageChange: (src: string) => void;
   about: AboutContent; setAbout: (v: AboutContent) => void;
   footer: FooterContent; setFooter: (v: FooterContent) => void;
@@ -1235,7 +1197,6 @@ interface HomeEditorProps {
 const HomePageEditor = ({
   hero, setHero, heroSlides, onSlideReplace, onSlideAltChange, onSlideRemove, onSlideAdd,
   announcement, setAnnouncement,
-  collectionBanner, setCollectionBanner, collectionImage, onCollectionImageChange,
   aboutImage, onAboutImageChange,
   about, setAbout, footer, setFooter, sections, toggleSection,
 }: HomeEditorProps) => (
@@ -1315,44 +1276,6 @@ const HomePageEditor = ({
             </EditorCard>
 
           </div>
-        </TabsContent>
-
-        {/* Collection Banner */}
-        <TabsContent value="collection">
-          <EditorCard title="Collection Banner" description="Full-width parallax banner section">
-            <SingleImageUploader src={collectionImage} label="Banner Image" onUpload={onCollectionImageChange} />
-            <Separator />
-            <div className="space-y-2">
-              <Label className="font-body text-sm">Subtitle</Label>
-              <Input value={collectionBanner.subtitle} onChange={e => setCollectionBanner({ ...collectionBanner, subtitle: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label className="font-body text-sm">Title</Label>
-              <Input value={collectionBanner.title} onChange={e => setCollectionBanner({ ...collectionBanner, title: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="font-body text-sm">CTA Text</Label>
-                <Input value={collectionBanner.ctaText} onChange={e => setCollectionBanner({ ...collectionBanner, ctaText: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label className="font-body text-sm">CTA Link</Label>
-                <Input value={collectionBanner.ctaLink} onChange={e => setCollectionBanner({ ...collectionBanner, ctaLink: e.target.value })} />
-              </div>
-            </div>
-            <PreviewBox>
-              <div className="relative rounded-lg overflow-hidden">
-                <img src={collectionImage} alt="" className="w-full h-48 object-cover" />
-                <div className="absolute inset-0 bg-charcoal/40 flex items-center justify-center text-center">
-                  <div>
-                    <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/70 mb-1">{collectionBanner.subtitle}</p>
-                    <p className="font-heading text-2xl font-light text-primary-foreground italic">{collectionBanner.title}</p>
-                    <span className="inline-block mt-2 border border-primary-foreground/50 text-primary-foreground px-4 py-1 font-body text-[10px] tracking-[0.15em] uppercase">{collectionBanner.ctaText}</span>
-                  </div>
-                </div>
-              </div>
-            </PreviewBox>
-          </EditorCard>
         </TabsContent>
 
         {/* About */}

@@ -43,7 +43,7 @@ export const safariProducts: Product[] = [
   { id: "sf1", name: "Tropical Coral Hi-Low Dress", price: 0, image: safari1, category: "Hi-Low Dress", style: "hi low dress", color: "Pink" },
   { id: "sf2", name: "Tropical Coral Open Frill Dress", price: 0, image: safari2, category: "Open Frill Dress", style: "front open frill dress", color: "Pink" },
   { id: "sf3", name: "Athena Long Shirt Dress - Blue", price: 0, image: safari3, category: "Long Shirt Dress", style: "long dress", color: "Blue" },
-  { id: "sf4", name: "Athena Gypsy Top - Blue", price: 0, image: safari4, category: "Gypsy Top", style: "gypsy dress", color: "Blue" },
+  { id: "sf4", name: "Athena Gypsy Dress - Blue", price: 0, image: safari4, category: "Gypsy Dress", style: "gypsy dress", color: "Blue" },
   { id: "sf5", name: "Athena Box Kaftan - Blue", price: 0, image: safari5, category: "Box Kaftan", style: "box kaftan", color: "Blue" },
   { id: "sf6", name: "Athena Gypsy Top - Blue Print", price: 0, image: safari6, category: "Gypsy Top", style: "gypsy top", color: "Blue" },
   { id: "sf7", name: "Athena Tank Top & Palazzo Pant - Blue", price: 0, image: safari7, category: "Tank Top + Plazo Pant", style: "top and plazo pant", color: "Blue" },

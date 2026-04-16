@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { TrendingUp, Star, Heart } from "lucide-react";
+import { TrendingUp, Star, Heart, ArrowRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { productService } from "@/lib/productService";
 import type { Product as DBProduct } from "@/lib/productService";
@@ -111,7 +111,22 @@ const BestSellersSection = () => {
               ))}
             </div>
 
-                      </>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-center"
+            >
+              <Link
+                to="/best-sellers"
+                className="inline-flex items-center gap-2 font-body text-sm tracking-[0.2em] uppercase text-foreground hover:text-primary transition-colors duration-300 border-b border-foreground hover:border-primary pb-1"
+              >
+                View All Best Sellers
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </>
         )}
 
         {/* Customer testimonials mini section */}

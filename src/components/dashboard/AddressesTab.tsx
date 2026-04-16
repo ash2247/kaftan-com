@@ -38,7 +38,7 @@ const AddressesTab = () => {
     city: "",
     state: "",
     postal_code: "",
-    country: "Pakistan"
+    country: "Australia"
   });
   
   const emptyForm = {
@@ -50,7 +50,7 @@ const AddressesTab = () => {
     city: "",
     state: "",
     postal_code: "",
-    country: "Pakistan"
+    country: "Australia"
   };
 
   // Fetch addresses from database
@@ -94,7 +94,7 @@ const AddressesTab = () => {
               city: customer.city || '',
               state: customer.state || '',
               postal_code: customer.postal_code || '',
-              country: customer.country || 'Pakistan',
+              country: customer.country || 'Australia',
               created_at: customer.created_at
             });
           }
@@ -115,7 +115,7 @@ const AddressesTab = () => {
             city: order.shipping_city || '',
             state: '', // Orders table doesn't have state field
             postal_code: '', // Orders table doesn't have postal_code field
-            country: order.shipping_country || 'Pakistan',
+            country: order.shipping_country || 'Australia',
             created_at: order.created_at
           });
         });
@@ -220,7 +220,7 @@ const AddressesTab = () => {
         city: customer.city || '',
         state: customer.state || '',
         postal_code: customer.postal_code || '',
-        country: customer.country || 'Pakistan',
+        country: customer.country || 'Australia',
         created_at: customer.created_at
       }));
       

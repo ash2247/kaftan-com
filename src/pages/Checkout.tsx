@@ -50,7 +50,7 @@ type PaymentForm = z.infer<typeof paymentSchema>;
 
 const initialShipping: ShippingForm = {
   firstName: "", lastName: "", email: "", phone: "",
-  address: "", apartment: "", city: "", state: "", zip: "", country: "United States",
+  address: "", apartment: "", city: "", state: "", zip: "", country: "Australia",
 };
 
 const initialPayment: PaymentForm = {
@@ -113,7 +113,7 @@ const Checkout = () => {
         city: user?.user_metadata?.city || "",
         state: user?.user_metadata?.state || "",
         zip: user?.user_metadata?.zip || "",
-        country: user?.user_metadata?.country || "United States",
+        country: user?.user_metadata?.country || "Australia",
       }));
     }
   }, [user]);
