@@ -74,7 +74,7 @@ const NewArrivalsSection = () => {
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-[3/4] bg-secondary rounded-lg mb-4" />
@@ -85,7 +85,7 @@ const NewArrivalsSection = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5 mb-12">
               {newArrivalProducts.map((product, index) => (
                 <motion.div
                   key={product.id}

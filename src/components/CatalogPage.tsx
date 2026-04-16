@@ -281,7 +281,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                   </p>
                 </div>
               ) : (
-                <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
+                <div className={getGridClassesForColumns(currentColumns) + " gap-4 lg:gap-5"}>
                   {filteredManagedProducts
                     .map((product) => {
                       const managedItem = managedProducts.find(item => item.id === product.id);
@@ -333,7 +333,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               </div>
             ) : (
               // Show regular filtered products
-              <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
+              <div className={getGridClassesForColumns(currentColumns) + " gap-4 lg:gap-5"}>
                 {filtered.map((product, index) => (
                   <motion.div
                     key={product.id}
@@ -384,7 +384,7 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
             </div>
           </div>
 
-          <div className="px-4 sm:px-6 md:px-16 py-8 md:py-12">
+          <div className="px-4 sm:px-6 lg:px-12 py-8 md:py-12">
             {/* Search Bar */}
             <div className="flex justify-center mb-8">
               <div className="relative w-full max-w-md">
@@ -436,25 +436,11 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               </button>
             </div>
 
-            <div className="flex gap-8">
-              {/* Advanced Filters Sidebar */}
-              <div className="w-full md:w-80 flex-shrink-0">
-                <ProductFilters
-                  products={products}
-                  collections={categories}
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  isOpen={showFilters}
-                  onToggle={() => setShowFilters(!showFilters)}
-                  className="md:sticky md:top-24"
-                />
-              </div>
-
-              {/* Product Grid */}
-              <div className="flex-1">
-                {managedProducts.length > 0 ? (
-                  // Show managed products if available
-                  <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
+            {/* Product Grid - Full width, no sidebar */}
+            <div className="w-full max-w-7xl mx-auto">
+              {managedProducts.length > 0 ? (
+                // Show managed products if available
+                <div className={getGridClassesForColumns(currentColumns) + " gap-4 lg:gap-5 justify-items-center"}>
                     {managedProducts
                       .filter(p => p.enabled)
                       .sort((a, b) => a.order - b.order)
@@ -497,20 +483,19 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
                         );
                       })}
                   </div>
-                ) : filtered.length === 0 ? (
-                  <div className="text-center py-20">
-                    <p className="font-heading text-2xl text-foreground mb-2">No products found</p>
-                    <p className="font-body text-xs text-muted-foreground">Try adjusting your filters or search query.</p>
-                  </div>
-                ) : (
-                  // Show regular filtered products
-                  <div className={getGridClassesForColumns(currentColumns) + " gap-4 md:gap-6"}>
-                    {filtered.map((product, i) => (
-                      <ProductCard key={product.id} product={product} index={i} />
-                    ))}
-                  </div>
-                )}
-              </div>
+              ) : filtered.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="font-heading text-2xl text-foreground mb-2">No products found</p>
+                  <p className="font-body text-xs text-muted-foreground">Try adjusting your filters or search query.</p>
+                </div>
+              ) : (
+                // Show regular filtered products - centered
+                <div className={getGridClassesForColumns(currentColumns) + " gap-4 lg:gap-5 justify-items-center"}>
+                  {filtered.map((product, i) => (
+                    <ProductCard key={product.id} product={product} index={i} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </>
