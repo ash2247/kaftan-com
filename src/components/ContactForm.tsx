@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { sendContactEmail } from '@/services/emailService';
+import { sendContactEmail } from '@/services/emailjsService';
 
 interface ContactFormData {
   name: string;
