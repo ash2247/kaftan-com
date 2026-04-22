@@ -71,7 +71,8 @@ export const sendAutoReplyEmail = async (formData: {
       from_name: 'Fashion Spectrum',
       subject: formData.subject || 'Your inquiry has been received',
       message: formData.message,
-      title: formData.subject || 'Your inquiry'
+      title: formData.subject || 'Your inquiry',
+      reply_to: 'sendthistoash1@gmail.com'
     };
 
     await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams);
@@ -116,6 +117,8 @@ export const sendContactEmail = async (formData: {
 
     // Send auto-reply to customer
     await sendAutoReplyEmail(formData);
+
+    console.log('Auto-reply sent to customer via EmailJS');
 
     return true;
   } catch (error) {
@@ -179,7 +182,7 @@ export const sendNewsletterEmail = async (email: string): Promise<boolean> => {
       to_name: email,
       from_name: 'Fashion Spectrum',
       message: 'Thank you for subscribing to our newsletter! You will now receive updates about new collections, special offers, and exclusive deals.',
-      subject: 'Welcome to Kaftan Store Newsletter!'
+      subject: 'Welcome to Fashion Spectrum Newsletter!'
     };
 
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
