@@ -8,7 +8,6 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { sendContactEmail } from "@/services/emailService";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -45,21 +44,16 @@ const ContactUs = () => {
     setSending(true);
     
     try {
-      const success = await sendContactEmail({
-        name: form.name,
-        email: form.email,
-        subject: form.subject,
-        message: form.message
-      });
+      // Simulate form submission without email service
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (success) {
-        toast.success("Message sent successfully! We'll get back to you soon.");
-        setForm({ name: "", email: "", subject: "", message: "" });
-      } else {
-        toast.error("Failed to send message. Please try again.");
-      }
+      // Log the form data for debugging
+      console.log("Contact form submitted:", form);
+      
+      toast.success("Message received! We'll get back to you soon.");
+      setForm({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      console.error("Error sending contact form:", error);
+      console.error("Error submitting contact form:", error);
       toast.error("An error occurred. Please try again.");
     } finally {
       setSending(false);

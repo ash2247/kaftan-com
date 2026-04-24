@@ -464,8 +464,8 @@ const AdminProducts = () => {
       }
     }
     
-    // Save collections for the product
-    if (productId && form.selectedCollections.length > 0) {
+    // Save collections for the product (always update collections, even if empty)
+    if (productId) {
       try {
         // First, remove existing collections for this product
         await (supabase as any)
@@ -473,17 +473,19 @@ const AdminProducts = () => {
           .delete()
           .eq('product_id', productId);
         
-        // Then add new collections
-        const collectionProducts = form.selectedCollections.map(collectionId => ({
-          collection_id: collectionId,
-          product_id: productId
-        }));
-        
-        const { error } = await (supabase as any)
-          .from('collection_products')
-          .insert(collectionProducts);
-        
-        if (error) throw error;
+        // Then add new collections if any are selected
+        if (form.selectedCollections.length > 0) {
+          const collectionProducts = form.selectedCollections.map(collectionId => ({
+            collection_id: collectionId,
+            product_id: productId
+          }));
+          
+          const { error } = await (supabase as any)
+            .from('collection_products')
+            .insert(collectionProducts);
+          
+          if (error) throw error;
+        }
         
         console.log('✅ Collections saved successfully');
       } catch (error) {
@@ -924,33 +926,40 @@ const AdminProducts = () => {
                 {collectionsLoading ? (
                   <div className="text-sm text-muted-foreground">Loading collections...</div>
                 ) : (
-                  <Select
-                    value={form.selectedCollections[0] || "none"}
-                    onValueChange={(value) => {
-                      setForm(f => ({ ...f, selectedCollections: value !== "none" ? [value] : [] }));
-                    }}
-                  >
-                    <SelectTrigger className="h-10 bg-card border-border font-body">
-                      <SelectValue placeholder="Select a collection (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No Collection</SelectItem>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border border-border rounded-lg p-2">
                       {collections.map((collection) => (
-                        <SelectItem key={collection.id} value={collection.id}>
+                        <label key={collection.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={form.selectedCollections.includes(collection.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setForm(f => ({ ...f, selectedCollections: [...f.selectedCollections, collection.id] }));
+                              } else {
+                                setForm(f => ({ ...f, selectedCollections: f.selectedCollections.filter(id => id !== collection.id) }));
+                              }
+                            }}
+                            className="rounded border-border text-primary focus:ring-primary"
+                          />
                           <div className="flex items-center gap-2">
-                            {collection.name}
-                            {collection.featured && (
-                              <span className="w-2 h-2 bg-primary rounded-full"></span>
-                            )}
+                            {collection.featured && <span className="w-2 h-2 bg-primary rounded-full"></span>}
+                            <span className="text-sm font-body">{collection.name}</span>
                           </div>
-                        </SelectItem>
+                        </label>
                       ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                {form.selectedCollections.length > 0 && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Selected: {collections.find(c => c.id === form.selectedCollections[0])?.name || 'Unknown Collection'}
+                    </div>
+                    {form.selectedCollections.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        Selected: {form.selectedCollections.length > 0 
+                          ? form.selectedCollections
+                              .map(id => collections.find(c => c.id === id)?.name)
+                              .filter(Boolean)
+                              .join(', ')
+                          : 'None'
+                        }
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

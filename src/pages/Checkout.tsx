@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { settingsService } from "@/lib/settingsService";
+import { sendOrderConfirmationEmail } from "@/services/emailjsService";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import React from "react";
@@ -641,6 +642,32 @@ const Checkout = () => {
       }
 
       clearCart();
+      
+      // Send order confirmation email
+      try {
+        const emailSent = await sendOrderConfirmationEmail({
+          customerEmail: form.email,
+          customerName: `${form.firstName} ${form.lastName}`,
+          orderId: order.order_number || `FS-${order.id}`,
+          orderTotal: grandTotal,
+          items: items.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            size: item.size
+          }))
+        });
+        
+        if (emailSent) {
+          console.log('Order confirmation email sent successfully');
+        } else {
+          console.warn('Failed to send order confirmation email');
+        }
+      } catch (emailError) {
+        console.error('Error sending order confirmation email:', emailError);
+        // Don't block the checkout process if email fails
+      }
+      
       setStep("confirmation");
       toast.success("Order placed successfully!");
     } catch (err: any) {

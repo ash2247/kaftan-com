@@ -14,16 +14,22 @@ interface SearchOverlayProps {
 const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const allProducts = useMemo(() => getAllProducts(), []);
+  const allProducts = useMemo(() => {
+    const products = getAllProducts();
+    console.log('SearchOverlay - All products loaded:', products.length, products);
+    return products;
+  }, []);
 
   const results = useMemo(() => {
     if (query.trim().length < 2) return [];
     const q = query.toLowerCase();
-    return allProducts.filter(
+    const filtered = allProducts.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q)
     ).slice(0, 8);
+    console.log('SearchOverlay - Query:', q, 'Results:', filtered.length, filtered);
+    return filtered;
   }, [query, allProducts]);
 
   const categories = useMemo(() => {
@@ -178,8 +184,8 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
 };
 
 const SearchProductCard = ({ product, index, onClick }: { product: Product; index: number; onClick: () => void }) => {
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const discount = product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
   return (
@@ -201,9 +207,9 @@ const SearchProductCard = ({ product, index, onClick }: { product: Product; inde
         </h4>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="font-body text-xs font-medium text-foreground">${product.price.toFixed(2)}</span>
-          {product.originalPrice && (
+          {product.original_price && (
             <>
-              <span className="font-body text-[10px] text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</span>
+              <span className="font-body text-[10px] text-muted-foreground line-through">${product.original_price.toFixed(2)}</span>
               <span className="font-body text-[10px] text-sale">-{discount}%</span>
             </>
           )}

@@ -493,6 +493,205 @@ const ProductManager = ({ products, onChange }: { products: ProductItem[]; onCha
   );
 };
 
+// ---- Single Image Uploader Component ----
+const SingleImageUploader = ({ src, label, onUpload, onRemove }: { 
+  src: string; 
+  label: string; 
+  onUpload: (dataUrl: string) => void;
+  onRemove?: () => void;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    
+    // Check file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({ 
+        title: "File Too Large", 
+        description: "Please select an image smaller than 10MB.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
+    reader.readAsDataURL(file);
+  };
+  
+  return (
+    <div className="space-y-2">
+      <Label className="font-body text-sm">{label}</Label>
+      <div
+        className="relative group overflow-hidden rounded-lg border border-border cursor-pointer"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files[0];
+          if (file) handleFile(file);
+        }}
+      >
+        <img src={src} alt={label} className="w-full h-48 object-cover" />
+        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+            <div className="bg-background/90 rounded-full p-2.5">
+              <Upload size={18} className="text-foreground" />
+            </div>
+            <span className="font-body text-sm text-background font-medium bg-foreground/70 px-3 py-1.5 rounded">Upload New Image</span>
+          </div>
+        </div>
+        {onRemove && (
+          <button
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onRemove(); 
+            }}
+            className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-destructive/90"
+            title="Remove image"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. Max size 10MB.</p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            handleFile(file);
+            e.target.value = "";
+          }
+        }}
+      />
+    </div>
+  );
+};
+
+// ---- Image Uploader Component ----
+const ImageUploader = ({ 
+  src, 
+  alt, 
+  onUpload, 
+  onRemove, 
+  onAltChange, 
+  className = "",
+  draggable = false,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop
+}: {
+  src: string;
+  alt: string;
+  onUpload: (dataUrl: string) => void;
+  onRemove?: () => void;
+  onAltChange?: (alt: string) => void;
+  className?: string;
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleFile = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    
+    // Check file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({ 
+        title: "File Too Large", 
+        description: "Please select an image smaller than 10MB.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) onUpload(e.target.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, [onUpload, toast]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    
+    // Check file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({ 
+        title: "File Too Large", 
+        description: "Please select an image smaller than 10MB.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    handleFile(file);
+  }, [handleFile, toast]);
+
+  return (
+    <div className={`relative group ${className}`}>
+      <div
+        className={`relative overflow-hidden rounded-lg border border-border bg-secondary/30 ${draggable ? 'cursor-move' : 'cursor-pointer'}`}
+        onClick={() => !draggable && inputRef.current?.click()}
+        draggable={draggable}
+        onDragStart={draggable ? onDragStart : undefined}
+        onDragEnd={draggable ? onDragEnd : undefined}
+        onDragOver={draggable ? onDragOver : (e) => e.preventDefault()}
+        onDrop={draggable ? onDrop : handleDrop}
+      >
+        <img src={src} alt={alt} className="w-full h-40 object-cover" />
+        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+            <div className="bg-background/90 rounded-full p-2">
+              <Replace size={16} className="text-foreground" />
+            </div>
+            <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">Replace</span>
+          </div>
+        </div>
+      </div>
+      {onRemove && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+        >
+          <X size={12} />
+        </button>
+      )}
+      {onAltChange && (
+        <Input
+          value={alt}
+          onChange={(e) => onAltChange(e.target.value)}
+          placeholder="Alt text..."
+          className="mt-2 text-xs h-8"
+        />
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+      />
+    </div>
+  );
+};
+
 // ---- Main Component ----
 const AdminPageEditor = () => {
   const { pageId } = useParams<{ pageId: string }>();
@@ -888,102 +1087,7 @@ const AdminPageEditor = () => {
 
   const pageName = isHome ? "Home" : (isDynamicPage ? dynamicPage?.name : (catalogPageDefaults[pageKey]?.title || pageKey));
 
-  // ---- Image Uploader Component ----
-  const ImageUploader = ({ src, alt, onUpload, onRemove, onAltChange, className = "" }: {
-    src: string;
-    alt: string;
-    onUpload: (dataUrl: string) => void;
-    onRemove?: () => void;
-    onAltChange?: (alt: string) => void;
-    className?: string;
-  }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    const handleFile = useCallback((file: File) => {
-      if (!file.type.startsWith("image/")) return;
-      
-      // Check file size (limit to 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast({ 
-          title: "File Too Large", 
-          description: "Please select an image smaller than 10MB.",
-          variant: "destructive" 
-        });
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) onUpload(e.target.result as string);
-      };
-      reader.readAsDataURL(file);
-    }, [onUpload, toast]);
-
-    const handleDrop = useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (!file || !file.type.startsWith("image/")) return;
-      
-      // Check file size (limit to 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast({ 
-          title: "File Too Large", 
-          description: "Please select an image smaller than 10MB.",
-          variant: "destructive" 
-        });
-        return;
-      }
-      
-      handleFile(file);
-    }, [handleFile, toast]);
-
-    return (
-      <div className={`relative group ${className}`}>
-        <div
-          className="relative overflow-hidden rounded-lg border border-border bg-secondary/30 cursor-pointer"
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
-        >
-          <img src={src} alt={alt} className="w-full h-40 object-cover" />
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-              <div className="bg-background/90 rounded-full p-2">
-                <Replace size={16} className="text-foreground" />
-              </div>
-              <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">Replace</span>
-            </div>
-          </div>
-        </div>
-        {onRemove && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-          >
-            <X size={12} />
-          </button>
-        )}
-        {onAltChange && (
-          <Input
-            value={alt}
-            onChange={(e) => onAltChange(e.target.value)}
-            placeholder="Alt text..."
-            className="mt-2 text-xs h-8"
-          />
-        )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
-        />
-      </div>
-    );
-  };
-
+  
   // Add new slide placeholder
   const AddSlideButton = ({ onAdd }: { onAdd: (dataUrl: string) => void }) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -1033,70 +1137,7 @@ const AdminPageEditor = () => {
     );
   };
 
-  // Single image upload card (for collection banner / about)
-  const SingleImageUploader = ({ src, label, onUpload }: { src: string; label: string; onUpload: (dataUrl: string) => void }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    
-    const handleFile = (file: File) => {
-      if (!file.type.startsWith("image/")) return;
-      
-      // Check file size (limit to 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast({ 
-          title: "File Too Large", 
-          description: "Please select an image smaller than 10MB.",
-          variant: "destructive" 
-        });
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (ev) => { if (ev.target?.result) onUpload(ev.target.result as string); };
-      reader.readAsDataURL(file);
-    };
-    
-    return (
-      <div className="space-y-2">
-        <Label className="font-body text-sm">{label}</Label>
-        <div
-          className="relative group overflow-hidden rounded-lg border border-border cursor-pointer"
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const file = e.dataTransfer.files[0];
-            if (file) handleFile(file);
-          }}
-        >
-          <img src={src} alt={label} className="w-full h-48 object-cover" />
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-              <div className="bg-background/90 rounded-full p-2.5">
-                <Upload size={18} className="text-foreground" />
-              </div>
-              <span className="font-body text-sm text-background font-medium bg-foreground/70 px-3 py-1.5 rounded">Upload New Image</span>
-            </div>
-          </div>
-        </div>
-        <p className="font-body text-xs text-muted-foreground">Click or drag & drop to replace. Max size 10MB.</p>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              handleFile(file);
-              e.target.value = "";
-            }
-          }}
-        />
-      </div>
-    );
-  };
-
+  
   return (
     <div className="space-y-6">
       {loading ? (
@@ -1165,7 +1206,7 @@ const AdminPageEditor = () => {
               onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
               onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
               announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
-              aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }}
+              aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }} onAboutImageRemove={() => { setAboutImage(aboutBrandImg); markChanged(); }}
               about={about} setAbout={(v) => { setAbout(v); markChanged(); }}
               footer={footer} setFooter={(v) => { setFooter(v); markChanged(); }}
               sections={sections} toggleSection={toggleSection}
@@ -1188,7 +1229,7 @@ interface HomeEditorProps {
   onSlideRemove: (index: number) => void;
   onSlideAdd: (src: string) => void;
   announcement: AnnouncementContent; setAnnouncement: (v: AnnouncementContent) => void;
-  aboutImage: string; onAboutImageChange: (src: string) => void;
+  aboutImage: string; onAboutImageChange: (src: string) => void; onAboutImageRemove: () => void;
   about: AboutContent; setAbout: (v: AboutContent) => void;
   footer: FooterContent; setFooter: (v: FooterContent) => void;
   sections: SectionMeta[]; toggleSection: (id: string) => void;
@@ -1197,28 +1238,49 @@ interface HomeEditorProps {
 const HomePageEditor = ({
   hero, setHero, heroSlides, onSlideReplace, onSlideAltChange, onSlideRemove, onSlideAdd,
   announcement, setAnnouncement,
-  aboutImage, onAboutImageChange,
+  aboutImage, onAboutImageChange, onAboutImageRemove,
   about, setAbout, footer, setFooter, sections, toggleSection,
-}: HomeEditorProps) => (
-  <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-    {/* Sidebar */}
-    <div className="bg-card border border-border rounded-xl p-4 h-fit">
-      <h3 className="font-body text-xs uppercase tracking-wider text-muted-foreground mb-4">Page Sections</h3>
-      <div className="space-y-1">
-        {sections.map(sec => (
-          <div key={sec.id} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-secondary/50 transition-colors group">
-            <div className="flex items-center gap-3">
-              <GripVertical size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab" />
-              <div className="text-muted-foreground">{getIconComponent(sec.icon)}</div>
-              <span className="font-body text-sm text-foreground">{sec.label}</span>
-            </div>
-            <Switch checked={sec.enabled} onCheckedChange={() => toggleSection(sec.id)} />
-          </div>
-        ))}
-      </div>
-    </div>
+}: HomeEditorProps) => {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-    {/* Main Editor */}
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && draggedIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    // Reorder the slides
+    const newSlides = [...heroSlides];
+    const draggedSlide = newSlides[draggedIndex];
+    newSlides.splice(draggedIndex, 1);
+    newSlides.splice(dropIndex, 0, draggedSlide);
+
+    // Update the slides with new order
+    newSlides.forEach((slide, index) => {
+      onSlideReplace(index, slide.src);
+    });
+
+    handleDragEnd();
+  };
+
+  return (
     <div className="space-y-6">
       <Tabs defaultValue="hero" className="w-full">
         <TabsList className="w-full justify-start bg-card border border-border h-auto p-1 flex-wrap">
@@ -1266,6 +1328,12 @@ const HomePageEditor = ({
                     onUpload={(src) => onSlideReplace(i, src)}
                     onRemove={heroSlides.length > 1 ? () => onSlideRemove(i) : undefined}
                     onAltChange={(alt) => onSlideAltChange(i, alt)}
+                    draggable={true}
+                    onDragStart={(e) => handleDragStart(e, i)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => handleDragOver(e, i)}
+                    onDrop={(e) => handleDrop(e, i)}
+                    className={dragOverIndex === i ? 'ring-2 ring-primary ring-offset-2' : ''}
                   />
                 ))}
                 {heroSlides.length < 10 && (
@@ -1281,7 +1349,7 @@ const HomePageEditor = ({
         {/* About */}
         <TabsContent value="about">
           <EditorCard title="About Brand" description="Brand story section with image and text">
-            <SingleImageUploader src={aboutImage} label="About Section Image" onUpload={onAboutImageChange} />
+            <SingleImageUploader src={aboutImage} label="About Section Image" onUpload={onAboutImageChange} onRemove={onAboutImageRemove} />
             <Separator />
             <div className="space-y-2">
               <Label className="font-body text-sm">Section Title</Label>
@@ -1352,8 +1420,8 @@ const HomePageEditor = ({
         </TabsContent>
       </Tabs>
     </div>
-  </div>
-);
+  );
+};
 
 // ---- Catalog Page Editor ----
 const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageContent; setPage: (v: CatalogPageContent) => void; pageKey: string }) => (
@@ -1380,6 +1448,7 @@ const CatalogPageEditor = ({ page, setPage, pageKey }: { page: CatalogPageConten
                 src={page.bannerImage || "/placeholder.svg"}
                 label="Banner Image"
                 onUpload={(src) => setPage({ ...page, bannerImage: src })}
+                onRemove={() => setPage({ ...page, bannerImage: "" })}
               />
             )}
           </div>
@@ -1512,79 +1581,6 @@ const PreviewBox = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-// Image Upload Components
-const ImageUploader = ({ 
-  src, 
-  alt, 
-  onUpload, 
-  onRemove, 
-  onAltChange 
-}: { 
-  src: string; 
-  alt: string; 
-  onUpload: (src: string) => void; 
-  onRemove?: () => void; 
-  onAltChange: (alt: string) => void; 
-}) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        onUpload(result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="relative group">
-      <div className="aspect-square rounded-lg overflow-hidden border border-border bg-secondary/20">
-        {src ? (
-          <img src={src} alt={alt} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-        )}
-      </div>
-      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Replace className="w-4 h-4" />
-        </Button>
-        {onRemove && (
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={onRemove}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      <Input
-        value={alt}
-        onChange={(e) => onAltChange(e.target.value)}
-        placeholder="Alt text"
-        className="mt-2 h-8 text-xs"
-      />
-    </div>
-  );
-};
 
 const AddSlideButton = ({ onAdd }: { onAdd: (src: string) => void }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1620,64 +1616,6 @@ const AddSlideButton = ({ onAdd }: { onAdd: (src: string) => void }) => {
   );
 };
 
-const SingleImageUploader = ({ 
-  src, 
-  label, 
-  onUpload 
-}: { 
-  src: string; 
-  label: string; 
-  onUpload: (src: string) => void; 
-}) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        onUpload(result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <Label className="font-body text-sm">{label}</Label>
-      <div 
-        className="relative group cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <div className="rounded-lg overflow-hidden border border-border bg-secondary/20 min-h-[200px] flex items-center justify-center">
-          {src ? (
-            <img src={src} alt="" className="w-full h-full object-cover min-h-[200px]" />
-          ) : (
-            <div className="text-center">
-              <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-              <p className="font-body text-sm text-muted-foreground">Click to upload image</p>
-            </div>
-          )}
-        </div>
-        {src && (
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-            <Button size="sm" variant="secondary">
-              <Replace className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-      </div>
-    </div>
-  );
-};
 
 // ---- Dynamic Page Editor ----
 interface DynamicEditorProps {

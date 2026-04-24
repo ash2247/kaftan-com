@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { useHeaderFooter } from "@/hooks/useHeaderFooter";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { sendNewsletterEmail } from "@/services/emailService";
 import Logo from "./Logo";
 
 const CollapsibleSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
@@ -129,13 +128,7 @@ const FooterEditable = ({ showLogo = true, logoType = 'footer' }: Props) => {
         // Don't block on DB error - still show success to user
       }
 
-      // 2. Send confirmation email via Mailgun
-      try {
-        await sendNewsletterEmail(email);
-      } catch (emailError) {
-        console.error('Email sending error:', emailError);
-        // Don't block on email error
-      }
+      // 2. Email service removed - subscription stored in database only
 
       // 3. Show success
       setIsSubscribed(true);

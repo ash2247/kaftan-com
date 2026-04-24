@@ -6,7 +6,7 @@ import { FooterContent } from "@/hooks/usePageContent";
 import { useNavigationPages } from "@/hooks/useNavigationPages";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { sendNewsletterEmail } from "@/services/emailService";
+import { sendNewsletterEmail } from "@/services/emailjsService";
 import Logo from "./Logo";
 
 const CollapsibleSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
@@ -83,12 +83,17 @@ const Footer = ({ content, showLogo = true, logoType = 'footer' }: Props) => {
         // Don't block on DB error - still show success to user
       }
 
-      // 2. Send confirmation email via Mailgun
+      // 2. Send newsletter email
       try {
-        await sendNewsletterEmail(email);
+        const emailSent = await sendNewsletterEmail(email);
+        if (emailSent) {
+          console.log('Newsletter email sent successfully');
+        } else {
+          console.warn('Failed to send newsletter email');
+        }
       } catch (emailError) {
-        console.error('Email sending error:', emailError);
-        // Don't block on email error
+        console.error('Error sending newsletter email:', emailError);
+        // Don't block the subscription process if email fails
       }
 
       // 3. Show success

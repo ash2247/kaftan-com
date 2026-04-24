@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Product } from "@/lib/products";
 import { slugify } from "@/lib/productUtils";
@@ -157,6 +157,17 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
               </span>
             )}
           </div>
+        )}
+
+        {/* Add to Cart Button - Only show if price is valid and not sold out */}
+        {(product.price != null && product.price !== undefined && product.price > 0) && product.badge !== "Sold out" && (
+          <button
+            onClick={handleQuickAdd}
+            className="w-full mt-3 bg-primary text-primary-foreground py-2 px-4 rounded-lg font-body text-sm font-medium hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <Plus size={16} />
+            Add to Cart
+          </button>
         )}
       </div>
     </motion.div>

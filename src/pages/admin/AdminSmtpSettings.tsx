@@ -36,7 +36,6 @@ const presets = [
   { label: "Outlook", host: "smtp-mail.outlook.com", port: "587", encryption: "tls" as const },
   { label: "Yahoo", host: "smtp.mail.yahoo.com", port: "465", encryption: "ssl" as const },
   { label: "SendGrid", host: "smtp.sendgrid.net", port: "587", encryption: "tls" as const },
-  { label: "Mailgun", host: "smtp.mailgun.org", port: "587", encryption: "tls" as const },
   { label: "Custom", host: "", port: "587", encryption: "tls" as const },
 ];
 
@@ -447,7 +446,7 @@ const AdminSmtpSettings = () => {
                 For Gmail, enable "App Passwords" in your Google Account security settings.
               </p>
               <p className="text-xs font-body text-muted-foreground">
-                For SendGrid/Mailgun, use your API key as the password.
+                For SendGrid, use your API key as the password.
               </p>
             </CardContent>
           </Card>
