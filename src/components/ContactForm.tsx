@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { sendContactEmail } from '@/services/emailjsService';
+import { sendContactEmail, sendUserAutoReply } from '@/services/emailjsService';
 
 interface ContactFormData {
   name: string;
@@ -31,15 +31,26 @@ const ContactForm: React.FC = () => {
     }));
   };
 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const success = await sendContactEmail(formData);
+      // Send admin notification
+      const adminSuccess = await sendContactEmail(formData);
       
-      if (success) {
-        toast.success('Email sent successfully!');
+      if (adminSuccess) {
+        toast.success('Message sent to admin successfully!');
+        
+        // Send auto-reply to user
+        try {
+          await sendUserAutoReply(formData);
+        } catch (autoReplyError) {
+          console.warn('Auto-reply failed but admin notification succeeded:', autoReplyError);
+          // Don't show error to user since admin notification worked
+        }
+        
         setFormData({
           name: '',
           email: '',
@@ -47,7 +58,7 @@ const ContactForm: React.FC = () => {
           message: ''
         });
       } else {
-        toast.error('Failed to send email. Please try again.');
+        toast.error('Failed to send message to admin. Please try again.');
       }
     } catch (error) {
       console.error('Error sending email:', error);
@@ -121,7 +132,8 @@ const ContactForm: React.FC = () => {
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Sending...' : 'Send Message'}
           </Button>
-        </form>
+          
+                  </form>
       </CardContent>
     </Card>
   );

@@ -105,24 +105,56 @@ export const sendContactEmail = async (formData: {
     const templateParams = {
       from_name: formData.name,
       from_email: formData.email,
-      to_email: 'sendthistoash1@gmail.com,anjudeepak84@gmail.com',
       to_name: 'Admin',
       message: formData.message,
-      subject: formData.subject || 'New Contact Form Submission'
+      subject: formData.subject || 'New Contact Form Submission',
+      time: new Date().toLocaleString(),
+      phone: 'Not provided'
     };
 
     // Send admin notification
     await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams);
     console.log('Contact email sent successfully to admins via EmailJS');
 
-    // Send auto-reply to customer
-    await sendAutoReplyEmail(formData);
-
-    console.log('Auto-reply sent to customer via EmailJS');
-
     return true;
   } catch (error) {
     console.error('Failed to send contact email via EmailJS:', error);
+    return false;
+  }
+};
+
+// Separate function to send auto-reply to users
+export const sendUserAutoReply = async (formData: {
+  name: string;
+  email: string;
+  subject?: string;
+}): Promise<boolean> => {
+  try {
+    if (!EMAILJS_SERVICE_ID) {
+      console.error('EmailJS not configured for auto-reply');
+      return false;
+    }
+
+    const autoReplyTemplateId = EMAILJS_AUTOREPLY_TEMPLATE_ID || EMAILJS_TEMPLATE_ID;
+    if (!autoReplyTemplateId) {
+      console.error('Auto-reply template not configured');
+      return false;
+    }
+
+    const templateParams = {
+      to_email: formData.email,
+      to_name: formData.name,
+      from_name: 'Fashion Spectrum',
+      subject: formData.subject || 'Your inquiry has been received',
+      message: 'Thank you for contacting Fashion Spectrum! We have received your message and will get back to you within 24 hours.'
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, autoReplyTemplateId, templateParams);
+    console.log('Auto-reply sent successfully to user via EmailJS');
+
+    return true;
+  } catch (error) {
+    console.error('Failed to send auto-reply via EmailJS:', error);
     return false;
   }
 };
@@ -170,6 +202,30 @@ export const sendOrderConfirmationEmail = async (orderData: {
   }
 };
 
+export const sendNewsletterAdminNotification = async (subscriberEmail: string): Promise<boolean> => {
+  try {
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+      console.error('EmailJS not configured');
+      return false;
+    }
+
+    const templateParams = {
+      from_name: 'Fashion Spectrum System',
+      from_email: 'noreply@fashionspectrum.com',
+      to_name: 'Admin',
+      message: `New newsletter subscription received from: ${subscriberEmail}\n\nThe user has been successfully added to the mailing list and will receive future newsletters.`,
+      subject: 'New Newsletter Subscription - Fashion Spectrum'
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    console.log('Newsletter admin notification sent successfully via EmailJS');
+    return true;
+  } catch (error) {
+    console.error('Failed to send newsletter admin notification via EmailJS:', error);
+    return false;
+  }
+};
+
 export const sendNewsletterEmail = async (email: string): Promise<boolean> => {
   try {
     if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
@@ -177,6 +233,7 @@ export const sendNewsletterEmail = async (email: string): Promise<boolean> => {
       return false;
     }
 
+    // Send welcome email to subscriber
     const templateParams = {
       to_email: email,
       to_name: email,
@@ -187,6 +244,11 @@ export const sendNewsletterEmail = async (email: string): Promise<boolean> => {
 
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
     console.log('Newsletter email sent successfully via EmailJS');
+
+    // Send admin notification
+    await sendNewsletterAdminNotification(email);
+    console.log('Newsletter admin notification sent successfully');
+
     return true;
   } catch (error) {
     console.error('Failed to send newsletter email via EmailJS:', error);
