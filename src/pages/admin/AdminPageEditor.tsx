@@ -658,10 +658,15 @@ const ImageUploader = ({
         <img src={src} alt={alt} className="w-full h-40 object-cover" />
         <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-200 flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+            {draggable && (
+              <div className="bg-background/90 rounded-full p-2">
+                <GripVertical size={16} className="text-foreground" />
+              </div>
+            )}
             <div className="bg-background/90 rounded-full p-2">
               <Replace size={16} className="text-foreground" />
             </div>
-            <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">Replace</span>
+            <span className="font-body text-xs text-background font-medium bg-foreground/70 px-2 py-1 rounded">{draggable ? 'Drag to reorder' : 'Replace'}</span>
           </div>
         </div>
       </div>
@@ -1205,6 +1210,7 @@ const AdminPageEditor = () => {
               onSlideAltChange={(i, alt) => { const s = [...heroSlides]; s[i] = { ...s[i], alt }; setHeroSlides(s); markChanged(); }}
               onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
               onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
+              onSlideReorder={(newSlides) => { setHeroSlides(newSlides); markChanged(); }}
               announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
               aboutImage={aboutImage} onAboutImageChange={(src) => { setAboutImage(src); markChanged(); }} onAboutImageRemove={() => { setAboutImage(aboutBrandImg); markChanged(); }}
               about={about} setAbout={(v) => { setAbout(v); markChanged(); }}
@@ -1228,6 +1234,7 @@ interface HomeEditorProps {
   onSlideAltChange: (index: number, alt: string) => void;
   onSlideRemove: (index: number) => void;
   onSlideAdd: (src: string) => void;
+  onSlideReorder: (newSlides: HeroSlide[]) => void;
   announcement: AnnouncementContent; setAnnouncement: (v: AnnouncementContent) => void;
   aboutImage: string; onAboutImageChange: (src: string) => void; onAboutImageRemove: () => void;
   about: AboutContent; setAbout: (v: AboutContent) => void;
@@ -1236,7 +1243,7 @@ interface HomeEditorProps {
 }
 
 const HomePageEditor = ({
-  hero, setHero, heroSlides, onSlideReplace, onSlideAltChange, onSlideRemove, onSlideAdd,
+  hero, setHero, heroSlides, onSlideReplace, onSlideAltChange, onSlideRemove, onSlideAdd, onSlideReorder,
   announcement, setAnnouncement,
   aboutImage, onAboutImageChange, onAboutImageRemove,
   about, setAbout, footer, setFooter, sections, toggleSection,
@@ -1273,9 +1280,7 @@ const HomePageEditor = ({
     newSlides.splice(dropIndex, 0, draggedSlide);
 
     // Update the slides with new order
-    newSlides.forEach((slide, index) => {
-      onSlideReplace(index, slide.src);
-    });
+    onSlideReorder(newSlides);
 
     handleDragEnd();
   };
