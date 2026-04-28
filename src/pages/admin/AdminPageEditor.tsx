@@ -1208,7 +1208,18 @@ const AdminPageEditor = () => {
               heroSlides={heroSlides}
               onSlideReplace={(i, src) => { const s = [...heroSlides]; s[i] = { ...s[i], src }; setHeroSlides(s); markChanged(); }}
               onSlideAltChange={(i, alt) => { const s = [...heroSlides]; s[i] = { ...s[i], alt }; setHeroSlides(s); markChanged(); }}
-              onSlideRemove={(i) => { setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); markChanged(); }}
+              onSlideRemove={(i) => { 
+  if (heroSlides.length <= 1) {
+    toast({ 
+      title: "Cannot Delete", 
+      description: "At least one slide is required. Please add a new slide before deleting this one.",
+      variant: "destructive" 
+    });
+    return;
+  }
+  setHeroSlides(heroSlides.filter((_, idx) => idx !== i)); 
+  markChanged(); 
+}}
               onSlideAdd={(src) => { setHeroSlides([...heroSlides, { src, alt: `Slide ${heroSlides.length + 1}` }]); markChanged(); }}
               onSlideReorder={(newSlides) => { setHeroSlides(newSlides); markChanged(); }}
               announcement={announcement} setAnnouncement={(v) => { setAnnouncement(v); markChanged(); }}
@@ -1331,7 +1342,7 @@ const HomePageEditor = ({
                     src={slide.src}
                     alt={slide.alt}
                     onUpload={(src) => onSlideReplace(i, src)}
-                    onRemove={heroSlides.length > 1 ? () => onSlideRemove(i) : undefined}
+                    onRemove={() => onSlideRemove(i)}
                     onAltChange={(alt) => onSlideAltChange(i, alt)}
                     draggable={true}
                     onDragStart={(e) => handleDragStart(e, i)}
