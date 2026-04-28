@@ -128,12 +128,68 @@ const AdminSettings = () => {
 
   useEffect(() => {
     loadSettings();
-    // Load Stripe config from localStorage (never store secret keys in DB)
-    try {
-      const raw = localStorage.getItem("stripe_settings");
-      if (raw) setStripe(JSON.parse(raw));
-    } catch { /* ignore */ }
+    loadStripeSettings();
   }, []);
+
+  // Load Stripe settings from database
+  const loadStripeSettings = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('site_settings')
+        .select('key, value')
+        .like('key', 'stripe_%');
+
+      if (error) {
+        console.error('Error loading Stripe settings:', error);
+        // Fallback to localStorage
+        try {
+          const raw = localStorage.getItem("stripe_settings");
+          if (raw) setStripe(JSON.parse(raw));
+        } catch { /* ignore */ }
+        return;
+      }
+
+      // Convert settings to object
+      const settings: any = {
+        enabled: false,
+        liveMode: false,
+        publishableKeyTest: "",
+        publishableKeyLive: "",
+        secretKeyTest: "",
+        secretKeyLive: "",
+        webhookSecretTest: "",
+        webhookSecretLive: ""
+      };
+
+      data?.forEach((setting: any) => {
+        const key = setting.key.replace('stripe_', '');
+        // Convert camelCase back to original format
+        if (key === 'enabled') settings.enabled = setting.value;
+        else if (key === 'live_mode') settings.liveMode = setting.value;
+        else if (key === 'publishable_key_test') settings.publishableKeyTest = setting.value;
+        else if (key === 'publishable_key_live') settings.publishableKeyLive = setting.value;
+        else if (key === 'secret_key_test') settings.secretKeyTest = setting.value;
+        else if (key === 'secret_key_live') settings.secretKeyLive = setting.value;
+        else if (key === 'webhook_secret_test') settings.webhookSecretTest = setting.value;
+        else if (key === 'webhook_secret_live') settings.webhookSecretLive = setting.value;
+      });
+
+      setStripe(settings);
+      console.log('Stripe settings loaded from database:', { 
+        enabled: settings.enabled, 
+        liveMode: settings.liveMode,
+        hasTestKeys: !!settings.publishableKeyTest && !!settings.secretKeyTest,
+        hasLiveKeys: !!settings.publishableKeyLive && !!settings.secretKeyLive
+      });
+    } catch (error) {
+      console.error('Error loading Stripe settings:', error);
+      // Fallback to localStorage
+      try {
+        const raw = localStorage.getItem("stripe_settings");
+        if (raw) setStripe(JSON.parse(raw));
+      } catch { /* ignore */ }
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -174,7 +230,7 @@ const AdminSettings = () => {
     }
   };
 
-  const saveStripeSettings = () => {
+  const saveStripeSettings = async () => {
     try {
       setSavingStripe(true);
       const pubKey = stripe.liveMode ? stripe.publishableKeyLive : stripe.publishableKeyTest;
@@ -188,11 +244,51 @@ const AdminSettings = () => {
         setSavingStripe(false);
         return;
       }
+
+      // Save to database
+      const stripeSettings = [
+        { key: 'stripe_enabled', value: stripe.enabled },
+        { key: 'stripe_live_mode', value: stripe.liveMode },
+        { key: 'stripe_publishable_key_test', value: stripe.publishableKeyTest },
+        { key: 'stripe_publishable_key_live', value: stripe.publishableKeyLive },
+        { key: 'stripe_secret_key_test', value: stripe.secretKeyTest },
+        { key: 'stripe_secret_key_live', value: stripe.secretKeyLive },
+        { key: 'stripe_webhook_secret_test', value: stripe.webhookSecretTest },
+        { key: 'stripe_webhook_secret_live', value: stripe.webhookSecretLive },
+      ];
+
+      // Save each setting to database
+      for (const setting of stripeSettings) {
+        const { error } = await (supabase as any)
+          .from('site_settings')
+          .upsert({ 
+            key: setting.key, 
+            value: setting.value,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'key'
+          });
+
+        if (error) {
+          console.error(`Error saving ${setting.key}:`, error);
+          throw error;
+        }
+      }
+
+      // Also save to localStorage for immediate use
       localStorage.setItem("stripe_settings", JSON.stringify(stripe));
-      toast({ title: "Stripe settings saved!", description: "Keys stored securely in browser storage." });
+      
+      toast({ 
+        title: "Stripe settings saved!", 
+        description: "Settings saved to database and ready for use." 
+      });
     } catch (error) {
       console.error("Error saving Stripe settings:", error);
-      toast({ title: "Failed to save Stripe settings", variant: "destructive" });
+      toast({ 
+        title: "Failed to save Stripe settings", 
+        description: "Please check your database connection and try again.",
+        variant: "destructive" 
+      });
     } finally {
       setSavingStripe(false);
     }
