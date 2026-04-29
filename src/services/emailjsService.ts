@@ -253,7 +253,7 @@ export const sendOrderAdminNotification = async (orderData: {
       subject: `🆕 NEW ORDER - ${orderData.orderId} - ${orderData.customerName}`,
       message: `New order received!\n\nOrder ID: ${orderData.orderId}\nCustomer: ${orderData.customerName}\nEmail: ${orderData.customerEmail}\nPhone: ${orderData.customerPhone}\nTotal: $${orderData.orderTotal.toFixed(2)}\nPayment: ${orderData.paymentMethod === 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}\n\nItems:\n${itemsList}\n\nShipping Address:\n${orderData.shippingAddress.address}\n${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.postalCode}\n${orderData.shippingAddress.country}`,
       // Add BCC for second admin
-      bcc_email: 'tcv00898@gmail.com' // BCC admin email
+      bcc_email: 'sukhrajd@gmail.com' // BCC admin email
     };
 
     await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams);
