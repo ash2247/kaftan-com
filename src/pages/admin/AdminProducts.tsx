@@ -330,8 +330,12 @@ const AdminProducts = () => {
     resetForm();
   };
 
-  const openEdit = (p: AdminProduct) => {
+  const openEdit = async (p: AdminProduct) => {
     setEditProduct(p);
+    
+    // Fetch collections for this product from the database
+    const productCollections = await fetchProductCollections(p.id);
+    
     setForm({
       name: p.name,
       price: String(p.price),
@@ -340,7 +344,7 @@ const AdminProducts = () => {
       stock: String(p.stock),
       sku: p.sku,
       status: p.status,
-      selectedCollections: (p as any).collections || [],
+      selectedCollections: productCollections,
       style: p.style || "",
       color: p.color || "",
       size: p.size || "",
@@ -467,11 +471,19 @@ const AdminProducts = () => {
     // Save collections for the product (always update collections, even if empty)
     if (productId) {
       try {
+        console.log('🔄 Saving collections for product:', productId);
+        console.log('📋 Selected collections:', form.selectedCollections);
+        
         // First, remove existing collections for this product
-        await (supabase as any)
+        const { error: deleteError } = await (supabase as any)
           .from('collection_products')
           .delete()
           .eq('product_id', productId);
+        
+        if (deleteError) {
+          console.error('❌ Error deleting existing collections:', deleteError);
+          throw deleteError;
+        }
         
         // Then add new collections if any are selected
         if (form.selectedCollections.length > 0) {
@@ -480,11 +492,20 @@ const AdminProducts = () => {
             product_id: productId
           }));
           
-          const { error } = await (supabase as any)
+          console.log('📝 Inserting collection products:', collectionProducts);
+          
+          const { error: insertError } = await (supabase as any)
             .from('collection_products')
             .insert(collectionProducts);
           
-          if (error) throw error;
+          if (insertError) {
+            console.error('❌ Error inserting collections:', insertError);
+            throw insertError;
+          }
+          
+          console.log('✅ Collections inserted successfully');
+        } else {
+          console.log('ℹ️ No collections selected, removed all existing collections');
         }
         
         console.log('✅ Collections saved successfully');

@@ -13,15 +13,31 @@ interface SearchOverlayProps {
 
 const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
   const [query, setQuery] = useState("");
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const allProducts = useMemo(() => {
-    const products = getAllProducts();
-    console.log('SearchOverlay - All products loaded:', products.length, products);
-    return products;
+
+  // Load products from database when component mounts
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const products = await getAllProducts();
+        console.log('SearchOverlay - All products loaded from database:', products.length, products);
+        setAllProducts(products);
+      } catch (error) {
+        console.error('Error loading products for search:', error);
+        setAllProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   const results = useMemo(() => {
-    if (query.trim().length < 2) return [];
+    if (loading || query.trim().length < 2) return [];
     const q = query.toLowerCase();
     const filtered = allProducts.filter(
       (p) =>
@@ -30,14 +46,14 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
     ).slice(0, 8);
     console.log('SearchOverlay - Query:', q, 'Results:', filtered.length, filtered);
     return filtered;
-  }, [query, allProducts]);
+  }, [query, allProducts, loading]);
 
   const categories = useMemo(() => {
-    if (query.trim().length < 1) return [];
+    if (loading || query.trim().length < 1) return [];
     const q = query.toLowerCase();
     const cats = Array.from(new Set(allProducts.map((p) => p.category)));
     return cats.filter((c) => c.toLowerCase().includes(q)).slice(0, 4);
-  }, [query, allProducts]);
+  }, [query, allProducts, loading]);
 
   useEffect(() => {
     if (isOpen) {
@@ -102,27 +118,17 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
 
             {/* Results */}
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-16 py-6">
-              {query.trim().length < 2 ? (
+              {loading ? (
+                <div className="text-center py-12">
+                  <p className="font-body text-xs text-muted-foreground tracking-wider">
+                    Loading products...
+                  </p>
+                </div>
+              ) : query.trim().length < 2 ? (
                 <div className="text-center py-12">
                   <p className="font-body text-xs text-muted-foreground tracking-wider">
                     Start typing to search...
                   </p>
-                  <div className="mt-8">
-                    <p className="font-body text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-4">
-                      Popular Searches
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {["Kaftans", "Dresses", "Co-Ords", "Blazers", "Swimwear", "Jumpsuits"].map((term) => (
-                        <button
-                          key={term}
-                          onClick={() => setQuery(term)}
-                          className="border border-border px-4 py-2 font-body text-xs tracking-wider text-foreground hover:border-primary hover:text-primary transition-colors"
-                        >
-                          {term}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               ) : results.length === 0 && categories.length === 0 ? (
                 <div className="text-center py-12">
