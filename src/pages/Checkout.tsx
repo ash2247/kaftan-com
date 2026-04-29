@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { settingsService } from "@/lib/settingsService";
-import { sendOrderConfirmationEmail } from "@/services/emailjsService";
+import { sendOrderConfirmationEmail, sendOrderAdminNotification } from "@/services/emailjsService";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import React from "react";
@@ -758,6 +758,47 @@ const Checkout = () => {
         }
       } catch (emailError) {
         console.error('Error sending order confirmation email:', emailError);
+        // Don't block the checkout process if email fails
+      }
+
+      // Send admin notification email
+      try {
+        console.log('🔄 Preparing to send admin notification email...');
+        const adminOrderData = {
+          customerEmail: form.email,
+          customerName: `${form.firstName} ${form.lastName}`,
+          customerPhone: form.phone,
+          orderId: order.order_number || `FS-${order.id}`,
+          orderTotal: grandTotal,
+          items: items.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            size: item.size
+          })),
+          shippingAddress: {
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            postalCode: form.zip,
+            country: form.country
+          },
+          paymentMethod: paymentMethod
+        };
+        
+        console.log('📋 Admin email data prepared:', adminOrderData);
+        
+        const adminEmailSent = await sendOrderAdminNotification(adminOrderData);
+        
+        console.log('📧 Admin email send result:', adminEmailSent);
+        
+        if (adminEmailSent) {
+          console.log('✅ Order admin notification email sent successfully');
+        } else {
+          console.warn('❌ Failed to send order admin notification email');
+        }
+      } catch (adminEmailError) {
+        console.error('❌ Error sending order admin notification email:', adminEmailError);
         // Don't block the checkout process if email fails
       }
       

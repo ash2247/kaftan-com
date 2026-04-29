@@ -178,8 +178,8 @@ export const sendOrderConfirmationEmail = async (orderData: {
       return false;
     }
 
-    const itemsList = orderData.items.map((item: any) => 
-      `${item.name || item.product_name} - $${item.price || item.total}`
+    const itemsList = orderData.items.map(item => 
+      `${item.name} - ${item.quantity} x $${item.price.toFixed(2)}`
     ).join(', ');
 
     const templateParams = {
@@ -187,9 +187,8 @@ export const sendOrderConfirmationEmail = async (orderData: {
       to_name: orderData.customerName,
       from_name: 'Fashion Spectrum',
       order_id: orderData.orderId,
-      order_total: orderData.orderTotal,
-      items: itemsList,
-      message: `Your order ${orderData.orderId} has been confirmed. Total: $${orderData.orderTotal}. Items: ${itemsList}`,
+      order_total: orderData.orderTotal.toFixed(2),
+      items_list: itemsList,
       subject: `Order Confirmation - ${orderData.orderId}`
     };
 
@@ -198,6 +197,70 @@ export const sendOrderConfirmationEmail = async (orderData: {
     return true;
   } catch (error) {
     console.error('Failed to send order confirmation email via EmailJS:', error);
+    return false;
+  }
+};
+
+export const sendOrderAdminNotification = async (orderData: {
+  customerEmail: string;
+  customerName: string;
+  customerPhone: string;
+  orderId: string;
+  orderTotal: number;
+  items: any[];
+  shippingAddress: {
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  paymentMethod: string;
+}): Promise<boolean> => {
+  try {
+    console.log('🔧 EmailJS Configuration Check:');
+    console.log('📧 EMAILJS_SERVICE_ID:', EMAILJS_SERVICE_ID);
+    console.log('📋 EMAILJS_TEMPLATE_ID:', EMAILJS_TEMPLATE_ID);
+    console.log('🔑 EMAILJS_PUBLIC_KEY:', EMAILJS_PUBLIC_KEY ? 'Set' : 'Not set');
+    
+    if (!EMAILJS_SERVICE_ID) {
+      console.error('❌ EmailJS not configured. Please set VITE_EMAILJS_SERVICE_ID in .env');
+      return false;
+    }
+
+    const templateId = EMAILJS_TEMPLATE_ID;
+    if (!templateId) {
+      console.error('❌ EmailJS template not configured');
+      return false;
+    }
+
+    const itemsList = orderData.items.map(item => 
+      `${item.name} - ${item.quantity} x $${item.price.toFixed(2)} = $${(item.price * item.quantity).toFixed(2)}`
+    ).join('\n');
+
+    const templateParams = {
+      to_email: 'ashprop123456@gmail.com', // Main admin email
+      to_name: 'Fashion Spectrum Admin',
+      from_name: 'Fashion Spectrum System',
+      customer_name: orderData.customerName,
+      customer_email: orderData.customerEmail,
+      customer_phone: orderData.customerPhone,
+      order_id: orderData.orderId,
+      order_total: orderData.orderTotal.toFixed(2),
+      items_list: itemsList,
+      shipping_address: `${orderData.shippingAddress.address}\n${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.postalCode}\n${orderData.shippingAddress.country}`,
+      payment_method: orderData.paymentMethod === 'card' ? 'Credit/Debit Card' : 'Cash on Delivery',
+      subject: `🆕 NEW ORDER - ${orderData.orderId} - ${orderData.customerName}`,
+      message: `New order received!\n\nOrder ID: ${orderData.orderId}\nCustomer: ${orderData.customerName}\nEmail: ${orderData.customerEmail}\nPhone: ${orderData.customerPhone}\nTotal: $${orderData.orderTotal.toFixed(2)}\nPayment: ${orderData.paymentMethod === 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}\n\nItems:\n${itemsList}\n\nShipping Address:\n${orderData.shippingAddress.address}\n${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.postalCode}\n${orderData.shippingAddress.country}`,
+      // Add BCC for second admin
+      bcc_email: 'tcv00898@gmail.com' // BCC admin email
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams);
+    console.log('Order admin notification sent successfully via EmailJS');
+    return true;
+  } catch (error) {
+    console.error('Failed to send order admin notification via EmailJS:', error);
     return false;
   }
 };
