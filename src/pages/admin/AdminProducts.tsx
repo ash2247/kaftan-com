@@ -991,6 +991,14 @@ const AdminProducts = () => {
                       {collections.map((collection) => {
                         const isChecked = form.selectedCollections.includes(collection.id);
                         console.log(`🔍 Collection ${collection.name} (${collection.id}): checked = ${isChecked}`);
+                        console.log(`📋 Comparing with selectedCollections:`, form.selectedCollections);
+                        console.log(`🔍 ID match test:`, {
+                          collectionId: collection.id,
+                          isInSelected: form.selectedCollections.includes(collection.id),
+                          selectedCollections: form.selectedCollections,
+                          collectionIdType: typeof collection.id,
+                          selectedIdsType: form.selectedCollections.map(id => typeof id)
+                        });
                         return (
                           <label key={collection.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 p-1 rounded">
                             <input
@@ -1009,7 +1017,8 @@ const AdminProducts = () => {
                             <div className="flex items-center gap-2">
                               {collection.featured && <span className="w-2 h-2 bg-primary rounded-full"></span>}
                               <span className="text-sm font-body">{collection.name}</span>
-                              <span className="text-xs text-muted-foreground">({collection.id})</span>
+                              <span className="text-xs text-muted-foreground">({collection.id.slice(0, 8)}...)</span>
+                              {isChecked && <span className="text-xs text-green-600 font-bold">✓</span>}
                             </div>
                           </label>
                         );

@@ -25,12 +25,15 @@ export const useCollections = () => {
         setLoading(true);
         setError(null);
 
+        console.log('🔍 Fetching collections for admin panel...');
         const { data, error } = await (supabase as any)
           .from('collections')
           .select('*')
-          .eq('status', 'published')
+          // Remove status filter for admin - fetch all collections
           .order('featured', { ascending: false })
           .order('name', { ascending: true });
+
+        console.log('📊 Raw collections data:', data);
 
         if (error) throw error;
 
