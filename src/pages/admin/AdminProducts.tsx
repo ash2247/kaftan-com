@@ -331,41 +331,76 @@ const AdminProducts = () => {
   };
 
   const openEdit = async (p: AdminProduct) => {
+    console.log('🔍 Opening edit for product:', p.id, p.name);
     setEditProduct(p);
     
-    // Fetch collections for this product from the database
-    const productCollections = await fetchProductCollections(p.id);
-    
-    setForm({
-      name: p.name,
-      price: String(p.price),
-      original_price: p.original_price ? String(p.original_price) : "",
-      category: p.category,
-      stock: String(p.stock),
-      sku: p.sku,
-      status: p.status,
-      selectedCollections: productCollections,
-      style: p.style || "",
-      color: p.color || "",
-      size: p.size || "",
-      display_pages: (p as any).display_pages || ["all"]
-    });
-    setUploadedImages(p.images || []);
-    setShowModal(true);
+    try {
+      // Fetch collections for this product from the database
+      const productCollections = await fetchProductCollections(p.id);
+      console.log('📋 Fetched product collections:', productCollections);
+      
+      const formState = {
+        name: p.name,
+        price: String(p.price),
+        original_price: p.original_price ? String(p.original_price) : "",
+        category: p.category,
+        stock: String(p.stock),
+        sku: p.sku,
+        status: p.status,
+        selectedCollections: productCollections,
+        style: p.style || "",
+        color: p.color || "",
+        size: p.size || "",
+        display_pages: (p as any).display_pages || ["all"]
+      };
+      
+      console.log('📝 Setting form state:', formState);
+      setForm(formState);
+      setUploadedImages(p.images || []);
+      setShowModal(true);
+    } catch (error) {
+      console.error('❌ Error in openEdit:', error);
+      // Still open the modal even if collections fail to load
+      setForm({
+        name: p.name,
+        price: String(p.price),
+        original_price: p.original_price ? String(p.original_price) : "",
+        category: p.category,
+        stock: String(p.stock),
+        sku: p.sku,
+        status: p.status,
+        selectedCollections: [], // Default to empty if fetch fails
+        style: p.style || "",
+        color: p.color || "",
+        size: p.size || "",
+        display_pages: (p as any).display_pages || ["all"]
+      });
+      setUploadedImages(p.images || []);
+      setShowModal(true);
+    }
   };
 
   // Fetch collections for a specific product
   const fetchProductCollections = async (productId: string): Promise<string[]> => {
     try {
+      console.log('🔍 Fetching collections for product:', productId);
       const { data, error } = await (supabase as any)
         .from('collection_products')
         .select('collection_id')
         .eq('product_id', productId);
       
-      if (error) throw error;
-      return data?.map((item: any) => item.collection_id) || [];
+      if (error) {
+        console.error('❌ Database error fetching collections:', error);
+        throw error;
+      }
+      
+      console.log('📊 Raw collection data from DB:', data);
+      const collectionIds = data?.map((item: any) => item.collection_id) || [];
+      console.log('📋 Processed collection IDs:', collectionIds);
+      
+      return collectionIds;
     } catch (error) {
-      console.error('Error fetching product collections:', error);
+      console.error('❌ Error fetching product collections:', error);
       return [];
     }
   };
@@ -948,27 +983,37 @@ const AdminProducts = () => {
                   <div className="text-sm text-muted-foreground">Loading collections...</div>
                 ) : (
                   <div className="space-y-2">
+                    {/* Debug info */}
+                    <div className="text-xs text-muted-foreground border border-border rounded p-2">
+                      Debug: selectedCollections = {JSON.stringify(form.selectedCollections)}
+                    </div>
                     <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border border-border rounded-lg p-2">
-                      {collections.map((collection) => (
-                        <label key={collection.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 p-1 rounded">
-                          <input
-                            type="checkbox"
-                            checked={form.selectedCollections.includes(collection.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setForm(f => ({ ...f, selectedCollections: [...f.selectedCollections, collection.id] }));
-                              } else {
-                                setForm(f => ({ ...f, selectedCollections: f.selectedCollections.filter(id => id !== collection.id) }));
-                              }
-                            }}
-                            className="rounded border-border text-primary focus:ring-primary"
-                          />
-                          <div className="flex items-center gap-2">
-                            {collection.featured && <span className="w-2 h-2 bg-primary rounded-full"></span>}
-                            <span className="text-sm font-body">{collection.name}</span>
-                          </div>
-                        </label>
-                      ))}
+                      {collections.map((collection) => {
+                        const isChecked = form.selectedCollections.includes(collection.id);
+                        console.log(`🔍 Collection ${collection.name} (${collection.id}): checked = ${isChecked}`);
+                        return (
+                          <label key={collection.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 p-1 rounded">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                console.log(`🔄 Toggle collection ${collection.name}: ${e.target.checked}`);
+                                if (e.target.checked) {
+                                  setForm(f => ({ ...f, selectedCollections: [...f.selectedCollections, collection.id] }));
+                                } else {
+                                  setForm(f => ({ ...f, selectedCollections: f.selectedCollections.filter(id => id !== collection.id) }));
+                                }
+                              }}
+                              className="rounded border-border text-primary focus:ring-primary"
+                            />
+                            <div className="flex items-center gap-2">
+                              {collection.featured && <span className="w-2 h-2 bg-primary rounded-full"></span>}
+                              <span className="text-sm font-body">{collection.name}</span>
+                              <span className="text-xs text-muted-foreground">({collection.id})</span>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
                     {form.selectedCollections.length > 0 && (
                       <div className="text-xs text-muted-foreground">
