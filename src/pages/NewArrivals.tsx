@@ -5,7 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 
 const NewArrivals = () => {
   const cmsContent = useCatalogPageContent("new-arrivals");
-  const { data: dbProducts } = useProducts();
+  const { data: dbProducts } = useProducts({ displayPage: 'all' });
   const products = dbProducts && dbProducts.length > 0 ? dbProducts : newArrivals;
 
   return (

@@ -335,17 +335,12 @@ const CatalogPage = ({ title, subtitle, products, bannerImage, showBanner = fals
               // Show regular filtered products
               <div className={getGridClassesForColumns(currentColumns) + " gap-4 lg:gap-5"}>
                 {filtered.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
+                  <div key={product.id}>
                     <ProductCard
                       product={product}
                       index={index}
                     />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}

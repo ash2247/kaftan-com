@@ -87,25 +87,13 @@ const NewArrivalsSection = () => {
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5 mb-12">
               {newArrivalProducts.map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
+                <div key={product.id}>
                   <ProductCard product={product} index={index} />
-                </motion.div>
+                </div>
               ))}
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <Link
                 to="/new-arrivals"
                 className="inline-flex items-center gap-2 font-body text-sm tracking-[0.2em] uppercase text-foreground hover:text-primary transition-colors duration-300 border-b border-foreground hover:border-primary pb-1"
@@ -113,7 +101,7 @@ const NewArrivalsSection = () => {
                 <Clock size={16} />
                 View All New Arrivals
               </Link>
-            </motion.div>
+            </div>
           </>
         )}
       </div>

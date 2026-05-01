@@ -49,13 +49,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group cursor-pointer"
-    >
+    <div className="group cursor-pointer">
       <Link to={`/product/${slugify(product.name)}`}>
         <div className={`relative overflow-hidden ${isParadiseProduct ? 'bg-secondary' : 'bg-secondary'}`}>
           <motion.img
@@ -170,7 +164,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
