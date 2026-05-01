@@ -384,6 +384,8 @@ const AdminProducts = () => {
   const fetchProductCollections = async (productId: string): Promise<string[]> => {
     try {
       console.log('🔍 Fetching collections for product:', productId);
+      
+      // First try to get from junction table
       const { data, error } = await (supabase as any)
         .from('collection_products')
         .select('collection_id')
@@ -395,9 +397,35 @@ const AdminProducts = () => {
       }
       
       console.log('📊 Raw collection data from DB:', data);
-      const collectionIds = data?.map((item: any) => item.collection_id) || [];
+      let collectionIds = data?.map((item: any) => item.collection_id) || [];
       console.log('📋 Processed collection IDs:', collectionIds);
       
+      // If no collections found in junction table, try to get from product's collection field
+      if (collectionIds.length === 0) {
+        console.log('🔍 No collections in junction table, checking product.collection field...');
+        const { data: productData, error: productError } = await (supabase as any)
+          .from('products')
+          .select('collection')
+          .eq('id', productId)
+          .single();
+        
+        if (!productError && productData?.collection) {
+          console.log('📋 Found collection in product.collection field:', productData.collection);
+          // Find collection by name to get its ID
+          const { data: collectionData, error: collectionError } = await (supabase as any)
+            .from('collections')
+            .select('id')
+            .eq('name', productData.collection)
+            .single();
+          
+          if (!collectionError && collectionData?.id) {
+            collectionIds = [collectionData.id];
+            console.log('📋 Mapped collection name to ID:', collectionIds);
+          }
+        }
+      }
+      
+      console.log('📋 Final collection IDs:', collectionIds);
       return collectionIds;
     } catch (error) {
       console.error('❌ Error fetching product collections:', error);
@@ -983,29 +1011,15 @@ const AdminProducts = () => {
                   <div className="text-sm text-muted-foreground">Loading collections...</div>
                 ) : (
                   <div className="space-y-2">
-                    {/* Debug info */}
-                    <div className="text-xs text-muted-foreground border border-border rounded p-2">
-                      Debug: selectedCollections = {JSON.stringify(form.selectedCollections)}
-                    </div>
                     <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto border border-border rounded-lg p-2">
                       {collections.map((collection) => {
                         const isChecked = form.selectedCollections.includes(collection.id);
-                        console.log(`🔍 Collection ${collection.name} (${collection.id}): checked = ${isChecked}`);
-                        console.log(`📋 Comparing with selectedCollections:`, form.selectedCollections);
-                        console.log(`🔍 ID match test:`, {
-                          collectionId: collection.id,
-                          isInSelected: form.selectedCollections.includes(collection.id),
-                          selectedCollections: form.selectedCollections,
-                          collectionIdType: typeof collection.id,
-                          selectedIdsType: form.selectedCollections.map(id => typeof id)
-                        });
                         return (
                           <label key={collection.id} className="flex items-center gap-2 cursor-pointer hover:bg-secondary/50 p-1 rounded">
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={(e) => {
-                                console.log(`🔄 Toggle collection ${collection.name}: ${e.target.checked}`);
                                 if (e.target.checked) {
                                   setForm(f => ({ ...f, selectedCollections: [...f.selectedCollections, collection.id] }));
                                 } else {
@@ -1017,8 +1031,6 @@ const AdminProducts = () => {
                             <div className="flex items-center gap-2">
                               {collection.featured && <span className="w-2 h-2 bg-primary rounded-full"></span>}
                               <span className="text-sm font-body">{collection.name}</span>
-                              <span className="text-xs text-muted-foreground">({collection.id.slice(0, 8)}...)</span>
-                              {isChecked && <span className="text-xs text-green-600 font-bold">✓</span>}
                             </div>
                           </label>
                         );
