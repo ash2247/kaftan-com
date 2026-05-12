@@ -68,6 +68,10 @@ const AdminSettings = () => {
   const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
   const [changingPassword, setChangingPassword] = useState(false);
 
+  /* ── Email Change ── */
+  const [emailData, setEmailData] = useState({ newEmail: "", confirmEmail: "", currentPassword: "" });
+  const [changingEmail, setChangingEmail] = useState(false);
+
   /* ── Logo Management ── */
   const handleLogoUpload = async (type: keyof typeof logos, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -319,6 +323,56 @@ const AdminSettings = () => {
       toast({ title: "Error changing password", description: "Please try again later", variant: "destructive" });
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const changeEmail = async () => {
+    try {
+      setChangingEmail(true);
+      if (!emailData.newEmail || !emailData.confirmEmail || !emailData.currentPassword) {
+        toast({ title: "All email fields are required", variant: "destructive" });
+        return;
+      }
+      if (emailData.newEmail !== emailData.confirmEmail) {
+        toast({ title: "Email Mismatch", description: "New email and confirmation do not match", variant: "destructive" });
+        return;
+      }
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailData.newEmail)) {
+        toast({ title: "Invalid Email", description: "Please enter a valid email address", variant: "destructive" });
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast({ title: "No authenticated user found", variant: "destructive" }); return; }
+      
+      // Verify current password first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: emailData.currentPassword
+      });
+      
+      if (signInError) {
+        toast({ title: "Invalid Password", description: "Current password is incorrect", variant: "destructive" });
+        return;
+      }
+      
+      // Update email
+      const { error } = await supabase.auth.updateUser({ email: emailData.newEmail });
+      if (error) { 
+        toast({ title: "Email Change Failed", description: error.message, variant: "destructive" }); 
+        return; 
+      }
+      
+      setEmailData({ newEmail: "", confirmEmail: "", currentPassword: "" });
+      toast({ 
+        title: "Email change initiated!", 
+        description: "Please check your new email inbox for confirmation." 
+      });
+    } catch {
+      toast({ title: "Error changing email", description: "Please try again later", variant: "destructive" });
+    } finally {
+      setChangingEmail(false);
     }
   };
 
@@ -1061,6 +1115,62 @@ const AdminSettings = () => {
                   {changingPassword
                     ? <><Loader2 size={14} className="mr-1 animate-spin" /> Changing...</>
                     : <><Key size={14} className="mr-1" /> Change Password</>}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail size={18} className="text-primary" />
+                Change Email
+              </CardTitle>
+              <CardDescription>Update your admin account email address</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <Label className="font-body text-xs uppercase text-muted-foreground">New Email</Label>
+                  <Input
+                    type="email"
+                    value={emailData.newEmail}
+                    onChange={e => setEmailData(p => ({ ...p, newEmail: e.target.value }))}
+                    placeholder="Enter new email address"
+                    className="mt-1 font-mono text-sm"
+                  />
+                </div>
+                <div>
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Confirm New Email</Label>
+                  <Input
+                    type="email"
+                    value={emailData.confirmEmail}
+                    onChange={e => setEmailData(p => ({ ...p, confirmEmail: e.target.value }))}
+                    placeholder="Confirm new email address"
+                    className="mt-1 font-mono text-sm"
+                  />
+                </div>
+                <div>
+                  <Label className="font-body text-xs uppercase text-muted-foreground">Current Password</Label>
+                  <Input
+                    type="password"
+                    value={emailData.currentPassword}
+                    onChange={e => setEmailData(p => ({ ...p, currentPassword: e.target.value }))}
+                    placeholder="Enter current password to verify"
+                    className="mt-1 font-mono text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="font-body text-xs text-muted-foreground">You will need to confirm the new email address</p>
+                <Button
+                  onClick={changeEmail}
+                  disabled={changingEmail || !emailData.newEmail || !emailData.confirmEmail || !emailData.currentPassword}
+                  className="font-body text-xs"
+                >
+                  {changingEmail
+                    ? <><Loader2 size={14} className="mr-1 animate-spin" /> Changing...</>
+                    : <><Mail size={14} className="mr-1" /> Change Email</>}
                 </Button>
               </div>
             </CardContent>
